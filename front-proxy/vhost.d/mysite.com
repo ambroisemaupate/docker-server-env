@@ -1,0 +1,1 @@
+return  301 http://www.mysite.com$request_uri;

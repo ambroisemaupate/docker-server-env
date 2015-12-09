@@ -1,0 +1,4 @@
+bck-*.sh
+ftp-credentials.sh
+create-roadiz.sh
+create-solr.sh

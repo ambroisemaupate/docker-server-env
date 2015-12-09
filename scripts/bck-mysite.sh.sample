@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Author: Ambroise Maupate
+
+. `dirname $0`/ftp-credentials.sh || {
+    echo "`dirname $0`/ftp-credentials.sh";
+    echo 'Impossible to import your configuration.';
+    exit 1;
+}
+
+NAME="mysite"
+
+docker run --rm -t --name="${NAME}_BCK" --volumes-from ${NAME}_DATA \
+           -e FTP_USER="${FTP_USER}"\
+           -e FTP_PASS="${FTP_PASS}"\
+           -e FTP_HOST="${FTP_HOST}"\
+           -e FTP_PORT="${FTP_PORT}"\
+           -e DB_USER="mysite"\
+           -e DB_HOST="mariadb"\
+           -e DB_PASS="password"\
+           -e DB_NAME="mysite"\
+           -e REMOTE_PATH="/docker-bck/${NAME}"\
+           --link ${NAME}_DB:mariadb ambroisemaupate/ftp-backup
