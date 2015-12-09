@@ -1,7 +1,7 @@
 # Docker server enviroment scripts and configurations
 
 This repository is meant to get a configuration set for installing a fresh server for *Docker* hosting.
-It’s specialized for my personal usage, but it fits your needs, do not hesitate to give your feedback.
+It’s specialized for **my personal usage**, but if it fits your needs, feel free to use it and give your feedback.
 
 ## Base path
 
@@ -31,7 +31,7 @@ git clone https://github.com/ambroisemaupate/docker-server-env.git /root/docker-
 * Copy the sample `.zshrc` in your home folder to enable git and docker plugins.
 * Copy the sample `etc/fail2ban/jail.conf` in real location to enable ssh monitoring with fail2ban.
 
-## Used images
+## Docker images to use
 
 * jwilder/nginx-proxy
 * uay.io/letsencrypt/letsencrypt
@@ -41,15 +41,49 @@ git clone https://github.com/ambroisemaupate/docker-server-env.git /root/docker-
 * maxexcloo/data
 * maxexcloo/mariadb
 
-## Container backups
+## Naming conventions and containers creation
 
-In order to backup your containers on your FTP. Duplicate `scripts/bck-mysite.sh.sample` without `.sample` suffix file
-and fill variables in the `scripts/ftp-credentials.sh`.
+For any *Roadiz* website, you should have:
+
+- One *data* container: `mysite_DATA` using *maxexcloo/data* image
+
+```bash
+docker run -d --name="mysite_DATA" maxexcloo/data
+```
+
+- One database *data* container: `mysite_DBDATA` using *maxexcloo/data* image
+
+```bash
+docker run -d --name="mysite_DBDATA" maxexcloo/data
+```
+
+- One database *process* container: `mysite_DB` using *maxexcloo/mariadb* image
+
+```bash
+docker run -d --name="mysite_DB"
+           --volumes-from="mysite_DBDATA"
+           -e "MARIADB_PASS=password"
+           -e "MARIADB_USER=mysite"
+           -e "MARIADB_DB=mysite"
+           --restart="always"
+           maxexcloo/mariadb
+```
+
+- One Roadiz *process* container: `mysite` using *roadiz/roadiz* image — *see create-roadiz.sh script*
+
+## Back-up containers
+
+In order to backup your containers to your FTP. Duplicate `scripts/bck-mysite.sh.sample`
+file without `.sample` suffix for each of your websites.
+Fill all variables in the `scripts/ftp-credentials.sh`. Make sure you are using a *data* container to hold your site contents.
+For example, for `mysite` Roadiz container, all data must be stored in `mysite_DATA` container.
 
 ```bash
 # Crontab
 # m h  dom mon dow   command
-0 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysite.sh >> ~/docker-server-env/bck_logs/bck-mysite.log
+00 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysite.sh >> ~/docker-server-env/bck_logs/bck-mysite.log
+20 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysecondsite.sh >> ~/docker-server-env/bck_logs/bck-mysecondsite.log
+# etc
 ```
 
 ## Clean up backups
@@ -61,7 +95,7 @@ create another folder in your FTP.
 ```bash
 # Crontab
 # m h  dom mon dow   command
-0 12 * * * /bin/bash ~/docker-server-env/scripts/cleanup-bck.sh >> ~/docker-server-env/bck_logs/cleanup-bck.log
+00 12 * * * /bin/bash ~/docker-server-env/scripts/cleanup-bck.sh >> ~/docker-server-env/bck_logs/cleanup-bck.log
 ```
 
 ## Rotating logs

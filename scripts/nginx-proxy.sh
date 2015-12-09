@@ -1,6 +1,12 @@
 #!/bin/bash
 #
-
+#
+# We need to use volumes for
+# /etc/letsencrypt/archive and
+# /etc/letsencrypt/live to avoid dangling symlinks
+# with SSL certs
+#
+#
 docker run  -d -p 80:80 -p 443:443 \
             --name="front-proxy" \
             -v /var/run/docker.sock:/tmp/docker.sock \
