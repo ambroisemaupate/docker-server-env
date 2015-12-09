@@ -1,4 +1,4 @@
-# Docker server enviroment scripts and configurations
+# Docker server environment scripts and configurations
 
 This repository is meant to get a configuration set for installing a fresh server for *Docker* hosting.
 It’s specialized for **my personal usage**, but if it fits your needs, feel free to use it and give your feedback.
