@@ -7,6 +7,8 @@ docker run  -d -t \
             --name=${CONT_NAME} \
             -e "ROADIZ_BRANCH=master" \
             -e "VIRTUAL_HOST=${HOSTS}" \
+            -e "LETSENCRYPT_HOST=${HOSTS}" \
+            -e "LETSENCRYPT_EMAIL=ambroise@rezo-zero.com" \
             --volumes-from=${CONT_NAME}_DATA \
             --link="${CONT_NAME}_DB:mariadb" \
             --link="${CONT_NAME}_SOLR:solr" \
@@ -14,5 +16,4 @@ docker run  -d -t \
             roadiz/roadiz;
 
 docker exec -it --user=root ${CONT_NAME} sed -i'.original' 's/\;date.timezone \=/date.timezone = Europe\/Paris/' /etc/php5/cli/php.ini;
-# bin/roadiz solr -r
-# curl http://solr:8983/solr/mysite/update?commit=true
+

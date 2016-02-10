@@ -33,13 +33,13 @@ git clone https://github.com/ambroisemaupate/docker-server-env.git /root/docker-
 
 ## Docker images to use
 
-* jwilder/nginx-proxy
-* uay.io/letsencrypt/letsencrypt
-* roadiz/roadiz
-* solr
-* ambroisemaupate/ftp-backup
-* maxexcloo/data
-* maxexcloo/mariadb
+* *jwilder/nginx-proxy*
+* *jrcs/letsencrypt-nginx-proxy-companion*: For automatic *Let’s encrypt* certificate issuing and configuration
+* *roadiz/roadiz*
+* *solr*
+* *ambroisemaupate/ftp-backup*
+* *maxexcloo/data*
+* *maxexcloo/mariadb*
 
 ## Naming conventions and containers creation
 
@@ -102,13 +102,3 @@ create another folder in your FTP.
 
 Add the `etc/logrotate.d/dockerbck` configuration to your real `logrotate.d` system folder.
 
-## Installing SSL certificates after Let’s encrypt usage
-
-Make symlinks your SSL certs in your `/root/docker-server-env/front-proxy/certs` folder, naming according to *jwilder/nginx-proxy*
-documentation: https://github.com/jwilder/nginx-proxy#ssl-support.
-
-```bash
-cd /root/docker-server-env/front-proxy/certs;
-ln -s /etc/letsencrypt/live/mysite.com/fullchain.pem mysite.com.crt;
-ln -s /etc/letsencrypt/live/mysite.com/privkey.pem mysite.com.key;
-```
