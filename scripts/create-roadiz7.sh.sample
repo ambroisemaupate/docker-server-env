@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+CONT_NAME="mysite";
+HOSTS="www.mysite.com";
+
+docker run  -d -t \
+            --name=${CONT_NAME} \
+            -e "ROADIZ_BRANCH=master" \
+            -e "VIRTUAL_HOST=${HOSTS}" \
+            -e "LETSENCRYPT_HOST=${HOSTS}" \
+            -e "LETSENCRYPT_EMAIL=ambroise@rezo-zero.com" \
+            --volumes-from=${CONT_NAME}_DATA \
+            --link="${CONT_NAME}_DB:mariadb" \
+            --link="${CONT_NAME}_SOLR:solr" \
+            --restart="always" \
+            ambroisemaupate/roadiz;
+
