@@ -36,7 +36,7 @@ git clone https://github.com/ambroisemaupate/docker-server-env.git /root/docker-
 * *jwilder/nginx-proxy*: I disabled *HTTP/2* due to strange errors with *Dropzone.js* (file upload SSL HTTP/2 proxied to HTTP/1.1)
 * *jrcs/letsencrypt-nginx-proxy-companion*: For automatic *Let’s encrypt* certificate issuing and configuration
 * *roadiz/roadiz* (for PHP56 and Nginx 1.6.1+) and *ambroisemaupate/roadiz* (for PHP7 and Nginx 1.9.11+)
-* *solr*
+* *solr* (I limit heap size to 256m because we don’t usually use big document data, and it can be painful on a small VPS server)
 * *ambroisemaupate/ftp-backup*
 * *maxexcloo/data*
 * *maxexcloo/mariadb*

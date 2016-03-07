@@ -6,7 +6,8 @@ CORE_NAME="mysite";
 docker run  -d -t \
             --name=$CONT_NAME \
             --restart="always" \
-            solr;
+            solr \
+            /opt/solr/bin/solr -f -m 256m;
 
 sleep 3;
 docker exec -it --user=solr $CONT_NAME bin/solr create_core -c $CORE_NAME;
