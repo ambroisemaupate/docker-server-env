@@ -1,4 +1,9 @@
-bck-*.sh
-ftp-credentials.sh
-create-roadiz.sh
-create-solr.sh
+*
+!.gitignore
+!bck-mysite.sh.sample
+!cleanup-bck.sh
+!create-roadiz.sh.sample
+!create-roadiz7.sh.sample
+!create-solr.sh.sample
+!ftp-credentials.sh.sample
+!nginx-proxy.sh

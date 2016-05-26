@@ -1,8 +1,8 @@
 /root/docker-server-env/bckup_logs/*.log {
-        weekly
-        missingok
-        rotate 7
-        compress
-        notifempty
+    weekly
+    missingok
+    rotate 7
+    compress
+    notifempty
     nocreate
 }

@@ -15,7 +15,7 @@ Please, adapt them if you want to clone this git repository elsewhere.
 # Base apps
 #
 apt-get update;
-apt-get install ntp ntpdate nano git htop curl curlftpfs zsh fail2ban;
+apt-get install ntp ntpdate nano git htop curl curlftpfs zsh fail2ban postfix mailutils;
 
 #
 # Install oh-my-zsh
@@ -30,6 +30,8 @@ git clone https://github.com/ambroisemaupate/docker-server-env.git /root/docker-
 
 * Copy the sample `.zshrc` in your home folder to enable git and docker plugins.
 * Copy the sample `etc/fail2ban/jail.conf` in real location to enable ssh monitoring with fail2ban.
+* Add your email in `/etc/aliases` to receive all *root* emails and type `newaliases` to update aliases DB.
+* Reload Postfix config `postfix reload`
 
 ## Docker images to use
 
