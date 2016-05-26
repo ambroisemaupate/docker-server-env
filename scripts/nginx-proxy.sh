@@ -19,7 +19,7 @@ docker run  -d -p 80:80 -p 443:443 \
             -v /root/docker-server-env/front-proxy/html:/usr/share/nginx/html \
             -v /root/docker-server-env/front-proxy/nginx-proxy.conf:/etc/nginx/conf.d/nginx-proxy.conf:ro \
             --restart="always" \
-            jwilder/nginx-proxy
+            jwilder/nginx-proxy;
 
 docker run  -d \
             --name="front-proxy-letsencrypt" \
@@ -27,7 +27,7 @@ docker run  -d \
             --volumes-from "front-proxy" \
             -v /var/run/docker.sock:/var/run/docker.sock:ro \
             --restart="always" \
-            jrcs/letsencrypt-nginx-proxy-companion
+            jrcs/letsencrypt-nginx-proxy-companion;
 
 # For the moment we need to disable HTTP/2
 # Because of some errors with XHR SSL file upload and Dropzone.js
