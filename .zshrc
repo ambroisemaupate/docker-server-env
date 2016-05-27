@@ -26,3 +26,5 @@ source $ZSH/oh-my-zsh.sh
 #
 alias zshconfig="mate ~/.zshrc"
 alias ohmyzsh="mate ~/.oh-my-zsh"
+# Alias to mount external FTP backup volume
+alias ftpmount="curlftpfs USER:PASS@HOST:21 /mnt/ftpbackup/"

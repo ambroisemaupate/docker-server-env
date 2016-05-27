@@ -32,6 +32,7 @@ git clone https://github.com/ambroisemaupate/docker-server-env.git /root/docker-
 * Copy the sample `etc/fail2ban/jail.conf` in real location to enable ssh monitoring with fail2ban.
 * Add your email in `/etc/aliases` to receive all *root* emails and type `newaliases` to update aliases DB.
 * Reload Postfix config `postfix reload`
+* Create the `/mnt/ftpbackup` mount point for FTP backup: `mkdir -p /mnt/ftpbackup`
 
 ## Docker images to use
 
