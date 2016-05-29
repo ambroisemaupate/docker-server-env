@@ -96,8 +96,8 @@ For example, for `mysite` Roadiz container, all data must be stored in `mysite_D
 ```bash
 # Crontab
 # m h  dom mon dow   command
-00 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysite.sh >> ~/docker-server-env/bck_logs/bck-mysite.log
-20 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysecondsite.sh >> ~/docker-server-env/bck_logs/bck-mysecondsite.log
+00 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysite.sh >> ~/docker-server-env/bckup_logs/bck-mysite.log
+20 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysecondsite.sh >> ~/docker-server-env/bckup_logs/bck-mysecondsite.log
 # etc
 ```
 
@@ -110,7 +110,7 @@ create another folder in your FTP.
 ```bash
 # Crontab
 # m h  dom mon dow   command
-00 12 * * * /bin/bash ~/docker-server-env/scripts/cleanup-bck.sh >> ~/docker-server-env/bck_logs/cleanup-bck.log
+00 12 * * * /bin/bash ~/docker-server-env/scripts/cleanup-bck.sh >> ~/docker-server-env/bckup_logs/cleanup-bck.log
 ```
 
 ## Rotating logs
