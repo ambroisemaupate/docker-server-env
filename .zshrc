@@ -28,3 +28,6 @@ alias zshconfig="mate ~/.zshrc"
 alias ohmyzsh="mate ~/.oh-my-zsh"
 # Alias to mount external FTP backup volume
 alias ftpmount="curlftpfs USER:PASS@HOST:21 /mnt/ftpbackup/"
+# Alias for pretty docker ps output
+alias dps="docker ps --format \"table{{.Names}}\\t{{.Image}}\\t{{.Ports}}\\t{{.Status}}\""
+alias dpsa="docker ps --format \"table{{.Names}}\\t{{.Image}}\\t{{.Ports}}\\t{{.Status}}\" -a"
