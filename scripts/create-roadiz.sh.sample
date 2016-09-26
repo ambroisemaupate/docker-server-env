@@ -9,7 +9,7 @@ docker run  -d -t \
             -e "VIRTUAL_HOST=${HOSTS}" \
             -e "LETSENCRYPT_HOST=${HOSTS}" \
             -e "LETSENCRYPT_EMAIL=ambroise@rezo-zero.com" \
-            --volumes-from=${CONT_NAME}_DATA \
+            -v ${CONT_NAME}_DATA:/data \
             --link="${CONT_NAME}_DB:mariadb" \
             --link="${CONT_NAME}_SOLR:solr" \
             --restart="always" \

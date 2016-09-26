@@ -31,3 +31,5 @@ alias ftpmount="curlftpfs USER:PASS@HOST:21 /mnt/ftpbackup/"
 # Alias for pretty docker ps output
 alias dps="docker ps --format \"table{{.Names}}\\t{{.Image}}\\t{{.Ports}}\\t{{.Status}}\""
 alias dpsa="docker ps --format \"table{{.Names}}\\t{{.Image}}\\t{{.Ports}}\\t{{.Status}}\" -a"
+# List docker volumes
+alias dvls="docker volume ls"

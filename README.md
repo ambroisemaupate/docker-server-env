@@ -42,49 +42,38 @@ git clone https://github.com/ambroisemaupate/docker-server-env.git /root/docker-
 * *solr* (I limit heap size to 256m because we don’t usually use big document data, and it can be painful on a small VPS server)
 * *ambroisemaupate/ftp-backup*
 * *ambroisemaupate/light-ssh*, For SSH access directly inside your container with some useful command as `mysqldump`, `git` and `composer`.
-* *ambroisemaupate/data*
 * *maxexcloo/mariadb*
 
 ## Naming conventions and containers creation
 
 For any *Roadiz* website, you should have:
 
-- One *data* container: `mysite_DATA` using *ambroisemaupate/data* image
+- One *data* container: `mysite_DATA` using `docker volume` command
 
 ```bash
-docker run -d --name="mysite_DATA" ambroisemaupate/data;
+docker volume create --name mysite_DATA;
 ```
 
-- One database *data* container: `mysite_DBDATA` using *ambroisemaupate/data* image
+- One database *data* container: `mysite_DBDATA` using `docker volume` command
 
 ```bash
-docker run -d --name="mysite_DBDATA" ambroisemaupate/data;
+docker volume create --name mysite_DBDATA;
 ```
 
 - One database *process* container: `mysite_DB` using *maxexcloo/mariadb* image
 
 ```bash
-docker run -d --name="mysite_DB" \
-           --volumes-from="mysite_DBDATA" \
-           -e "MARIADB_PASS=password" \
-           -e "MARIADB_USER=mysite" \
-           -e "MARIADB_DB=mysite" \
-           --restart="always" \
-           maxexcloo/mariadb;
+docker run -d --name="mysite_DB" -v mysite_DBDATA:/data -e "MARIADB_PASS=password" -e "MARIADB_USER=mysite" --restart="always" maxexcloo/mariadb;
 ```
 
 - One SSH *process* container: `mysite_SSH` using *maxexcloo/mariadb* image. You’ll have to link
 your *MariaDB* container if you want to dump your database with `mysqldump`.
 
 ```bash
-docker run -d --name="mysite_SSH" \
-           -e PASS=xxxxxxxx \
-           --volumes-from="mysite_DATA" \
-           --link="mysite_DB:mariadb" \
-           -p 22 ambroisemaupate/light-ssh;
+docker run -d --name="mysite_SSH" -e PASS=xxxxxxxx -v mysite_DATA:/data --link="mysite_DB:mariadb" -p 22 ambroisemaupate/light-ssh;
 ```
 
-- One Roadiz *process* container: `mysite` using *roadiz/roadiz* image — *see create-roadiz7.sh.sample script*
+- One Roadiz *process* container: `mysite` using *ambroisemaupate/roadiz* image — *see create-roadiz7.sh.sample script*
 
 ## Back-up containers
 

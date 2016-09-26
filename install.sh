@@ -30,5 +30,4 @@ docker pull ambroisemaupate/roadiz;
 docker pull solr;
 docker pull ambroisemaupate/ftp-backup;
 docker pull ambroisemaupate/light-ssh;
-docker pull ambroisemaupate/data;
 docker pull maxexcloo/mariadb;
