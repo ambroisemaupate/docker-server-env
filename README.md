@@ -42,7 +42,7 @@ git clone https://github.com/ambroisemaupate/docker-server-env.git /root/docker-
 * *solr* (I limit heap size to 256m because we don’t usually use big document data, and it can be painful on a small VPS server)
 * *ambroisemaupate/ftp-backup*
 * *ambroisemaupate/light-ssh*, For SSH access directly inside your container with some useful command as `mysqldump`, `git` and `composer`.
-* *maxexcloo/mariadb*
+* *ambroisemaupate/mariadb*
 
 ## Naming conventions and containers creation
 
@@ -63,10 +63,10 @@ docker volume create --name mysite_DBDATA;
 - One database *process* container: `mysite_DB` using *maxexcloo/mariadb* image
 
 ```bash
-docker run -d --name="mysite_DB" -v mysite_DBDATA:/data -e "MARIADB_PASS=password" -e "MARIADB_USER=mysite" --restart="always" maxexcloo/mariadb;
+docker run -d --name="mysite_DB" -v mysite_DBDATA:/data -e "MARIADB_USER=mysite" -e "MARIADB_PASS=password" --restart="always" ambroisemaupate/mariadb;
 ```
 
-- One SSH *process* container: `mysite_SSH` using *maxexcloo/mariadb* image. You’ll have to link
+- One SSH *process* container: `mysite_SSH` using *ambroisemaupate/light-ssh* image. You’ll have to link
 your *MariaDB* container if you want to dump your database with `mysqldump`.
 
 ```bash
