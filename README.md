@@ -42,23 +42,23 @@ git clone https://github.com/ambroisemaupate/docker-server-env.git /root/docker-
 * *solr* (I limit heap size to 256m because we don’t usually use big document data, and it can be painful on a small VPS server)
 * *ambroisemaupate/ftp-backup*
 * *ambroisemaupate/light-ssh*, For SSH access directly inside your container with some useful command as `mysqldump`, `git` and `composer`.
-* *maxexcloo/data*
+* *ambroisemaupate/data*
 * *maxexcloo/mariadb*
 
 ## Naming conventions and containers creation
 
 For any *Roadiz* website, you should have:
 
-- One *data* container: `mysite_DATA` using *maxexcloo/data* image
+- One *data* container: `mysite_DATA` using *ambroisemaupate/data* image
 
 ```bash
-docker run -d --name="mysite_DATA" maxexcloo/data;
+docker run -d --name="mysite_DATA" ambroisemaupate/data;
 ```
 
-- One database *data* container: `mysite_DBDATA` using *maxexcloo/data* image
+- One database *data* container: `mysite_DBDATA` using *ambroisemaupate/data* image
 
 ```bash
-docker run -d --name="mysite_DBDATA" maxexcloo/data;
+docker run -d --name="mysite_DBDATA" ambroisemaupate/data;
 ```
 
 - One database *process* container: `mysite_DB` using *maxexcloo/mariadb* image
