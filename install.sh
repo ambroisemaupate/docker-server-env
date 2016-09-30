@@ -4,6 +4,14 @@ apt-get update;
 apt-get install ntp ntpdate nano htop curl curlftpfs zsh fail2ban postfix mailutils;
 
 #
+# Listen only localhost for Postfix
+#
+sed -i -e "s/inet\_interfaces = all/inet\_interfaces = loopback-only/" /etc/postfix/main.cf;
+echo "root:    ambroise@rezo-zero.com" >> /etc/aliases;
+newaliases;
+service postfix restart;
+
+#
 # go to current script folder
 #
 cd "$(dirname "$0")";

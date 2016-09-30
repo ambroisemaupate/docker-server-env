@@ -15,7 +15,7 @@ Please, adapt them if you want to clone this git repository elsewhere.
 # Base apps
 #
 apt-get update;
-apt-get install ntp ntpdate nano git htop curl curlftpfs zsh fail2ban postfix mailutils;
+apt-get install nano git zsh;
 
 #
 # Install oh-my-zsh
@@ -26,13 +26,13 @@ sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/i
 # Clone this repository in root’s home
 #
 git clone https://github.com/ambroisemaupate/docker-server-env.git /root/docker-server-env;
-```
 
-* Copy the sample `.zshrc` in your home folder to enable git and docker plugins.
-* Copy the sample `etc/fail2ban/jail.conf` in real location to enable ssh monitoring with fail2ban.
-* Add your email in `/etc/aliases` to receive all *root* emails and type `newaliases` to update aliases DB.
-* Reload Postfix config `postfix reload`
-* Create the `/mnt/ftpbackup` mount point for FTP backup: `mkdir -p /mnt/ftpbackup`
+#
+# Execute base installation
+# It will install more lib, secure postfix and pull base docker images
+#
+sh /root/docker-server-env/install.sh
+```
 
 ## Docker images to use
 
