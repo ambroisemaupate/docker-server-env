@@ -1,0 +1,45 @@
+version: '2'
+services:
+  MAIN:
+    hostname: example
+    image: ambroisemaupate/roadiz
+    environment:
+      ROADIZ_BRANCH: develop
+      VIRTUAL_HOST: example.localhost,www.example.localhost
+    volumes:
+      - DATA:/data
+    links:
+      - DB:mariadb
+    depends_on:
+      - DB
+    restart: always
+    # Needed to be reachable from front-proxy
+    network_mode: "bridge"
+  DB:
+    image: ambroisemaupate/mariadb
+    environment:
+      MARIADB_USER: "username"
+      MARIADB_PASS: "password"
+    restart: always
+    network_mode: "bridge"
+    volumes:
+      - DBDATA:/data
+  # SSH container linked to db to
+  # export or import mysqldumps and
+  # sync your files from/to your local server
+  SSH:
+    image: ambroisemaupate/light-ssh
+    network_mode: "bridge"
+    environment:
+      PASS: "password"
+    volumes:
+      - DATA:/data
+    links:
+      - DB:mariadb
+    depends_on:
+      - DB
+    ports:
+      - "22/tcp"
+volumes:
+  DATA:
+  DBDATA:
