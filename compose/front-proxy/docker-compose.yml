@@ -24,6 +24,3 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./../../front-proxy/certs:/etc/nginx/certs:rw
-
-
-
