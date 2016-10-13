@@ -87,6 +87,9 @@ For example, for `mysite` Roadiz container, all data must be stored in `mysite_D
 # m h  dom mon dow   command
 00 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysite.sh >> ~/docker-server-env/bckup_logs/bck-mysite.log
 20 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysecondsite.sh >> ~/docker-server-env/bckup_logs/bck-mysecondsite.log
+
+# Claim cached memory
+00 7 * * * sync && echo 3 | tee /proc/sys/vm/drop_caches
 # etc
 ```
 
