@@ -80,6 +80,8 @@ docker run -d --name="mysite_SSH" -e PASS=xxxxxxxx -v mysite_DATA:/data --link="
 You’ll find examples to launch *front-proxy* and *Roadiz* based containers with *docker-compose*
 in `compose/` folder. Just copy the sample `example/` folder naming it with your website reference.
 
+Then, use `docker-compose up -d --force-recreate` to create in background all your websites containers.
+
 We need to use [`bridge` networking](https://github.com/jwilder/nginx-proxy/issues/502) with *docker-compose* to be able
 to discover your containers from other global containers, such as the `front-proxy` and your daily backups.
 See https://docs.docker.com/compose/networking/ for further details.
