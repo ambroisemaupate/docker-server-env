@@ -31,7 +31,7 @@ services:
   SSH:
     image: ambroisemaupate/light-ssh
     network_mode: "bridge"
-    restart: no
+    restart: "no"
     environment:
       PASS: "password"
     volumes:
