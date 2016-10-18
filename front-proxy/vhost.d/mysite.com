@@ -1,1 +1,7 @@
-return 301 https://www.mysite.com$request_uri;
+#
+# Redirect only root domain
+# no other subdomains.
+#
+if ($host = 'mysite.com') {
+    return 301 $scheme://www.mysite.com$request_uri;
+}
