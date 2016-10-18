@@ -44,7 +44,7 @@ sh /root/docker-server-env/install.sh
 * *ambroisemaupate/light-ssh*, For SSH access directly inside your container with some useful command as `mysqldump`, `git` and `composer`.
 * *ambroisemaupate/mariadb*
 
-## Naming conventions and containers creation
+## Naming conventions and containers creation *without docker-compose*
 
 For any *Roadiz* website, you should have:
 
@@ -74,6 +74,15 @@ docker run -d --name="mysite_SSH" -e PASS=xxxxxxxx -v mysite_DATA:/data --link="
 ```
 
 - One Roadiz *process* container: `mysite` using *ambroisemaupate/roadiz* image — *see create-roadiz7.sh.sample script*
+
+## Using *docker-compose*
+
+You’ll find examples to launch *front-proxy* and *Roadiz* based containers with *docker-compose*
+in `compose/` folder. Just copy the sample `example/` folder naming it with your website reference.
+
+We need to use [`bridge` networking](https://github.com/jwilder/nginx-proxy/issues/502) with *docker-compose* to be able
+to discover your containers from other global containers, such as the `front-proxy` and your daily backups.
+See https://docs.docker.com/compose/networking/ for further details.
 
 ## Back-up containers
 

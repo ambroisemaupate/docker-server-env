@@ -5,6 +5,7 @@ HOSTS="www.mysite.com";
 
 docker run  -d -t \
             --name=${CONT_NAME} \
+            --hostname="${CONT_NAME}" \
             -e "ROADIZ_BRANCH=master" \
             -e "VIRTUAL_HOST=${HOSTS}" \
             -e "LETSENCRYPT_HOST=${HOSTS}" \
