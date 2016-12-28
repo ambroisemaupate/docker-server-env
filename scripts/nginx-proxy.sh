@@ -27,7 +27,7 @@ docker run  -d \
             --volumes-from "front-proxy" \
             -v /var/run/docker.sock:/var/run/docker.sock:ro \
             --restart="always" \
-            jrcs/letsencrypt-nginx-proxy-companion;
+            alastaircoote/docker-letsencrypt-nginx-proxy-companion;
 
 # For the moment we need to disable HTTP/2
 # Because of some errors with XHR SSL file upload and Dropzone.js
