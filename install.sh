@@ -35,6 +35,7 @@ service fail2ban restart;
 docker pull jwilder/nginx-proxy;
 docker pull jrcs/letsencrypt-nginx-proxy-companion;
 docker pull ambroisemaupate/roadiz;
+docker pull roadiz/standard-edition;
 docker pull solr;
 docker pull ambroisemaupate/ftp-backup;
 docker pull ambroisemaupate/light-ssh;

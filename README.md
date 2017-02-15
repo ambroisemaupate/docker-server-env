@@ -38,7 +38,8 @@ sh /root/docker-server-env/install.sh
 
 * *jwilder/nginx-proxy*: I disabled *HTTP/2* due to strange errors with *Dropzone.js* (file upload SSL HTTP/2 proxied to HTTP/1.1)
 * *alastaircoote/docker-letsencrypt-nginx-proxy-companion*: For automatic *Let’s encrypt* certificate issuing and configuration
-* *roadiz/roadiz* (for PHP56 and Nginx 1.6.1+) and *ambroisemaupate/roadiz* (for PHP7 and Nginx 1.9.11+)
+* *ambroisemaupate/roadiz* (for PHP7 and Nginx 1.9.11+)
+* *roadiz/standard-edition* (for PHP7 and Nginx 1.9.11+)
 * *solr* (I limit heap size to 256m because we don’t usually use big document data, and it can be painful on a small VPS server)
 * *ambroisemaupate/ftp-backup*
 * *ambroisemaupate/light-ssh*, For SSH access directly inside your container with some useful command as `mysqldump`, `git` and `composer`.
@@ -73,7 +74,7 @@ your *MariaDB* container if you want to dump your database with `mysqldump`.
 docker run -d --name="mysite_SSH" -e PASS=xxxxxxxx -v mysite_DATA:/data --link="mysite_DB:mariadb" -p 22 ambroisemaupate/light-ssh;
 ```
 
-- One Roadiz *process* container: `mysite` using *ambroisemaupate/roadiz* image — *see create-roadiz7.sh.sample script*
+- One Roadiz *process* container: `mysite` using *ambroisemaupate/roadiz* or *roadiz/standard-edition* image — *see create-roadiz.sh.sample script*
 
 ## Using *docker-compose*
 
