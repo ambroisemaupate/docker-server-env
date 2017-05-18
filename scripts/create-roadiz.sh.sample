@@ -37,10 +37,11 @@ docker run  -d -t \
             -p "22/tcp" \
             "ambroisemaupate/light-ssh";
 
-# Add some crontab to roadiz
+# Service cron start
+#docker exec -ti --user=root ${CONT_NAME} bash -c 'service cron start'
 
+# Add some crontab to roadiz
 #docker exec -ti \
 #            --user=core \
 #            ${CONT_NAME} \
-#            bash -c 'crontab -l | { cat; echo "* * * * * /usr/bin/php /data/http/bin/roadiz -h > /data/log/crontab.log"; } | crontab -'
-#
+#            bash -c 'crontab -l | { cat; echo "* * * * * /usr/bin/php /data/http/bin/roadiz -h > /data/logs/crontab.log"; } | crontab -'

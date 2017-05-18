@@ -16,6 +16,7 @@ services:
     # Needed to be reachable from front-proxy and backup containers
     network_mode: "bridge"
   DB:
+    hostname: example-db
     image: ambroisemaupate/mariadb
     environment:
       MARIADB_USER: "username"
@@ -29,6 +30,7 @@ services:
   # export or import mysqldumps and
   # sync your files from/to your local server
   SSH:
+    hostname: example-ssh
     image: ambroisemaupate/light-ssh
     network_mode: "bridge"
     restart: "no"
