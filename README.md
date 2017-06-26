@@ -38,7 +38,6 @@ sh /root/docker-server-env/install.sh
 
 * *jwilder/nginx-proxy*: I disabled *HTTP/2* due to strange errors with *Dropzone.js* (file upload SSL HTTP/2 proxied to HTTP/1.1)
 * *alastaircoote/docker-letsencrypt-nginx-proxy-companion*: For automatic *Let’s encrypt* certificate issuing and configuration
-* *ambroisemaupate/roadiz* (for PHP7 and Nginx 1.9.11+)
 * *roadiz/standard-edition* (for PHP7 and Nginx 1.9.11+)
 * *solr* (I limit heap size to 256m because we don’t usually use big document data, and it can be painful on a small VPS server)
 * *ambroisemaupate/ftp-backup*
