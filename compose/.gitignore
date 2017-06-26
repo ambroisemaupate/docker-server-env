@@ -1,5 +1,5 @@
-*
-!.gitignore
-!example
-!example-se
-!front-proxy
+/*
+!/.gitignore
+!/example
+!/example-se
+!/front-proxy

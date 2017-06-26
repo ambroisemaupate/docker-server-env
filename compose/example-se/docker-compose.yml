@@ -1,0 +1,68 @@
+version: '2'
+services:
+  MAIN:
+    hostname: example
+    image: roadiz/standard-edition
+    environment:
+      VIRTUAL_HOST: example.localhost,www.example.localhost
+      #LETSENCRYPT_HOST: example.localhost,www.example.localhost
+      #LETSENCRYPT_EMAIL: contact@example.localhost
+    volumes:
+      - DATA:/data
+    links:
+      - DB:mariadb
+    depends_on:
+      - DB
+    restart: always
+    # Needed to be reachable from front-proxy and backup containers
+    network_mode: "bridge"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 5m0s
+      timeout: 5s
+      retries: 3
+  DB:
+    hostname: example-db
+    image: ambroisemaupate/mariadb
+    environment:
+      MARIADB_USER: "username"
+      MARIADB_DB:   "username"
+      MARIADB_PASS: "password"
+    restart: always
+    # Needed to be reachable from backup containers
+    network_mode: "bridge"
+    volumes:
+      - DBDATA:/data
+  # SSH container linked to db to
+  # export or import mysqldumps and
+  # sync your files from/to your local server
+  SSH:
+    hostname: example-ssh
+    image: ambroisemaupate/light-ssh
+    network_mode: "bridge"
+    restart: "no"
+    environment:
+      PASS: "password"
+    volumes:
+      - DATA:/data
+    links:
+      - DB:mariadb
+    depends_on:
+      - DB
+    ports:
+      - "22/tcp"
+  #SOLR:
+  #  hostname: example-solr
+  #  image: solr
+  #  #ports:
+  #  # - "8983:8983"
+  #  #volumes:
+  #  #  - SOLRDATA:/opt/solr/server/solr/mycores
+  #  entrypoint:
+  #    - docker-entrypoint.sh
+  #    - solr-precreate
+  #    - example
+volumes:
+  DATA:
+  DBDATA:
+  #SOLRDATA:
