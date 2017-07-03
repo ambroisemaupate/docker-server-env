@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 apt-get update;
-apt-get install \
+apt-get install -y \
     ntp \
     ntpdate \
     nano \
@@ -17,11 +17,8 @@ apt-get install \
     software-properties-common;
 
 # Install latest docker
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -;
-add-apt-repository \
-   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-   $(lsb_release -cs) \
-   stable";
+curl -fsSL https://download.docker.com/linux/$DISTRIB/gpg | apt-key add -;
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$DISTRIB $(lsb_release -cs) stable";
 
 apt-get update;
 apt-get install docker-ce;
@@ -55,7 +52,7 @@ cd "$(dirname "$0")";
 # Copy sample config files
 #
 cp ./.zshrc ~/.zshrc;
-cp ./fail2ban/jail.conf /etc/fail2ban;
+cp ./etc/fail2ban/jail.conf /etc/fail2ban;
 cp ./etc/logrotate.d/dockerbck /etc/logrotate.d/dockerbck;
 
 #

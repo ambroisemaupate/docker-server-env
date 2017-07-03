@@ -15,7 +15,7 @@ Please, adapt them if you want to clone this git repository elsewhere.
 # Base apps
 #
 apt-get update;
-apt-get install nano git zsh;
+apt-get install sudo curl nano git zsh;
 
 #
 # Install oh-my-zsh
@@ -31,7 +31,11 @@ git clone https://github.com/ambroisemaupate/docker-server-env.git /root/docker-
 # Execute base installation
 # It will install more lib, secure postfix and pull base docker images
 #
-sh /root/docker-server-env/install.sh
+cd /path/to/docker-server-env
+#
+# Pass DISTRIB env to install [ubuntu/debian]
+# sudo DISTRIB="debian" bash ./install.sh if not root
+DISTRIB="debian" bash ./install.sh
 ```
 
 ## Docker images to use
