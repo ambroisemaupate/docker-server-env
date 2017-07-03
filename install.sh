@@ -1,5 +1,10 @@
 #!/bin/bash
 #
+if [ -z "$DISTRIB" ]; then
+    echo "Need to set DISTRIB env variable [debian|ubuntu]."
+    exit 1
+fi
+
 apt-get update;
 apt-get install -y \
     ntp \
@@ -21,7 +26,9 @@ curl -fsSL https://download.docker.com/linux/$DISTRIB/gpg | apt-key add -;
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$DISTRIB $(lsb_release -cs) stable";
 
 apt-get update;
-apt-get install docker-ce;
+apt-get install -y docker-ce;
+groupadd docker;
+usermod -aG docker $USER;
 
 # Add your user to docker group
 # for non-root installs
@@ -39,7 +46,7 @@ chmod +x /usr/local/bin/docker-compose;
 # Listen only localhost for Postfix
 #
 sed -i -e "s/inet\_interfaces = all/inet\_interfaces = loopback-only/" /etc/postfix/main.cf;
-echo "root:    ambroise@rezo-zero.com" >> /etc/aliases;
+echo "root: ambroise@rezo-zero.com" >> /etc/aliases;
 newaliases;
 service postfix restart;
 
@@ -51,7 +58,7 @@ cd "$(dirname "$0")";
 #
 # Copy sample config files
 #
-cp ./.zshrc ~/.zshrc;
+cp ./.zshrc $HOME/.zshrc;
 cp ./etc/fail2ban/jail.conf /etc/fail2ban;
 cp ./etc/logrotate.d/dockerbck /etc/logrotate.d/dockerbck;
 
