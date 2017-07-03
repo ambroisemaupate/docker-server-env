@@ -82,7 +82,11 @@ docker run -d --name="mysite_SSH" -e PASS=xxxxxxxx -v mysite_DATA:/data --link="
 ## Using *docker-compose*
 
 You’ll find examples to launch *front-proxy* and *Roadiz* based containers with *docker-compose*
-in `compose/` folder. Just copy the sample `example/` folder naming it with your website reference.
+in `compose/` folder. Just copy the sample `example-se/` folder naming it with your website reference.
+
+```bash
+cp -a ./compose/example-se ./compose/mywebsite.tld
+```
 
 Then, use `docker-compose up -d --force-recreate` to create in background all your websites containers.
 
@@ -92,10 +96,16 @@ See https://docs.docker.com/compose/networking/ for further details.
 
 ## Back-up containers
 
-In order to backup your containers to your FTP. Duplicate `scripts/bck-mysite.sh.sample`
-file without `.sample` suffix for each of your websites.
-Fill all variables in the `scripts/ftp-credentials.sh`. Make sure you are using a *data* container to hold your site contents.
-For example, for `mysite` Roadiz container, all data must be stored in `mysite_DATA` container.
+In order to backup your containers to your FTP. Duplicate `./scripts/bck-mysite.sh.sample`
+file without `.sample` suffix for each of your websites and `./scripts/ftp-credentials.sh.sample` once.
+
+Fill all variables in the `scripts/ftp-credentials.sh`. Make sure you are using a volume to hold your site contents.
+For example, for `mysite` Roadiz container, all data must be stored in `mysite_DATA` volume.
+
+If you’re using *docker-compose*, check your volume name with `docker volume list`.
+If not, check your database link name: `--link ${NAME}_DB_1:mariadb` and remove the `_1` (added for *docker-compose* websites).
+
+Then add execution flag to your backup script: `chmod u+x ./scripts/bck-mysite.sh`.
 
 ```bash
 # Crontab
@@ -103,6 +113,7 @@ For example, for `mysite` Roadiz container, all data must be stored in `mysite_D
 00 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysite.sh >> ~/docker-server-env/bckup_logs/bck-mysite.log
 20 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysecondsite.sh >> ~/docker-server-env/bckup_logs/bck-mysecondsite.log
 
+# If your system seems to be short in RAM because of linux file cache.
 # Claim cached memory
 00 7 * * * sync && echo 3 | tee /proc/sys/vm/drop_caches
 # etc

@@ -14,16 +14,19 @@ NAME="mysite"
 #  _DB for manually created websites
 #
 #  We add a CPU share constraint of 256 (a quarter)
-docker run --rm -t --name="${NAME}_BCK"
+docker run --rm -t --name="${NAME}_BCK" \
            -c=256 \
            -v ${NAME}_DATA:/data \
-           -e FTP_USER="${FTP_USER}"\
-           -e FTP_PASS="${FTP_PASS}"\
-           -e FTP_HOST="${FTP_HOST}"\
-           -e FTP_PORT="${FTP_PORT}"\
-           -e DB_USER="mysite"\
-           -e DB_HOST="mariadb"\
-           -e DB_PASS="password"\
-           -e DB_NAME="mysite"\
-           -e REMOTE_PATH="/docker-bck/${NAME}"\
+           -e FTP_USER="${FTP_USER}" \
+           -e FTP_PASS="${FTP_PASS}" \
+           -e FTP_HOST="${FTP_HOST}" \
+           -e FTP_PORT="${FTP_PORT}" \
+           -e DB_USER="mysite" \
+           -e DB_HOST="mariadb" \
+           -e DB_PASS="password" \
+           -e DB_NAME="mysite" \
+           -e REMOTE_PATH="/docker-bck/${NAME}" \
+           # If you want to use a SSH/SFTP remote \
+           #-e FTP_PROTO="sftp" \
+           #-e REMOTE_PATH="/home/ambroisemaupate/docker-bck/${NAME}" \
            --link ${NAME}_DB_1:mariadb ambroisemaupate/ftp-backup
