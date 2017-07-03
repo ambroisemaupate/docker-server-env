@@ -11,8 +11,10 @@ services:
       - DATA:/data
     links:
       - DB:mariadb
+      #- SOLR:solr
     depends_on:
       - DB
+      #- SOLR
     restart: always
     # Needed to be reachable from front-proxy and backup containers
     network_mode: "bridge"
@@ -54,6 +56,8 @@ services:
   #SOLR:
   #  hostname: example-solr
   #  image: solr
+  #  restart: always
+  #  network_mode: "bridge"
   #  #ports:
   #  # - "8983:8983"
   #  #volumes:
