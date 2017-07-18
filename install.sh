@@ -28,7 +28,6 @@ add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$DISTRIB 
 apt-get update;
 apt-get install -y docker-ce;
 groupadd docker;
-usermod -aG docker $USER;
 
 # Add your user to docker group
 # for non-root installs
@@ -59,7 +58,7 @@ cd "$(dirname "$0")";
 # Copy sample config files
 #
 cp ./.zshrc $HOME/.zshrc;
-cp ./etc/fail2ban/jail.conf /etc/fail2ban;
+cp ./etc/fail2ban/jail.d/defaults-debian.conf /etc/fail2ban/jail.d/defaults-debian.conf;
 cp ./etc/logrotate.d/dockerbck /etc/logrotate.d/dockerbck;
 
 #
@@ -67,14 +66,3 @@ cp ./etc/logrotate.d/dockerbck /etc/logrotate.d/dockerbck;
 #
 mkdir -p /mnt/ftpbackup;
 service fail2ban restart;
-
-#
-# Pull base docker images
-#
-docker pull jwilder/nginx-proxy;
-docker pull jrcs/letsencrypt-nginx-proxy-companion;
-docker pull roadiz/standard-edition;
-docker pull solr;
-docker pull ambroisemaupate/ftp-backup;
-docker pull ambroisemaupate/light-ssh;
-docker pull ambroisemaupate/mariadb;

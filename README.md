@@ -115,7 +115,7 @@ Then add execution flag to your backup script: `chmod u+x ./scripts/bck-mysite.s
 
 # If your system seems to be short in RAM because of linux file cache.
 # Claim cached memory
-00 7 * * * sync && echo 3 | tee /proc/sys/vm/drop_caches
+# 00 7 * * * sync && echo 3 | tee /proc/sys/vm/drop_caches
 # etc
 ```
 
