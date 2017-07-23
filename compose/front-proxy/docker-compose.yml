@@ -1,10 +1,12 @@
 ---
-version: "3"
+version: "2"
 services:
   nginx:
     network_mode: "bridge"
     restart: always
     image: jwilder/nginx-proxy
+    environment:
+        ENABLE_IPV6: "true"
     ports:
       - 80:80
       - 443:443
@@ -21,11 +23,8 @@ services:
     restart: always
     depends_on:
       - nginx
+    volumes_from:
+      - nginx
     volumes:
-      - ./../../front-proxy/htpasswd:/etc/nginx/htpasswd:ro
-      - ./../../front-proxy/certs:/etc/nginx/certs:ro
-      - ./../../front-proxy/vhost.d:/etc/nginx/vhost.d
-      - ./../../front-proxy/html:/usr/share/nginx/html
-      - ./../../front-proxy/nginx-proxy.conf:/etc/nginx/conf.d/nginx-proxy.conf:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./../../front-proxy/certs:/etc/nginx/certs:rw
