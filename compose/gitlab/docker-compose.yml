@@ -4,7 +4,7 @@ services:
     image: 'gitlab/gitlab-ce:latest'
     restart: always
     hostname: 'HOSTNAME'
-    network_mode: "HOSTNAME"
+    network_mode: "bridge"
     environment:
       VIRTUAL_HOST: HOSTNAME
       LETSENCRYPT_HOST: HOSTNAME
