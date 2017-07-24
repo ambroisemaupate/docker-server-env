@@ -1,0 +1,41 @@
+version: '3'
+services:
+  web:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: always
+    hostname: 'HOSTNAME'
+    # Enable bridge network mode to make your container
+    # visible from your nginx proxy.
+    network_mode: "bridge"
+    environment:
+      VIRTUAL_HOST: HOSTNAME
+      LETSENCRYPT_HOST: HOSTNAME
+      LETSENCRYPT_EMAIL: YOUREMAIL
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://HOSTNAME'
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+        nginx['proxy_set_headers'] = {
+          'X-Forwarded-Proto' => 'https',
+          'X-Forwarded-Ssl' => 'on'
+        }
+        nginx['client_max_body_size'] = '2G'
+        gitlab_rails['smtp_enable'] = true
+        gitlab_rails['smtp_address'] = ""
+        gitlab_rails['smtp_port'] = 587
+        gitlab_rails['smtp_user_name'] = ""
+        gitlab_rails['smtp_password'] = ""
+        gitlab_rails['smtp_domain'] = ""
+        gitlab_rails['smtp_authentication'] = "login"
+        gitlab_rails['smtp_enable_starttls_auto'] = true
+        gitlab_rails['gitlab_email_from'] = 'gitlab@HOSTNAME'
+        gitlab_rails['gitlab_email_reply_to'] = 'noreply@HOSTNAME'
+    ports:
+      # Make sure your host 22 port is not already taken by SSH
+      # We encorage you to change you host SSH port to reserve it for Gitlab
+      - '22:22'
+    volumes:
+      # Use host volumes instead of docker named volumes for better config access
+      - '/srv/gitlab/config:/etc/gitlab'
+      - '/srv/gitlab/logs:/var/log/gitlab'
+      - '/srv/gitlab/data:/var/opt/gitlab'
