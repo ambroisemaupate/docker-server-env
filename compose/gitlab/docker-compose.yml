@@ -4,6 +4,8 @@ services:
     image: 'gitlab/gitlab-ce:latest'
     restart: always
     hostname: 'HOSTNAME'
+    # Enable bridge network mode to make your container
+    # visible from your nginx proxy.
     network_mode: "bridge"
     environment:
       VIRTUAL_HOST: HOSTNAME
@@ -29,8 +31,11 @@ services:
         gitlab_rails['gitlab_email_from'] = 'gitlab@HOSTNAME'
         gitlab_rails['gitlab_email_reply_to'] = 'noreply@HOSTNAME'
     ports:
+      # Make sure your host 22 port is not already taken by SSH
+      # We encorage you to change you host SSH port to reserve it for Gitlab
       - '22:22'
     volumes:
+      # Use host volumes instead of docker named volumes for better config access
       - '/srv/gitlab/config:/etc/gitlab'
       - '/srv/gitlab/logs:/var/log/gitlab'
       - '/srv/gitlab/data:/var/opt/gitlab'
