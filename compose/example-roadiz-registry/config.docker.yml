@@ -1,0 +1,55 @@
+---
+appNamespace: "example"
+timezone: "Europe/Paris"
+doctrine:
+    driver: "pdo_mysql"
+    host: "db"
+    user: "example"
+    password: "password"
+    dbname: "example"
+    charset: utf8mb4
+    default_table_options:
+        charset: utf8mb4
+        collate: utf8mb4_unicode_ci
+# http://symfony.com/doc/current/reference/configuration/doctrine.html#caching-drivers
+# If null or empty, Roadiz will try to detect best cache driver available
+cacheDriver:
+    type: apcu
+    host: ~
+    port: ~
+security:
+    secret: "example-secret"
+# Should USE an external SMTP
+# such as Mailjet
+mailer:
+    type: smtp
+    host: in-v3.mailjet.com
+    port: 587
+    encryption: false
+    username: ~
+    password: ~
+# Doctrine entities search paths
+# Append yours here if you want to create custom
+# entities in your theme. Path must be relative to
+# root dir (app/)
+entities:
+    - "../vendor/roadiz/roadiz/src/Roadiz/Core/Entities"
+    - "../vendor/roadiz/models/src/Roadiz/Core/AbstractEntities"
+    - "gen-src/GeneratedNodeSources"
+# Lifetime of remember-me cookie in seconds (30 days)
+rememberMeLifetime: 2592000
+additionalServiceProviders: []
+additionalCommands: []
+# Image intervention and Intervention Request
+# settings for generating image on the fly
+assetsProcessing:
+    # gd or imagick (gd does not support TIFF and PSD formats)
+    driver: gd
+    defaultQuality: 90
+    # pixel size limit () after roadiz
+    # should create a smaller copy.
+    maxPixelSize: 1920
+    jpegoptimPath: /usr/bin/jpegoptim
+    pngquantPath: /usr/bin/pngquant
+    subscribers: []
+

@@ -1,0 +1,68 @@
+version: '3'
+services:
+  app:
+    hostname: example
+    # Application is a packaged docker image
+    # hosted on Gitlab Registry (or hub.docker.com)
+    image: registry.gitlab.com/example/example
+    environment:
+      VIRTUAL_HOST: www.example.com,example.com
+      LETSENCRYPT_HOST: www.example.com,example.com
+      LETSENCRYPT_EMAIL: postmaster@example.com
+    # These volumes contain all user DATA
+    # and will be backuped if your backup container
+    # uses --volumes-from option.
+    volumes:
+      - ./config.docker.yml:/var/www/html/app/conf/config.yml
+      - private_files:/var/www/html/files
+      - public_files:/var/www/html/web/files
+      - gen_src:/var/www/html/app/gen-src
+    links:
+      - db:mariadb
+      - solr:solr
+    depends_on:
+      - db
+      - solr
+    restart: always
+    # Needed to be reachable from front-proxy and backup containers
+    network_mode: "bridge"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 5m0s
+      timeout: 5s
+      retries: 3
+
+
+  db:
+    hostname: db.example
+    image: mariadb
+    volumes:
+        - DBDATA:/var/lib/mysql
+    environment:
+        MYSQL_DATABASE: example
+        MYSQL_USER: example
+        MYSQL_PASSWORD: password
+        MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    restart: always
+    # Needed to be reachable from front-proxy and backup containers
+    network_mode: "bridge"
+
+
+  solr:
+    hostname: solr.example
+    image: solr
+    restart: always
+    network_mode: "bridge"
+    volumes:
+      - SOLRDATA:/opt/solr/server/solr/mycores
+    entrypoint:
+      - docker-entrypoint.sh
+      - solr-precreate
+      - example
+
+volumes:
+  private_files:
+  public_files:
+  gen_src:
+  DBDATA:
+  SOLRDATA:

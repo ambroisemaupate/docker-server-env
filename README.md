@@ -135,3 +135,8 @@ create another folder in your FTP.
 
 Add the `etc/logrotate.d/dockerbck` configuration to your real `logrotate.d` system folder.
 
+## Using custom Docker images for Roadiz
+
+Example files can be found in `./compose/example-roadiz-registry/` and `./scripts/bck-example-roadiz-registry.sh.sample`
+if you are building custom Roadiz images with direct *volumes* for your websites and private registry such as *Gitlab* one.
+
