@@ -66,3 +66,8 @@ cp ./etc/logrotate.d/dockerbck /etc/logrotate.d/dockerbck;
 #
 mkdir -p /mnt/ftpbackup;
 service fail2ban restart;
+
+# 
+# create default bridge network
+# 
+docker network create --driver bridge frontproxynet;

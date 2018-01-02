@@ -40,7 +40,7 @@ DISTRIB="debian" bash ./install.sh
 
 ## Docker images to use
 
-* *jwilder/nginx-proxy*: I disabled *HTTP/2* due to strange errors with *Dropzone.js* (file upload SSL HTTP/2 proxied to HTTP/1.1)
+* *jwilder/nginx-proxy*
 * *alastaircoote/docker-letsencrypt-nginx-proxy-companion*: For automatic *Let’s encrypt* certificate issuing and configuration
 * *roadiz/standard-edition* (for PHP7 and Nginx 1.9.11+)
 * *solr* (I limit heap size to 256m because we don’t usually use big document data, and it can be painful on a small VPS server)
@@ -90,9 +90,16 @@ cp -a ./compose/example-se ./compose/mywebsite.tld
 
 Then, use `docker-compose up -d --force-recreate` to create in background all your websites containers.
 
-We need to use [`bridge` networking](https://github.com/jwilder/nginx-proxy/issues/502) with *docker-compose* to be able
+We need to use the same *network* with *docker-compose* to be able
 to discover your containers from other global containers, such as the `front-proxy` and your daily backups.
-See https://docs.docker.com/compose/networking/ for further details.
+See https://docs.docker.com/compose/networking/#configure-the-default-network for further details. Here is the additional lines to append to your custom docker-compose applications:
+
+```yaml
+networks:
+  default:
+    external:
+      name: frontproxynet
+```
 
 ## Back-up containers
 

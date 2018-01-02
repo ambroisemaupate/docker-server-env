@@ -17,8 +17,6 @@ services:
       - DB
       #- SOLR
     restart: always
-    # Needed to be reachable from front-proxy and backup containers
-    network_mode: "bridge"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 5m0s
@@ -32,8 +30,6 @@ services:
       MARIADB_DB:   "username"
       MARIADB_PASS: "password"
     restart: always
-    # Needed to be reachable from backup containers
-    network_mode: "bridge"
     volumes:
       - DBDATA:/data
   # SSH container linked to db to
@@ -42,7 +38,6 @@ services:
   SSH:
     hostname: example-ssh
     image: ambroisemaupate/light-ssh
-    network_mode: "bridge"
     restart: "no"
     environment:
       PASS: "password"
@@ -58,7 +53,6 @@ services:
   #  hostname: example-solr
   #  image: solr
   #  restart: always
-  #  network_mode: "bridge"
   #  #ports:
   #  # - "8983:8983"
   #  #volumes:
@@ -71,3 +65,8 @@ volumes:
   DATA:
   DBDATA:
   #SOLRDATA:
+
+networks:
+  default:
+    external:
+      name: frontproxynet

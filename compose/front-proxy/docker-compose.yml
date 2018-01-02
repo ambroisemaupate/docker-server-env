@@ -1,8 +1,6 @@
----
-version: "2"
+version: "3"
 services:
   nginx:
-    network_mode: "bridge"
     restart: always
     image: jwilder/nginx-proxy
     environment:
@@ -18,13 +16,18 @@ services:
       - ./../../front-proxy/html:/usr/share/nginx/html
       - ./../../front-proxy/nginx-proxy.conf:/etc/nginx/conf.d/nginx-proxy.conf:ro
   letsencrypt:
-    network_mode: "bridge"
     image: jrcs/letsencrypt-nginx-proxy-companion
     restart: always
     depends_on:
       - nginx
-    volumes_from:
-      - nginx
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./../../front-proxy/certs:/etc/nginx/certs:rw
+      - ./../../front-proxy/htpasswd:/etc/nginx/htpasswd:ro
+      - ./../../front-proxy/vhost.d:/etc/nginx/vhost.d
+      - ./../../front-proxy/html:/usr/share/nginx/html
+      - ./../../front-proxy/nginx-proxy.conf:/etc/nginx/conf.d/nginx-proxy.conf:ro
+networks:
+  default:
+    external:
+      name: frontproxynet

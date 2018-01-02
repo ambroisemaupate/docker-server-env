@@ -24,8 +24,6 @@ services:
       - db
       - solr
     restart: always
-    # Needed to be reachable from front-proxy and backup containers
-    network_mode: "bridge"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 5m0s
@@ -44,15 +42,12 @@ services:
         MYSQL_PASSWORD: password
         MYSQL_RANDOM_ROOT_PASSWORD: "yes"
     restart: always
-    # Needed to be reachable from front-proxy and backup containers
-    network_mode: "bridge"
 
 
   solr:
     hostname: solr.example
     image: solr
     restart: always
-    network_mode: "bridge"
     volumes:
       - SOLRDATA:/opt/solr/server/solr/mycores
     entrypoint:
@@ -66,3 +61,8 @@ volumes:
   gen_src:
   DBDATA:
   SOLRDATA:
+
+networks:
+  default:
+    external:
+      name: frontproxynet
