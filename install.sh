@@ -5,6 +5,11 @@ if [ -z "$DISTRIB" ]; then
     exit 1
 fi
 
+if [ "$DISTRIB" != "debian" -a "$DISTRIB" != "ubuntu" ]; then
+    echo "DISTRIB env variable only supports debian or ubuntu."
+    exit 1
+fi
+
 apt-get update;
 apt-get install -y \
     ntp \
@@ -58,7 +63,7 @@ cd "$(dirname "$0")";
 # Copy sample config files
 #
 cp ./.zshrc $HOME/.zshrc;
-cp ./etc/fail2ban/jail.d/defaults-debian.conf /etc/fail2ban/jail.d/defaults-debian.conf;
+cp ./etc/fail2ban/jail.d/defaults-${DISTRIB}.conf /etc/fail2ban/jail.d/defaults-${DISTRIB}.conf;
 cp ./etc/logrotate.d/dockerbck /etc/logrotate.d/dockerbck;
 
 #
