@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Author: Ambroise Maupate
+
+. `dirname $0`/ftp-credentials.sh || {
+    echo "`dirname $0`/ftp-credentials.sh";
+    echo 'Impossible to import your configuration.';
+    exit 1;
+}
+
+NAME="examplegitlab"
+
+#
+# Perform backup
+#
+docker exec ${NAME}_gitlab_1 gitlab-rake gitlab:backup:create CRON=1;
+
+#
+# Mount FTP backup on file system
+#
+curlftpfs ${FTP_USER}:${FTP_PASS}@${FTP_HOST}:${FTP_PORT} /mnt/ftpbackup/;
+
+mkdir -p /mnt/ftpbackup/${NAME}/;
+
+rsync -ah --delete /srv/gitlab/data/backups/ /mnt/ftpbackup/${NAME}/;
+
+umount /mnt/ftpbackup/;
+
+#
+# Transfer your backups to an external SSH server
+#
+#rsync -az --delete /srv/gitlab/data/backups/ user@mybackup:~/backups/${NAME}/

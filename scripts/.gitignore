@@ -2,6 +2,7 @@
 !.gitignore
 !bck-mysite.sh.sample
 !bck-example-roadiz-registry.sh.sample
+!bck-example-gitlab.sh.sample
 !cleanup-bck.sh
 !create-roadiz.sh.sample
 !create-roadiz7.sh.sample
