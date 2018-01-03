@@ -18,6 +18,7 @@ apt-get install -y \
     htop \
     curl \
     curlftpfs \
+    lftp \
     zsh \
     fail2ban \
     postfix \
