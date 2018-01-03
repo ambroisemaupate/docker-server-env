@@ -57,7 +57,10 @@ services:
       - '/srv/gitlab/data:/var/opt/gitlab'
       #
       # First run this stack before
-      # using letsencrypt certs
+      # using letsencrypt certs !
+      # 
+      # Gitlab Nginx won’t be able to start before you uncomment these lines
+      # but wait for the second start-up: docker-compose up -d --force-recreate
       # 
       #- '/root/docker-server-env/front-proxy/certs/REGISTRY_HOSTNAME/fullchain.pem:/etc/gitlab/ssl/REGISTRY_HOSTNAME.crt:ro'
       #- '/root/docker-server-env/front-proxy/certs/REGISTRY_HOSTNAME/key.pem:/etc/gitlab/ssl/REGISTRY_HOSTNAME.key:ro'
@@ -74,13 +77,15 @@ services:
       - '/srv/gitlab/data/gitlab-rails/shared/registry:/registry'
       #
       # First run this stack before
-      # using letsencrypt certs
+      # using letsencrypt certs !
       # 
       #- '/root/docker-server-env/front-proxy/certs/REGISTRY_HOSTNAME/fullchain.pem:/certs/REGISTRY_HOSTNAME.crt:ro'
       #- '/root/docker-server-env/front-proxy/certs/REGISTRY_HOSTNAME/key.pem:/certs/REGISTRY_HOSTNAME.key:ro'
       #- '/srv/gitlab/data/registry/gitlab-registry.crt:/certs/gitlab-registry.crt:ro'
     environment:
       VIRTUAL_HOST: REGISTRY_HOSTNAME
+      # Tells nginx proxy to forward on port 5000
+      # and get a clean and nice registry URL
       VIRTUAL_PORT: 5000
       LETSENCRYPT_HOST: REGISTRY_HOSTNAME
       LETSENCRYPT_EMAIL: YOUREMAIL
