@@ -10,6 +10,7 @@ services:
       LETSENCRYPT_EMAIL: YOUREMAIL
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'https://HOSTNAME'
+        nginx['redirect_http_to_https'] = false
         nginx['listen_port'] = 80
         nginx['listen_https'] = false
         nginx['proxy_set_headers'] = {
@@ -27,6 +28,10 @@ services:
         gitlab_rails['smtp_enable_starttls_auto'] = true
         gitlab_rails['gitlab_email_from'] = 'gitlab@HOSTNAME'
         gitlab_rails['gitlab_email_reply_to'] = 'noreply@HOSTNAME'
+        unicorn['worker_timeout'] = 60
+        unicorn['worker_processes'] = 2
+        sidekiq['concurrency'] = 15
+        postgresql['shared_buffers'] = "512MB"
     ports:
       # Make sure your host 22 port is not already taken by SSH
       # We encorage you to change you host SSH port to reserve it for Gitlab
