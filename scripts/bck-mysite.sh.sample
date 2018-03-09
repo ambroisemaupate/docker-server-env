@@ -21,13 +21,15 @@ docker run --rm -t --name="${NAME}_BCK" \
            -e FTP_PASS="${FTP_PASS}" \
            -e FTP_HOST="${FTP_HOST}" \
            -e FTP_PORT="${FTP_PORT}" \
+           -e FTP_PROTO="${FTP_PROTO}" \
            -e DB_USER="mysite" \
            -e DB_HOST="mariadb" \
            -e DB_PASS="password" \
            -e DB_NAME="mysite" \
            -e REMOTE_PATH="/docker-bck/${NAME}" \
            # If you want to use a SSH/SFTP remote \
-           #-e FTP_PROTO="sftp" \
            #-e REMOTE_PATH="/home/ambroisemaupate/docker-bck/${NAME}" \
            --network="frontproxynet" \
            --link ${NAME}_DB_1:mariadb ambroisemaupate/ftp-backup
+
+# WARNING: Remove comments inside docker command!

@@ -19,6 +19,7 @@ apt-get install -y \
     curl \
     curlftpfs \
     lftp \
+    sshfs \
     zsh \
     fail2ban \
     postfix \
@@ -64,6 +65,7 @@ cd "$(dirname "$0")";
 # Copy sample config files
 #
 cp ./.zshrc $HOME/.zshrc;
+cp ./scripts/ftp-credentials.sh.sample ./scripts/ftp-credentials.sh;
 cp ./etc/fail2ban/jail.d/defaults-${DISTRIB}.conf /etc/fail2ban/jail.d/defaults-${DISTRIB}.conf;
 cp ./etc/logrotate.d/dockerbck /etc/logrotate.d/dockerbck;
 
