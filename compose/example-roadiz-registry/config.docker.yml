@@ -19,6 +19,10 @@ cacheDriver:
     port: ~
 security:
     secret: "example-secret"
+    session_name: roadiz_token
+    # Use true only if using HTTPS
+    session_cookie_secure: true
+    session_cookie_httponly: true
 # Should USE an external SMTP
 # such as Mailjet
 mailer:
