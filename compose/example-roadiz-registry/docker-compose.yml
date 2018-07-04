@@ -17,9 +17,6 @@ services:
       - private_files:/var/www/html/files
       - public_files:/var/www/html/web/files
       - gen_src:/var/www/html/app/gen-src
-    links:
-      - db:mariadb
-      - solr:solr
     depends_on:
       - db
       - solr
@@ -30,10 +27,13 @@ services:
     # If using Traefik 
     # https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
     #labels:
-    #  - "traefik.docker.network=example"
+    #  - "traefik.backend=example.localhost"
+    #  - "traefik.docker.network=frontproxynet"
     #  - "traefik.enable=true"
-    #  - "traefik.basic.frontend.rule=Host:app.my-awesome-app.org"
+    #  - "traefik.frontend.rule=Host:app.my-awesome-app.org"
     #  - "traefik.port=80"
+    #ports:
+    #  - "80/tcp"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 5m0s

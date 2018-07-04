@@ -13,9 +13,6 @@ services:
       #LETSENCRYPT_EMAIL: contact@example.localhost
     volumes:
       - DATA:/data
-    links:
-      - DB:mariadb
-      #- SOLR:solr
     depends_on:
       - DB
       #- SOLR

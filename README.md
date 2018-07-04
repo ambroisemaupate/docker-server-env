@@ -104,6 +104,14 @@ networks:
 
 https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
 
+If `install.sh` script did not setup traefik conf automatically, do:
+
+```bash
+cp ./compose/traefik/traefik.sample.toml ./compose/traefik/traefik.toml;
+touch ./compose/traefik/acme.json;
+chmod 0600 ./compose/traefik/acme.json;
+```
+
 ## Back-up containers
 
 In order to backup your containers to your FTP. Duplicate `./scripts/bck-mysite.sh.sample`

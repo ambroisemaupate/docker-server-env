@@ -10,9 +10,15 @@ defaultEntryPoints = ["https","http"]
     entryPoint = "https"
   [entryPoints.https]
   address = ":443"
-  [entryPoints.https.tls]
+    [entryPoints.https.tls]
+  [entryPoints.dashboard]
+  address = ":8089"
 
 [retry]
+
+[api]
+entryPoint = "dashboard"
+dashboard = true
 
 [docker]
 endpoint = "unix:///var/run/docker.sock"
