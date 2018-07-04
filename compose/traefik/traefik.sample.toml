@@ -11,13 +11,9 @@ defaultEntryPoints = ["https","http"]
   [entryPoints.https]
   address = ":443"
   compress = true
-    [entryPoints.https.tls]
-  [entryPoints.dashboard]
-  address = ":8089"
+  [entryPoints.https.tls]
 
 [api]
-entryPoint = "dashboard"
-dashboard = true
 
 [docker]
 endpoint = "unix:///var/run/docker.sock"
@@ -29,8 +25,7 @@ domain = "docker.test"
 [acme]
 email = "xxxx@xxxx.com"
 storage = "acme.json"
-onDemand = false
 entryPoint = "https"
 onHostRule = true
-  [acme.httpChallenge]
-  entryPoint = "http"
+[acme.httpChallenge]
+entryPoint = "http"
