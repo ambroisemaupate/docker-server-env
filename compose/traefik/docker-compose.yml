@@ -1,3 +1,4 @@
+
 version: '3'
 
 services:
@@ -7,7 +8,6 @@ services:
     ports:
       - 80:80
       - 443:443
-      - 8089:8089
     networks:
       - frontproxynet
     volumes:
@@ -15,6 +15,11 @@ services:
       - ./traefik.toml:/traefik.toml
       - ./acme.json:/acme.json
     container_name: traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=8089"
+      - "traefik.backend=traefik"
+      - "traefik.frontend=traefik"
 
 networks:
   frontproxynet:

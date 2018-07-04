@@ -10,11 +10,10 @@ defaultEntryPoints = ["https","http"]
     entryPoint = "https"
   [entryPoints.https]
   address = ":443"
+  compress = true
     [entryPoints.https.tls]
   [entryPoints.dashboard]
   address = ":8089"
-
-[retry]
 
 [api]
 entryPoint = "dashboard"
@@ -24,11 +23,14 @@ dashboard = true
 endpoint = "unix:///var/run/docker.sock"
 watch = true
 exposedByDefault = false
+network = "frontproxynet"
+domain = "docker.test"
 
 [acme]
-email = "your-email-here@my-awesome-app.org"
+email = "xxxx@xxxx.com"
 storage = "acme.json"
+onDemand = false
 entryPoint = "https"
 onHostRule = true
-[acme.httpChallenge]
-entryPoint = "http"
+  [acme.httpChallenge]
+  entryPoint = "http"
