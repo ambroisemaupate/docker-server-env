@@ -1,4 +1,3 @@
-
 version: '3'
 
 services:
@@ -17,7 +16,7 @@ services:
     container_name: traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.port=8089"
+      - "traefik.port=8080"
       - "traefik.backend=traefik"
       - "traefik.frontend=traefik"
 

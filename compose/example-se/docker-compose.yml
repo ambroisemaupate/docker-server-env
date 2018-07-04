@@ -19,13 +19,11 @@ services:
     # If using Traefik 
     # https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
     #labels:
-    #  - "traefik.backend=example.localhost"
-    #  - "traefik.docker.network=frontproxynet"
     #  - "traefik.enable=true"
-    #  - "traefik.frontend.rule=Host:example.localhost"
     #  - "traefik.port=80"
-    #ports:
-    #  - "80/tcp"
+    #  - "traefik.frontend.rule=Host:example.localhost,www.example.localhost"
+    #  - "traefik.frontend.passHostHeader=true"
+    #  - "traefik.backend=example"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 5m0s
