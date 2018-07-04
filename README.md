@@ -96,10 +96,13 @@ See https://docs.docker.com/compose/networking/#configure-the-default-network fo
 
 ```yaml
 networks:
-  default:
-    external:
-      name: frontproxynet
+  frontproxynet:
+    external: true
 ```
+
+### Using Traefik
+
+https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
 
 ## Back-up containers
 

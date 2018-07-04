@@ -24,6 +24,16 @@ services:
       - db
       - solr
     restart: always
+    networks: 
+      - default
+      - frontproxynet
+    # If using Traefik 
+    # https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
+    #labels:
+    #  - "traefik.docker.network=example"
+    #  - "traefik.enable=true"
+    #  - "traefik.basic.frontend.rule=Host:app.my-awesome-app.org"
+    #  - "traefik.port=80"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 5m0s
@@ -34,6 +44,8 @@ services:
   db:
     hostname: db.example
     image: mariadb
+    networks: 
+      - default
     volumes:
         - DBDATA:/var/lib/mysql
     environment:
@@ -48,6 +60,8 @@ services:
     hostname: solr.example
     image: solr
     restart: always
+    networks: 
+      - default
     volumes:
       - SOLRDATA:/opt/solr/server/solr/mycores
     entrypoint:
@@ -63,6 +77,5 @@ volumes:
   SOLRDATA:
 
 networks:
-  default:
-    external:
-      name: frontproxynet
+  frontproxynet:
+    external: true

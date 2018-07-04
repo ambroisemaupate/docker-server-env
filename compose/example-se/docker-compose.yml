@@ -3,6 +3,9 @@ services:
   MAIN:
     hostname: example
     image: roadiz/standard-edition
+    networks: 
+      - default
+      - frontproxynet
     environment:
       VIRTUAL_HOST: example.localhost,www.example.localhost
       #LETSENCRYPT_HOST: example.localhost,www.example.localhost
@@ -16,6 +19,13 @@ services:
       - DB
       #- SOLR
     restart: always
+    # If using Traefik 
+    # https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
+    #labels:
+    #  - "traefik.docker.network=example"
+    #  - "traefik.enable=true"
+    #  - "traefik.basic.frontend.rule=Host:app.my-awesome-app.org"
+    #  - "traefik.port=80"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 5m0s
@@ -24,6 +34,8 @@ services:
   DB:
     hostname: example-db
     image: ambroisemaupate/mariadb
+    networks: 
+      - default
     environment:
       MARIADB_USER: "username"
       MARIADB_DB:   "username"
@@ -38,6 +50,8 @@ services:
     hostname: example-ssh
     image: ambroisemaupate/light-ssh
     restart: "no"
+    networks: 
+      - default
     environment:
       PASS: "password"
     volumes:
@@ -52,6 +66,8 @@ services:
   #  hostname: example-solr
   #  image: solr
   #  restart: always
+  #  networks: 
+  #    - default
   #  #ports:
   #  # - "8983:8983"
   #  #volumes:
@@ -66,6 +82,5 @@ volumes:
   #SOLRDATA:
 
 networks:
-  default:
-    external:
-      name: frontproxynet
+  frontproxynet:
+    external: true

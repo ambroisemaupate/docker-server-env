@@ -3,6 +3,9 @@ services:
   MAIN:
     hostname: example
     image: ambroisemaupate/roadiz
+    networks: 
+      - default
+      - frontproxynet
     environment:
       ROADIZ_BRANCH: develop
       VIRTUAL_HOST: example.localhost,www.example.localhost
@@ -25,6 +28,8 @@ services:
   DB:
     hostname: example-db
     image: ambroisemaupate/mariadb
+    networks: 
+      - default
     environment:
       MARIADB_USER: "username"
       MARIADB_DB:   "username"
@@ -39,6 +44,8 @@ services:
     hostname: example-ssh
     image: ambroisemaupate/light-ssh
     restart: "no"
+    networks: 
+      - default
     environment:
       PASS: "password"
     volumes:
@@ -53,6 +60,8 @@ services:
   #  hostname: example-solr
   #  image: solr
   #  restart: always
+  #  networks: 
+  #    - default
   #  #ports:
   #  # - "8983:8983"
   #  #volumes:
@@ -67,6 +76,5 @@ volumes:
   #SOLRDATA:
 
 networks:
-  default:
-    external:
-      name: frontproxynet
+  frontproxynet:
+    external: true
