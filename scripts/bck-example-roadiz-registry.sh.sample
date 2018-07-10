@@ -35,7 +35,7 @@ docker run --rm -t --name="${NAME}_BCK" \
            #-e FTP_PROTO="sftp" \
            #-e REMOTE_PATH="/home/ambroisemaupate/docker-bck/${NAME}" \
            --link ${NAME}_db_1:mariadb \
-           --network="frontproxynet" \
+           --network="${NAME}_default" \
            ambroisemaupate/ftp-backup;
 
 # WARNING: Remove comments inside docker command!

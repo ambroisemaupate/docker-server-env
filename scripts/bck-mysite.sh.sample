@@ -29,7 +29,8 @@ docker run --rm -t --name="${NAME}_BCK" \
            -e REMOTE_PATH="/docker-bck/${NAME}" \
            # If you want to use a SSH/SFTP remote \
            #-e REMOTE_PATH="/home/ambroisemaupate/docker-bck/${NAME}" \
-           --network="frontproxynet" \
-           --link ${NAME}_DB_1:mariadb ambroisemaupate/ftp-backup
+           --network="${NAME}_default" \
+           --link ${NAME}_DB_1:mariadb \
+           ambroisemaupate/ftp-backup;
 
 # WARNING: Remove comments inside docker command!
