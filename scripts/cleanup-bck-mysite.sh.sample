@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Author: Ambroise Maupate
+
+. `dirname $0`/ftp-credentials.sh || {
+    echo "`dirname $0`/ftp-credentials.sh";
+    echo 'Impossible to import your configuration.';
+    exit 1;
+}
+
+NAME="mysite"
+
+#  We add a CPU share constraint of 256 (a quarter)
+docker run --rm -t --name="${NAME}_CLEANBCK" \
+           -c=256 \
+           -e FTP_USER="${FTP_USER}" \
+           -e FTP_PASS="${FTP_PASS}" \
+           -e FTP_HOST="${FTP_HOST}" \
+           -e FTP_PORT="${FTP_PORT}" \
+           -e FTP_PROTO="${FTP_PROTO}" \
+           -e STORE_DAYS="5" \
+           -e FTP_PATH="/docker-bck/${NAME}" \
+           ambroisemaupate/ftp-cleanup;
