@@ -10,6 +10,9 @@ Please, adapt them if you want to clone this git repository elsewhere.
 
 ## Base installation
 
+Skip this part if your hosting provider has already provisionned your server with latest
+*docker* and *docker-compose* services.
+
 ```bash
 #
 # Base apps
@@ -38,17 +41,146 @@ cd /path/to/docker-server-env
 DISTRIB="debian" bash ./install.sh
 ```
 
-## Docker images to use
+## Some of the docker images I use in this environment
 
-* *jwilder/nginx-proxy*
-* *alastaircoote/docker-letsencrypt-nginx-proxy-companion*: For automatic *Let’s encrypt* certificate issuing and configuration
+* *traefik*: as the main front proxy. It handles Let’s Encrypt certificates too.
+* *jwilder/nginx-proxy* (deprecated, use [Traefik](https://traefik.io/))
+* *alastaircoote/docker-letsencrypt-nginx-proxy-companion*: For automatic *Let’s encrypt* certificate issuing and configuration (deprecated, use [Traefik](https://traefik.io/))
 * *roadiz/standard-edition* (for PHP7 and Nginx 1.9.11+)
 * *solr* (I limit heap size to 256m because we don’t usually use big document data, and it can be painful on a small VPS server)
 * *ambroisemaupate/ftp-backup*
+* *ambroisemaupate/ftp-cleanup*
 * *ambroisemaupate/light-ssh*, For SSH access directly inside your container with some useful command as `mysqldump`, `git` and `composer`.
-* *ambroisemaupate/mariadb*
+* *ambroisemaupate/mariadb*: for older *roadiz/standard-edition* and *roadiz/roadiz* images
+* *mariadb*: for latest php72-alpine-nginx images and all official docker images
+* *gitlab-ce*: If you want to setup your own Gitlab instance with a dedicated registry, all running on *docker*
 
-## Naming conventions and containers creation *without docker-compose*
+## Using *docker-compose*
+
+This server environment is optimized to work with *docker-compose* for declaring your services.
+
+You’ll find examples to launch *front-proxy* and *Roadiz* based containers with *docker-compose*
+in `compose/` folder. Just copy the sample `example-se/` folder naming it with your website reference.
+
+```bash
+cp -a ./compose/example-se ./compose/mywebsite.tld
+```
+
+Then, use `docker-compose up -d --force-recreate` to create in background all your websites containers.
+
+We need to use the same *network* with *docker-compose* to be able
+to discover your containers from other global containers, such as the `front-proxy` and your daily backups.
+See https://docs.docker.com/compose/networking/#configure-the-default-network for further details. Here is the additional lines to append to your custom docker-compose applications:
+
+```yaml
+networks:
+  frontproxynet:
+    external: true
+```
+
+Then add the `frontproxynet` to your backends container that you want to expose to your front-proxy (*traefik* or *nginx-proxy*)
+
+```yaml
+services:
+  app:
+    image: nginx:latest
+    networks:
+      - default
+      - frontproxynet
+  db:
+    image: mariadb:latest
+    networks:
+      - default
+```
+
+## Using Traefik as main front-end
+
+https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
+
+If `install.sh` script did not setup traefik conf automatically, do:
+
+```bash
+cp ./compose/traefik/traefik.sample.toml ./compose/traefik/traefik.toml;
+touch ./compose/traefik/acme.json;
+chmod 0600 ./compose/traefik/acme.json;
+```
+
+Then you can start *traefik* service with *docker-compose*
+
+```bash
+cd ./compose/traefik;
+docker-compose pull && docker-compose up -d --force-recreate;
+```
+
+Traefik *dashboard* will be available on 8080 port without password. We strongly encourage you to
+copy default traefik compose folder in order to customize your dashboard options and add a *htpasswd* to
+dashboard.
+
+## Back-up containers
+
+In order to backup your containers to your FTP. Duplicate `./scripts/bck-mysite.sh.sample`
+file without `.sample` suffix for each of your websites and `./scripts/ftp-credentials.sh.sample` once.
+
+Fill all variables in the `scripts/ftp-credentials.sh`. Make sure you are using a volume to hold your site contents.
+For example, for `mysite` Roadiz container, all data must be stored in `mysite_DATA` volume.
+
+If you’re using *docker-compose*, check your volume name with `docker volume list`.
+If not, check your database link name: `--link ${NAME}_DB_1:mariadb` and remove the `_1` (added for *docker-compose* websites).
+
+Then add execution flag to your backup script: `chmod u+x ./scripts/bck-mysite.sh`.
+
+```bash
+# Crontab
+# m h  dom mon dow   command
+00 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysite.sh >> ~/docker-server-env/bckup_logs/bck-mysite.log
+20 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysecondsite.sh >> ~/docker-server-env/bckup_logs/bck-mysecondsite.log
+
+# If your system seems to be short in RAM because of linux file cache.
+# Claim cached memory
+# 00 7 * * * sync && echo 3 | tee /proc/sys/vm/drop_caches
+# etc
+```
+
+## Clean-up FTP backups
+
+### Using *ftp-cleanup* docker image
+
+This method uses [a dedicated docker image](https://github.com/ambroisemaupate/docker/tree/master/ftp-cleanup) to remove
+old backup files based on their creation date. It won't delete any files if you only have 2 backup listed in your `FTP_PATH` directory.
+Use this method if you can’t use `sshftpfs` of if you want to handle each website backup separately with more control.
+
+Duplicate `./scripts/cleanup-bck-mysite.sh.sample` file without `.sample` suffix for each of your websites.
+
+**Make sure to fill your `FTP_PATH` correctly, if not, it could delete every files in your FTP account.**
+
+```bash
+# Crontab
+# m h  dom mon dow   command
+00 0 * * * /bin/bash ~/docker-server-env/scripts/cleanup-bck-mysite.sh >> ~/docker-server-env/bckup_logs/bck-mysite.log
+```
+
+### Using *sshftpfs*
+
+`cleanup-bck.log` will automatically mount your FTP into `/mnt/ftpbackup` to find backups older than **15 days** and delete them.
+This script will perform deletions in `/mnt/ftpbackup/docker-bck` folder. If you want to backup permanently some files
+create another folder in your FTP.
+
+```bash
+# Crontab
+# m h  dom mon dow   command
+00 12 * * * /bin/bash ~/docker-server-env/scripts/cleanup-bck.sh >> ~/docker-server-env/bckup_logs/cleanup-bck.log
+```
+
+## Rotating logs
+
+Add the `etc/logrotate.d/dockerbck` configuration to your real `logrotate.d` system folder.
+
+## Using custom Docker images for Roadiz
+
+Example files can be found in `./compose/example-roadiz-registry/` and `./scripts/bck-example-roadiz-registry.sh.sample`
+if you are building custom Roadiz images with direct *volumes* for your websites and private registry such as *Gitlab* one.
+
+## [deprecated] Naming conventions and containers creation *without docker-compose*
 
 For any *Roadiz* website, you should have:
 
@@ -78,83 +210,3 @@ docker run -d --name="mysite_SSH" -e PASS=xxxxxxxx -v mysite_DATA:/data --link="
 ```
 
 - One Roadiz *process* container: `mysite` using *ambroisemaupate/roadiz* or *roadiz/standard-edition* image — *see create-roadiz.sh.sample script*
-
-## Using *docker-compose*
-
-You’ll find examples to launch *front-proxy* and *Roadiz* based containers with *docker-compose*
-in `compose/` folder. Just copy the sample `example-se/` folder naming it with your website reference.
-
-```bash
-cp -a ./compose/example-se ./compose/mywebsite.tld
-```
-
-Then, use `docker-compose up -d --force-recreate` to create in background all your websites containers.
-
-We need to use the same *network* with *docker-compose* to be able
-to discover your containers from other global containers, such as the `front-proxy` and your daily backups.
-See https://docs.docker.com/compose/networking/#configure-the-default-network for further details. Here is the additional lines to append to your custom docker-compose applications:
-
-```yaml
-networks:
-  frontproxynet:
-    external: true
-```
-
-### Using Traefik
-
-https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
-
-If `install.sh` script did not setup traefik conf automatically, do:
-
-```bash
-cp ./compose/traefik/traefik.sample.toml ./compose/traefik/traefik.toml;
-touch ./compose/traefik/acme.json;
-chmod 0600 ./compose/traefik/acme.json;
-```
-
-## Back-up containers
-
-In order to backup your containers to your FTP. Duplicate `./scripts/bck-mysite.sh.sample`
-file without `.sample` suffix for each of your websites and `./scripts/ftp-credentials.sh.sample` once.
-
-Fill all variables in the `scripts/ftp-credentials.sh`. Make sure you are using a volume to hold your site contents.
-For example, for `mysite` Roadiz container, all data must be stored in `mysite_DATA` volume.
-
-If you’re using *docker-compose*, check your volume name with `docker volume list`.
-If not, check your database link name: `--link ${NAME}_DB_1:mariadb` and remove the `_1` (added for *docker-compose* websites).
-
-Then add execution flag to your backup script: `chmod u+x ./scripts/bck-mysite.sh`.
-
-```bash
-# Crontab
-# m h  dom mon dow   command
-00 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysite.sh >> ~/docker-server-env/bckup_logs/bck-mysite.log
-20 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysecondsite.sh >> ~/docker-server-env/bckup_logs/bck-mysecondsite.log
-
-# If your system seems to be short in RAM because of linux file cache.
-# Claim cached memory
-# 00 7 * * * sync && echo 3 | tee /proc/sys/vm/drop_caches
-# etc
-```
-
-## Clean up backups
-
-`cleanup-bck.log` will automatically mount your FTP into `/mnt/ftpbackup` to find backups older than **15 days** and delete them.
-This script will perform deletions in `/mnt/ftpbackup/docker-bck` folder. If you want to backup permanently some files
-create another folder in your FTP.
-
-```bash
-# Crontab
-# m h  dom mon dow   command
-00 12 * * * /bin/bash ~/docker-server-env/scripts/cleanup-bck.sh >> ~/docker-server-env/bckup_logs/cleanup-bck.log
-```
-
-## Rotating logs
-
-Add the `etc/logrotate.d/dockerbck` configuration to your real `logrotate.d` system folder.
-
-## Using custom Docker images for Roadiz
-
-Example files can be found in `./compose/example-roadiz-registry/` and `./scripts/bck-example-roadiz-registry.sh.sample`
-if you are building custom Roadiz images with direct *volumes* for your websites and private registry such as *Gitlab* one.
-
