@@ -34,8 +34,8 @@ services:
     #  - "traefik.backend=example"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 5m0s
-      timeout: 5s
+      interval: 1m0s
+      timeout: 3s
       retries: 3
 
 
