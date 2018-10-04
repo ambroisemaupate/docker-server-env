@@ -11,6 +11,8 @@ doctrine:
     default_table_options:
         charset: utf8mb4
         collate: utf8mb4_unicode_ci
+# Register here your themes…
+themes: []
 # http://symfony.com/doc/current/reference/configuration/doctrine.html#caching-drivers
 # If null or empty, Roadiz will try to detect best cache driver available
 cacheDriver:
@@ -56,4 +58,29 @@ assetsProcessing:
     jpegoptimPath: /usr/bin/jpegoptim
     pngquantPath: /usr/bin/pngquant
     subscribers: []
+#
+# Solr endpoint example
+#
+#solr:
+#    endpoint:
+#        localhost:
+#            host: "solr"
+#            port: "8983"
+#            path: "/solr"
+#            core: "mycore"
+#            timeout: 3
+#            username: ""
+#            password: ""
 
+#
+# Reverse proxy invalidation
+#
+#reverseProxyCache:
+#    frontend:
+#        localhost:
+#            host: localhost
+#            domainName: myapp.test
+#
+#        external:
+#            host: varnish
+#            domainName: myapp.test
