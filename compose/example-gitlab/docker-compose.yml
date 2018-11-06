@@ -8,7 +8,6 @@ services:
   web:
     image: 'gitlab/gitlab-ce:latest'
     restart: always
-    hostname: 'HOSTNAME'
     environment:
       VIRTUAL_HOST: HOSTNAME
       LETSENCRYPT_HOST: HOSTNAME
@@ -43,9 +42,13 @@ services:
         gitlab_rails['lfs_enabled'] = true
         gitlab_rails['backup_keep_time'] = 172600
         gitlab_ci['backup_keep_time'] = 172600
+       
         registry_external_url 'https://REGISTRY_HOSTNAME'
         gitlab_rails['registry_enabled'] = true
         gitlab_rails['registry_issuer'] = "omnibus-gitlab-issuer"
+        gitlab_rails['time_zone'] = "Europe/Paris"
+        
+        
     ports:
       # Make sure your host 22 port is not already taken by SSH
       # We encorage you to change you host SSH port to reserve it for Gitlab
@@ -62,6 +65,8 @@ services:
       # Gitlab Nginx won’t be able to start before you uncomment these lines
       # but wait for the second start-up: docker-compose up -d --force-recreate
       # 
+      #- '/root/docker-server-env/front-proxy/certs/HOSTNAME/fullchain.pem:/etc/gitlab/ssl/HOSTNAME.crt:ro'
+      #- '/root/docker-server-env/front-proxy/certs/HOSTNAME/key.pem:/etc/gitlab/ssl/HOSTNAME.key:ro'
       #- '/root/docker-server-env/front-proxy/certs/REGISTRY_HOSTNAME/fullchain.pem:/etc/gitlab/ssl/REGISTRY_HOSTNAME.crt:ro'
       #- '/root/docker-server-env/front-proxy/certs/REGISTRY_HOSTNAME/key.pem:/etc/gitlab/ssl/REGISTRY_HOSTNAME.key:ro'
 
@@ -71,7 +76,7 @@ services:
   # 
   registry:
     restart: always
-    image: registry:2.4.1 
+    image: registry:2
     hostname: 'REGISTRY_HOSTNAME'
     volumes:
       - '/srv/gitlab/data/gitlab-rails/shared/registry:/registry'
@@ -96,6 +101,10 @@ services:
       REGISTRY_AUTH_TOKEN_ISSUER: omnibus-gitlab-issuer
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/gitlab-registry.crt
       REGISTRY_STORAGE_DELETE_ENABLED: 'true'
+    networks:
+      default:
+        aliases:
+          - "REGISTRY_HOSTNAME"
 
 networks:
   default:
