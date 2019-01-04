@@ -1,6 +1,7 @@
 #
-# Replace HOSTNAME with your gitlab domain
-# and REGISTRY_HOSTNAME with your gitlab.registry domain
+# Replace HOSTNAME with your gitlab domain,
+# REGISTRY_HOSTNAME with your gitlab.registry domain and 
+# MATTERMOST_HOSTNAME with your mattermost domain
 # these MUST be different
 #
 version: '3'
@@ -48,6 +49,29 @@ services:
         gitlab_rails['registry_issuer'] = "omnibus-gitlab-issuer"
         gitlab_rails['time_zone'] = "Europe/Paris"
         
+        #
+        # First run this stack before
+        # configuring Mattermost
+        #
+        #mattermost_external_url 'https://MATTERMOST_HOSTNAME'
+        #mattermost['enable'] = true
+        #mattermost_nginx['listen_port'] = 80
+        #mattermost_nginx['listen_https'] = false
+        #mattermost['service_use_ssl'] = true
+        #mattermost['gitlab_id'] = "xxxx"
+        #mattermost['gitlab_secret'] = "xxxx"
+        #mattermost['gitlab_scope'] = "read_user"
+        #mattermost['gitlab_auth_endpoint'] = "https://HOSTNAME/oauth/authorize"
+        #mattermost['gitlab_token_endpoint'] = "https://HOSTNAME/oauth/token"
+        #mattermost['gitlab_user_api_endpoint'] = "https://HOSTNAME/api/v4/user"
+        #mattermost_nginx['redirect_http_to_https'] = false
+        #mattermost_nginx['ssl_certificate'] = "/etc/gitlab/ssl/MATTERMOST_HOSTNAME.crt"
+        #mattermost_nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/MATTERMOST_HOSTNAME.key"
+        #mattermost_nginx['proxy_set_headers'] = {
+        #  "X-Forwarded-Proto" => "https",
+        #  "X-Forwarded-Ssl" => "on",
+        #}
+        
         
     ports:
       # Make sure your host 22 port is not already taken by SSH
@@ -69,6 +93,9 @@ services:
       #- '/root/docker-server-env/front-proxy/certs/HOSTNAME/key.pem:/etc/gitlab/ssl/HOSTNAME.key:ro'
       #- '/root/docker-server-env/front-proxy/certs/REGISTRY_HOSTNAME/fullchain.pem:/etc/gitlab/ssl/REGISTRY_HOSTNAME.crt:ro'
       #- '/root/docker-server-env/front-proxy/certs/REGISTRY_HOSTNAME/key.pem:/etc/gitlab/ssl/REGISTRY_HOSTNAME.key:ro'
+      ## Use gitlab cert for mattermost
+      #- '/root/docker-server-env/front-proxy/certs/HOSTNAME/fullchain.pem:/etc/gitlab/ssl/MATTERMOST_HOSTNAME.crt:ro'
+      #- '/root/docker-server-env/front-proxy/certs/HOSTNAME/key.pem:/etc/gitlab/ssl/MATTERMOST_HOSTNAME.key:ro'
 
   #
   # Create a docker registry
@@ -96,9 +123,11 @@ services:
       LETSENCRYPT_EMAIL: YOUREMAIL
       REGISTRY_LOG_LEVEL: info
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /registry
+      REGISTRY_AUTH: token
       REGISTRY_AUTH_TOKEN_REALM: https://HOSTNAME/jwt/auth
       REGISTRY_AUTH_TOKEN_SERVICE: container_registry
       REGISTRY_AUTH_TOKEN_ISSUER: omnibus-gitlab-issuer
+      REGISTRY_AUTH_TOKEN_AUTOREDIRECT: 'False'
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/gitlab-registry.crt
       REGISTRY_STORAGE_DELETE_ENABLED: 'true'
     networks:
