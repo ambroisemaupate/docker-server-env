@@ -9,18 +9,18 @@ services:
   web:
     image: 'gitlab/gitlab-ce:latest'
     restart: always
-    # If using Traefik 
+    # Using Traefik 
     # https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
-    #labels:
-    #  - "traefik.enable=true"
-    #  - "traefik.port=80"
-    #  - "traefik.frontend.rule=Host:HOSTNAME"
-    #  - "traefik.frontend.passHostHeader=true"
-    #  - "traefik.backend=gitlab"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.frontend.rule=Host:HOSTNAME"
+      - "traefik.frontend.passHostHeader=true"
+      - "traefik.backend=gitlab"
     environment:
-      VIRTUAL_HOST: HOSTNAME
-      LETSENCRYPT_HOST: HOSTNAME
-      LETSENCRYPT_EMAIL: YOUREMAIL
+      #VIRTUAL_HOST: HOSTNAME
+      #LETSENCRYPT_HOST: HOSTNAME
+      #LETSENCRYPT_EMAIL: YOUREMAIL
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'https://HOSTNAME'
         nginx['redirect_http_to_https'] = false
@@ -51,11 +51,13 @@ services:
         gitlab_rails['lfs_enabled'] = true
         gitlab_rails['backup_keep_time'] = 172600
         gitlab_ci['backup_keep_time'] = 172600
-       
-        registry_external_url 'https://REGISTRY_HOSTNAME'
-        gitlab_rails['registry_enabled'] = true
-        gitlab_rails['registry_issuer'] = "omnibus-gitlab-issuer"
         gitlab_rails['time_zone'] = "Europe/Paris"
+        #
+        # Docker registry
+        # 
+        #registry_external_url 'https://REGISTRY_HOSTNAME'
+        #gitlab_rails['registry_enabled'] = true
+        #gitlab_rails['registry_issuer'] = "omnibus-gitlab-issuer"
         
         #
         # First run this stack before
@@ -109,47 +111,47 @@ services:
   # Create a docker registry
   # to host docker images
   # 
-  registry:
-    restart: always
-    image: registry:2
-    hostname: 'REGISTRY_HOSTNAME'
-    # If using Traefik 
-    # https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
-    #labels:
-    #  - "traefik.enable=true"
-    #  - "traefik.port=5000"
-    #  - "traefik.frontend.rule=Host:REGISTRY_HOSTNAME"
-    #  - "traefik.frontend.passHostHeader=true"
-    #  - "traefik.backend=registry"
-    volumes:
-      - '/srv/gitlab/data/gitlab-rails/shared/registry:/registry'
-      #
-      # First run this stack before
-      # using letsencrypt certs !
-      # 
-      #- '/root/docker-server-env/front-proxy/certs/REGISTRY_HOSTNAME/fullchain.pem:/certs/REGISTRY_HOSTNAME.crt:ro'
-      #- '/root/docker-server-env/front-proxy/certs/REGISTRY_HOSTNAME/key.pem:/certs/REGISTRY_HOSTNAME.key:ro'
-      #- '/srv/gitlab/data/registry/gitlab-registry.crt:/certs/gitlab-registry.crt:ro'
-    environment:
-      VIRTUAL_HOST: REGISTRY_HOSTNAME
-      # Tells nginx proxy to forward on port 5000
-      # and get a clean and nice registry URL
-      VIRTUAL_PORT: 5000
-      LETSENCRYPT_HOST: REGISTRY_HOSTNAME
-      LETSENCRYPT_EMAIL: YOUREMAIL
-      REGISTRY_LOG_LEVEL: info
-      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /registry
-      REGISTRY_AUTH: token
-      REGISTRY_AUTH_TOKEN_REALM: https://HOSTNAME/jwt/auth
-      REGISTRY_AUTH_TOKEN_SERVICE: container_registry
-      REGISTRY_AUTH_TOKEN_ISSUER: omnibus-gitlab-issuer
-      REGISTRY_AUTH_TOKEN_AUTOREDIRECT: 'False'
-      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/gitlab-registry.crt
-      REGISTRY_STORAGE_DELETE_ENABLED: 'true'
-    networks:
-      default:
-        aliases:
-          - "REGISTRY_HOSTNAME"
+  #registry:
+  #  restart: always
+  #  image: registry:2
+  #  hostname: 'REGISTRY_HOSTNAME'
+  #  # If using Traefik 
+  #  # https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
+  #  labels:
+  #    - "traefik.enable=true"
+  #    - "traefik.port=5000"
+  #    - "traefik.frontend.rule=Host:REGISTRY_HOSTNAME"
+  #    - "traefik.frontend.passHostHeader=true"
+  #    - "traefik.backend=registry"
+  #  volumes:
+  #    - '/srv/gitlab/data/gitlab-rails/shared/registry:/registry'
+  #    #
+  #    # First run this stack before
+  #    # using letsencrypt certs !
+  #    # 
+  #    #- '/root/docker-server-env/front-proxy/certs/REGISTRY_HOSTNAME/fullchain.pem:/certs/REGISTRY_HOSTNAME.crt:ro'
+  #    #- '/root/docker-server-env/front-proxy/certs/REGISTRY_HOSTNAME/key.pem:/certs/REGISTRY_HOSTNAME.key:ro'
+  #    #- '/srv/gitlab/data/registry/gitlab-registry.crt:/certs/gitlab-registry.crt:ro'
+  #  environment:
+  #    #VIRTUAL_HOST: REGISTRY_HOSTNAME
+  #    # Tells nginx proxy to forward on port 5000
+  #    # and get a clean and nice registry URL
+  #    #VIRTUAL_PORT: 5000
+  #    #LETSENCRYPT_HOST: REGISTRY_HOSTNAME
+  #    #LETSENCRYPT_EMAIL: YOUREMAIL
+  #    REGISTRY_LOG_LEVEL: info
+  #    REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /registry
+  #    REGISTRY_AUTH: token
+  #    REGISTRY_AUTH_TOKEN_REALM: https://HOSTNAME/jwt/auth
+  #    REGISTRY_AUTH_TOKEN_SERVICE: container_registry
+  #    REGISTRY_AUTH_TOKEN_ISSUER: omnibus-gitlab-issuer
+  #    REGISTRY_AUTH_TOKEN_AUTOREDIRECT: 'False'
+  #    REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/gitlab-registry.crt
+  #    REGISTRY_STORAGE_DELETE_ENABLED: 'true'
+  #  networks:
+  #    default:
+  #      aliases:
+  #        - "REGISTRY_HOSTNAME"
 
 networks:
   default:
