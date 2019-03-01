@@ -17,6 +17,10 @@ services:
       - "traefik.frontend.rule=Host:HOSTNAME"
       - "traefik.frontend.passHostHeader=true"
       - "traefik.backend=gitlab"
+    # I had problems with the health check. Sometimes it reported unhealthyness and therefore Traefik removed 
+    # the container, so I turned it off. Maybe it works by now.
+    healthcheck:
+      disable: true
     environment:
       #VIRTUAL_HOST: HOSTNAME
       #LETSENCRYPT_HOST: HOSTNAME
@@ -123,6 +127,10 @@ services:
   #    - "traefik.frontend.rule=Host:REGISTRY_HOSTNAME"
   #    - "traefik.frontend.passHostHeader=true"
   #    - "traefik.backend=registry"
+  #  # I had problems with the health check. Sometimes it reported unhealthyness and therefore Traefik removed 
+  #  # the container, so I turned it off. Maybe it works by now.
+  #  healthcheck:
+  #    disable: true
   #  volumes:
   #    - '/srv/gitlab/data/gitlab-rails/shared/registry:/registry'
   #    #
