@@ -9,6 +9,14 @@ services:
   web:
     image: 'gitlab/gitlab-ce:latest'
     restart: always
+    # If using Traefik 
+    # https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
+    #labels:
+    #  - "traefik.enable=true"
+    #  - "traefik.port=80"
+    #  - "traefik.frontend.rule=Host:HOSTNAME"
+    #  - "traefik.frontend.passHostHeader=true"
+    #  - "traefik.backend=gitlab"
     environment:
       VIRTUAL_HOST: HOSTNAME
       LETSENCRYPT_HOST: HOSTNAME
@@ -105,6 +113,14 @@ services:
     restart: always
     image: registry:2
     hostname: 'REGISTRY_HOSTNAME'
+    # If using Traefik 
+    # https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
+    #labels:
+    #  - "traefik.enable=true"
+    #  - "traefik.port=5000"
+    #  - "traefik.frontend.rule=Host:REGISTRY_HOSTNAME"
+    #  - "traefik.frontend.passHostHeader=true"
+    #  - "traefik.backend=registry"
     volumes:
       - '/srv/gitlab/data/gitlab-rails/shared/registry:/registry'
       #
