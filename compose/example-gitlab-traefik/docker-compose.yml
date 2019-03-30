@@ -18,7 +18,7 @@ services:
       - "traefik.gl.frontend.rule=Host:${HOSTNAME}"
       - "traefik.gl.frontend.entryPoints=http,https"
       - "traefik.reg.enable=true"
-      - "traefik.reg.port=5000"
+      - "traefik.reg.port=4567"
       - "traefik.reg.frontend.rule=Host:${REGISTRY_HOSTNAME}"
       - "traefik.reg.frontend.entryPoints=http,https"
       - "traefik.mattermost.enable=true"
@@ -99,7 +99,7 @@ services:
       - config:/etc/gitlab
       - logs:/var/log/gitlab
       - data:/var/opt/gitlab
-      - ./../traefik/ssl:/etc/gitlab/ssl/
+      - ./../traefik/ssl:/etc/gitlab/ssl/:ro
 
 networks:
   default:
