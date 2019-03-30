@@ -8,6 +8,11 @@ services:
   web:
     image: 'gitlab/gitlab-ce:latest'
     restart: always
+    #
+    # Alias is needed for Mattermost
+    # to be able to contact Gitlab SSO
+    #
+    hostname: ${HOSTNAME}
     # Using Traefik
     # https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
     labels:
@@ -88,9 +93,13 @@ services:
         mattermost['gitlab_id'] = "${MATTERMOST_GITLAB_ID}"
         mattermost['gitlab_secret'] = "${MATTERMOST_GITLAB_SECRET}"
         mattermost['gitlab_scope'] = ""
-        mattermost['gitlab_auth_endpoint'] = "https://${HOSTNAME}/oauth/authorize"
-        mattermost['gitlab_token_endpoint'] = "https://${HOSTNAME}/oauth/token"
-        mattermost['gitlab_user_api_endpoint'] = "https://${HOSTNAME}/api/v4/user"
+        #
+        # Need to contact Gitlab on HTTP
+        # https://forum.mattermost.org/t/solved-mattermost-gitlab-token-request-failed/2628/6
+        #
+        mattermost['gitlab_auth_endpoint'] = "http://${HOSTNAME}/oauth/authorize"
+        mattermost['gitlab_token_endpoint'] = "http://${HOSTNAME}/oauth/token"
+        mattermost['gitlab_user_api_endpoint'] = "http://${HOSTNAME}/api/v4/user"
 
     ports:
       # Make sure your host 22 port is not already taken by SSH
