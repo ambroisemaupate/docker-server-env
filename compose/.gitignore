@@ -3,6 +3,7 @@
 !/example
 !/example-se
 !/example-roadiz-registry
+!/example-gitlab-traefik
 !/example-gitlab
 !/front-proxy
 !/traefik

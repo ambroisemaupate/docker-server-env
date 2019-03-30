@@ -1,2 +1,4 @@
 /traefik.toml
 /acme.json
+/ssl
+!/ssl/.gitkeep
