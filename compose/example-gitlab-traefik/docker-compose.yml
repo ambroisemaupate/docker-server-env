@@ -67,6 +67,8 @@ services:
         #
         registry_external_url 'https://${REGISTRY_HOSTNAME}'
         gitlab_rails['registry_enabled'] = true
+        gitlab_rails['registry_issuer'] = 'gitlab-issuer'
+        gitlab_rails['registry_api_url'] = 'https://${REGISTRY_HOSTNAME}'
 
         #
         # First run this stack before
@@ -77,9 +79,9 @@ services:
         mattermost_nginx['listen_port'] = 3000
         mattermost_nginx['listen_https'] = false
         mattermost['service_use_ssl'] = true
-        # mattermost['gitlab_id'] = "${MATTERMOST_GITLAB_ID}"
-        # mattermost['gitlab_secret'] = "${MATTERMOST_GITLAB_SECRET}"
-        # mattermost['gitlab_scope'] = "read_user"
+        mattermost['gitlab_id'] = "${MATTERMOST_GITLAB_ID}"
+        mattermost['gitlab_secret'] = "${MATTERMOST_GITLAB_SECRET}"
+        mattermost['gitlab_scope'] = "read_user"
         mattermost['gitlab_auth_endpoint'] = "https://${HOSTNAME}/oauth/authorize"
         mattermost['gitlab_token_endpoint'] = "https://${HOSTNAME}/oauth/token"
         mattermost['gitlab_user_api_endpoint'] = "https://${HOSTNAME}/api/v4/user"
