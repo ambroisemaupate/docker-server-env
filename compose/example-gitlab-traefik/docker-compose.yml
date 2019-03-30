@@ -18,7 +18,7 @@ services:
       - "traefik.gl.frontend.rule=Host:${HOSTNAME}"
       - "traefik.gl.frontend.entryPoints=http,https"
       - "traefik.reg.enable=true"
-      - "traefik.reg.port=4567"
+      - "traefik.reg.port=80"
       - "traefik.reg.frontend.rule=Host:${REGISTRY_HOSTNAME}"
       - "traefik.reg.frontend.entryPoints=http,https"
       - "traefik.mattermost.enable=true"
@@ -67,8 +67,8 @@ services:
         #
         registry_external_url 'https://${REGISTRY_HOSTNAME}'
         gitlab_rails['registry_enabled'] = true
-        gitlab_rails['registry_issuer'] = 'gitlab-issuer'
-        gitlab_rails['registry_api_url'] = 'https://${REGISTRY_HOSTNAME}'
+        registry_nginx['listen_port'] = 80
+        registry_nginx['listen_https'] = false
 
         #
         # First run this stack before
@@ -76,20 +76,21 @@ services:
         #
         mattermost_external_url 'https://${MATTERMOST_HOSTNAME}'
         mattermost['enable'] = true
+        mattermost['service_site_url'] = 'https://${MATTERMOST_HOSTNAME}'
         mattermost_nginx['listen_port'] = 3000
         mattermost_nginx['listen_https'] = false
-        mattermost['service_use_ssl'] = true
-        mattermost['gitlab_id'] = "${MATTERMOST_GITLAB_ID}"
-        mattermost['gitlab_secret'] = "${MATTERMOST_GITLAB_SECRET}"
-        mattermost['gitlab_scope'] = "read_user"
-        mattermost['gitlab_auth_endpoint'] = "https://${HOSTNAME}/oauth/authorize"
-        mattermost['gitlab_token_endpoint'] = "https://${HOSTNAME}/oauth/token"
-        mattermost['gitlab_user_api_endpoint'] = "https://${HOSTNAME}/api/v4/user"
         mattermost_nginx['redirect_http_to_https'] = false
         mattermost_nginx['proxy_set_headers'] = {
           "X-Forwarded-Proto" => "https",
           "X-Forwarded-Ssl" => "on",
         }
+        mattermost['service_use_ssl'] = false
+        mattermost['gitlab_id'] = "${MATTERMOST_GITLAB_ID}"
+        mattermost['gitlab_secret'] = "${MATTERMOST_GITLAB_SECRET}"
+        mattermost['gitlab_scope'] = ""
+        mattermost['gitlab_auth_endpoint'] = "https://${HOSTNAME}/oauth/authorize"
+        mattermost['gitlab_token_endpoint'] = "https://${HOSTNAME}/oauth/token"
+        mattermost['gitlab_user_api_endpoint'] = "https://${HOSTNAME}/api/v4/user"
 
     ports:
       # Make sure your host 22 port is not already taken by SSH
