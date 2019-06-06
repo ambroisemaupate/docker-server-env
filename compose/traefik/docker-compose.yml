@@ -29,7 +29,7 @@ services:
     command: >
       ash -c " \
         apk --no-cache add inotify-tools jq openssl util-linux bash && \
-        wget https://raw.githubusercontent.com/containous/traefik/master/contrib/scripts/dumpcerts.sh -O dumpcerts.sh && \
+        wget https://raw.githubusercontent.com/containous/traefik/v1.7/contrib/scripts/dumpcerts.sh -O dumpcerts.sh && \
         mkdir -p /traefik/ssl/ && \
         while true; do \
           inotifywait -e modify /traefik/acme.json && \
