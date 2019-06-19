@@ -16,7 +16,9 @@ services:
       - ./config.docker.yml:/var/www/html/app/conf/config.yml
       - private_files:/var/www/html/files
       - public_files:/var/www/html/web/files
-      - gen_src:/var/www/html/app/gen-src
+      - gen_src:/var/www/html/app/gen-src/GeneratedNodeSources
+      - proxies:/var/www/html/app/gen-src/Proxies
+      - compiled:/var/www/html/app/gen-src/Compiled
     depends_on:
       - db
       - solr
@@ -26,12 +28,12 @@ services:
       - frontproxynet
     # If using Traefik 
     # https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
-    #labels:
-    #  - "traefik.enable=true"
-    #  - "traefik.port=80"
-    #  - "traefik.frontend.rule=Host:www.example.com,example.com"
-    #  - "traefik.frontend.passHostHeader=true"
-    #  - "traefik.backend=example"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.frontend.rule=Host:www.example.com,example.com"
+      - "traefik.frontend.passHostHeader=true"
+      - "traefik.backend=example"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 1m0s
@@ -71,6 +73,8 @@ volumes:
   private_files:
   public_files:
   gen_src:
+  proxies:
+  compiled:
   DBDATA:
   SOLRDATA:
 
