@@ -34,16 +34,16 @@ services:
       - "traefik.frontend.rule=Host:www.example.com,example.com"
       - "traefik.frontend.passHostHeader=true"
       - "traefik.backend=example"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 1m0s
-      timeout: 3s
-      retries: 3
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost"]
+    #   interval: 1m0s
+    #   timeout: 3s
+    #   retries: 3
 
 
   db:
     hostname: db.example
-    image: mariadb
+    image: mysql:5.7
     networks: 
       - default
     volumes:
@@ -54,7 +54,6 @@ services:
         MYSQL_PASSWORD: password
         MYSQL_RANDOM_ROOT_PASSWORD: "yes"
     restart: always
-
 
   solr:
     hostname: solr.example
