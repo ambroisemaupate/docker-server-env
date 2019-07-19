@@ -101,6 +101,7 @@ If `install.sh` script did not setup traefik conf automatically, do:
 
 ```bash
 cp ./compose/traefik/traefik.sample.toml ./compose/traefik/traefik.toml;
+cp ./compose/traefik/.env.dist ./compose/traefik/.env;
 touch ./compose/traefik/acme.json;
 chmod 0600 ./compose/traefik/acme.json;
 ```
@@ -112,9 +113,7 @@ cd ./compose/traefik;
 docker-compose pull && docker-compose up -d --force-recreate;
 ```
 
-Traefik *dashboard* will be available on 8080 port without password. We strongly encourage you to
-copy default traefik compose folder in order to customize your dashboard options and add a *htpasswd* to
-dashboard.
+Traefik *dashboard* will be available on a dedicated domain name: edit `./compose/traefik/.env` file to choose a monitoring **host** and **password**. We strongly encourage you to change default *user and password* using `htpasswd -n`.
 
 ## Back-up containers
 
