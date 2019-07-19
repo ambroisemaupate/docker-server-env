@@ -69,6 +69,7 @@ cp ./scripts/ftp-credentials.sh.sample ./scripts/ftp-credentials.sh;
 cp ./etc/fail2ban/jail.d/defaults-${DISTRIB}.conf /etc/fail2ban/jail.d/defaults-${DISTRIB}.conf;
 cp ./etc/logrotate.d/dockerbck /etc/logrotate.d/dockerbck;
 cp ./compose/traefik/traefik.sample.toml ./compose/traefik/traefik.toml;
+cp ./compose/traefik/.env.dist ./compose/traefik/.env;
 touch ./compose/traefik/acme.json;
 chmod 0600 ./compose/traefik/acme.json;
 
