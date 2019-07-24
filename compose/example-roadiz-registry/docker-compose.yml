@@ -67,7 +67,43 @@ services:
       - docker-entrypoint.sh
       - solr-precreate
       - example
+      
+  backup:
+    image: ambroisemaupate/ftp-backup
+    networks:
+      - default
+    depends_on:
+      - db
+    environment:
+      LOCAL_PATH: /var/www/html
+      DB_USER: example
+      DB_HOST: db
+      DB_PASS: password
+      DB_NAME: example
+      FTP_PROTO: ftp
+      FTP_PORT: 21
+      FTP_HOST: ftp.server
+      FTP_USER: example
+      FTP_PASS: example
+      REMOTE_PATH: /home/example/backups/site
+    volumes:
+      - private_files:/var/www/html/files:ro
+      - public_files:/var/www/html/web/files:ro
+      - gen_src:/var/www/html/app/gen-src:ro
 
+  backup_cleanup:
+    image: ambroisemaupate/ftp-cleanup
+    networks:
+      - default
+    environment:
+      FTP_PROTO: ftp
+      FTP_PORT: 21
+      FTP_HOST: ftp.server
+      FTP_USER: example
+      FTP_PASS: example
+      STORE_DAYS: 5
+      FTP_PATH: /home/example/backups/site
+      
 volumes:
   private_files:
   public_files:
