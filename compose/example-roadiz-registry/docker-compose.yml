@@ -6,8 +6,8 @@ services:
     # hosted on Gitlab Registry (or hub.docker.com)
     image: registry.gitlab.com/example/example
     environment:
-      VIRTUAL_HOST: www.example.com,example.com
-      LETSENCRYPT_HOST: www.example.com,example.com
+      VIRTUAL_HOST: ${HOSTNAME}
+      LETSENCRYPT_HOST: ${HOSTNAME}
       LETSENCRYPT_EMAIL: postmaster@example.com
     # These volumes contain all user DATA
     # and will be backuped if your backup container
@@ -31,15 +31,14 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.port=80"
-      - "traefik.frontend.rule=Host:www.example.com,example.com"
+      - "traefik.frontend.rule=Host:${HOSTNAME}"
       - "traefik.frontend.passHostHeader=true"
+      # Add domain redirections (example non-www to www redir)
+      # - "traefik.frontend.redirect.regex=^https?://example.test/(.*)"
+      # - "traefik.frontend.redirect.replacement=http://www.example.test/$${1}"
+      # Add a Basic auth protection
+      # - "traefik.frontend.auth.basic=${AUTH_BASIC}"
       - "traefik.backend=example"
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost"]
-    #   interval: 1m0s
-    #   timeout: 3s
-    #   retries: 3
-
 
   db:
     hostname: db.example
@@ -49,9 +48,9 @@ services:
     volumes:
         - DBDATA:/var/lib/mysql
     environment:
-        MYSQL_DATABASE: example
-        MYSQL_USER: example
-        MYSQL_PASSWORD: password
+        MYSQL_DATABASE: ${MYSQL_DATABASE}
+        MYSQL_USER: ${MYSQL_USER}
+        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
         MYSQL_RANDOM_ROOT_PASSWORD: "yes"
     restart: always
 
@@ -76,16 +75,16 @@ services:
       - db
     environment:
       LOCAL_PATH: /var/www/html
-      DB_USER: example
+      DB_USER: ${MYSQL_USER}
       DB_HOST: db
-      DB_PASS: password
-      DB_NAME: example
-      FTP_PROTO: ftp
-      FTP_PORT: 21
-      FTP_HOST: ftp.server
-      FTP_USER: example
-      FTP_PASS: example
-      REMOTE_PATH: /home/example/backups/site
+      DB_PASS: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
+      FTP_PROTO: ${FTP_PROTO}
+      FTP_PORT: ${FTP_PORT}
+      FTP_HOST: ${FTP_HOST}
+      FTP_USER: ${FTP_USER}
+      FTP_PASS: ${FTP_PASS}
+      REMOTE_PATH: ${FTP_REMOTE_PATH}
     volumes:
       - private_files:/var/www/html/files:ro
       - public_files:/var/www/html/web/files:ro
@@ -96,13 +95,13 @@ services:
     networks:
       - default
     environment:
-      FTP_PROTO: ftp
-      FTP_PORT: 21
-      FTP_HOST: ftp.server
-      FTP_USER: example
-      FTP_PASS: example
-      STORE_DAYS: 5
-      FTP_PATH: /home/example/backups/site
+      FTP_PROTO: ${FTP_PROTO}
+      FTP_PORT: ${FTP_PORT}
+      FTP_HOST: ${FTP_HOST}
+      FTP_USER: ${FTP_USER}
+      FTP_PASS:  ${FTP_PASS}
+      STORE_DAYS: ${BACKUP_STORE_DAYS}
+      FTP_PATH: ${FTP_REMOTE_PATH}
       
 volumes:
   private_files:
