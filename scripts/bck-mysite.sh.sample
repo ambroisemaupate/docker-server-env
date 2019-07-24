@@ -28,9 +28,20 @@ docker run --rm -t --name="${NAME}_BCK" \
            -e DB_NAME="mysite" \
            -e REMOTE_PATH="/docker-bck/${NAME}" \
            # If you want to use a SSH/SFTP remote \
-           #-e REMOTE_PATH="/home/ambroisemaupate/docker-bck/${NAME}" \
+           #-e REMOTE_PATH="${REMOTE_PATH}/${NAME}" \
            --network="${NAME}_default" \
            --link ${NAME}_DB_1:mariadb \
            ambroisemaupate/ftp-backup;
+
+docker run --rm -t --name="${NAME}_CLEANBCK" \
+           -c=256 \
+           -e FTP_USER="${FTP_USER}" \
+           -e FTP_PASS="${FTP_PASS}" \
+           -e FTP_HOST="${FTP_HOST}" \
+           -e FTP_PORT="${FTP_PORT}" \
+           -e FTP_PROTO="${FTP_PROTO}" \
+           -e STORE_DAYS="5" \
+           -e FTP_PATH="${REMOTE_PATH}/${NAME}" \
+           ambroisemaupate/ftp-cleanup;
 
 # WARNING: Remove comments inside docker command!

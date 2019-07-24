@@ -18,5 +18,5 @@ docker run --rm -t --name="${NAME}_CLEANBCK" \
            -e FTP_PORT="${FTP_PORT}" \
            -e FTP_PROTO="${FTP_PROTO}" \
            -e STORE_DAYS="5" \
-           -e FTP_PATH="/docker-bck/${NAME}" \
+           -e FTP_PATH="${REMOTE_PATH}/${NAME}" \
            ambroisemaupate/ftp-cleanup;
