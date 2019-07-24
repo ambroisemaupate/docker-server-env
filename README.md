@@ -194,12 +194,12 @@ Then add *docker-compose* lines to your host `crontab -e` (do not forget to spec
 
 ```bash
 # crontab
-#
-# m h  dom mon dow   command
+
+# You must change directory in order to access .env file
 # Clean and backup "site_a" files and database at midnight
-0  0 * * * /usr/local/bin/docker-compose --no-deps --force-recreate -f /root/docker-server-env/compose/site_a/docker-compose.yml up backup backup_cleanup
+0  0 * * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose up --no-deps --force-recreate backup backup_cleanup
 # Clean and backup "site_b" files and database 15 minutes later
-15 0 * * * /usr/local/bin/docker-compose --no-deps --force-recreate -f /root/docker-server-env/compose/site_b/docker-compose.yml up backup backup_cleanup
+15 0 * * * cd /root/docker-server-env/compose/site_b && /usr/local/bin/docker-compose up --no-deps --force-recreate backup backup_cleanup
 ```
 
 *backup_cleanup* service uses a FTP/SFTP script that will check files older than `$STORE_DAYS` and delete them after. It will do nothing if there are only one of each *files* and *database* backup available. This is useful to prevent deletion of non-running services by keeping at least one backup. *backup_cleanup* does not use *sshftpfs* volume to perform file listing so you can use it with every FTP/SFTP account.
