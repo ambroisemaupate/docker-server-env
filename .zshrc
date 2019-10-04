@@ -40,3 +40,5 @@ alias dps="docker ps --format \"table{{.Names}}\\t{{.Image}}\\t{{.Ports}}\\t{{.S
 alias dpsa="docker ps --format \"table{{.Names}}\\t{{.Image}}\\t{{.Ports}}\\t{{.Status}}\" -a"
 # List docker volumes
 alias dvls="docker volume ls"
+# Because it is too long to write it 500x a day
+alias dc="docker-compose"
