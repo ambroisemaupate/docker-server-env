@@ -1,5 +1,5 @@
 [log]
-  level = "ERROR"
+  level = "WARNING"
 
 [global]
   checkNewVersion = false
@@ -13,6 +13,7 @@
     address = ":443"
 
 [api]
+  debug = false
   insecure = false
   dashboard = true
 
