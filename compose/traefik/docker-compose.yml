@@ -16,12 +16,13 @@ services:
     container_name: traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.port=8080"
-      - "traefik.frontend.rule=Host:${MONITORING_HOST}"
-      - "traefik.frontend.passHostHeader=true"
-      - "traefik.backend=traefik"
-      - "traefik.frontend=traefik"
-      - "traefik.frontend.auth.basic=${MONITORING_AUTH_BASIC}"
+      # V2.x
+      - "traefik.http.routers.api.rule=Host(`${MONITORING_HOST}`)"
+      - "traefik.http.routers.api.entrypoints=https"
+      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.api.middlewares=apiAuth"
+      - "traefik.http.routers.api.tls"
+      - "traefik.http.middlewares.apiAuth.basicauth.users=${MONITORING_AUTH_BASIC}"
 
 
   # Watch acme.json and dump certificates to files

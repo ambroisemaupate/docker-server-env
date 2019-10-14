@@ -65,7 +65,6 @@ cd "$(dirname "$0")";
 # Copy sample config files
 #
 cp ./.zshrc $HOME/.zshrc;
-cp ./scripts/ftp-credentials.sh.sample ./scripts/ftp-credentials.sh;
 cp ./etc/fail2ban/jail.d/defaults-${DISTRIB}.conf /etc/fail2ban/jail.d/defaults-${DISTRIB}.conf;
 cp ./etc/logrotate.d/dockerbck /etc/logrotate.d/dockerbck;
 cp ./compose/traefik/traefik.sample.toml ./compose/traefik/traefik.toml;
@@ -79,7 +78,7 @@ chmod 0600 ./compose/traefik/acme.json;
 mkdir -p /mnt/ftpbackup;
 service fail2ban restart;
 
-# 
+#
 # create default bridge network
-# 
+#
 docker network create --driver bridge frontproxynet;

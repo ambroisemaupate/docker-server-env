@@ -16,20 +16,18 @@ services:
     # Using Traefik
     # https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
     labels:
-      - "traefik.docker.network=frontproxynet"
       - "traefik.enable=true"
-      - "traefik.gl.enable=true"
-      - "traefik.gl.port=80"
-      - "traefik.gl.frontend.rule=Host:${HOSTNAME}"
-      - "traefik.gl.frontend.entryPoints=http,https"
-      - "traefik.reg.enable=true"
-      - "traefik.reg.port=80"
-      - "traefik.reg.frontend.rule=Host:${REGISTRY_HOSTNAME}"
-      - "traefik.reg.frontend.entryPoints=http,https"
-      - "traefik.mattermost.enable=true"
-      - "traefik.mattermost.port=3000"
-      - "traefik.mattermost.frontend.rule=Host:${MATTERMOST_HOSTNAME}"
-      - "traefik.mattermost.frontend.entryPoints=http,https"
+      - "traefik.http.routers.gitlab.rule=Host(`${HOSTNAME}`)"
+      - "traefik.http.routers.gitlab.entrypoints=http,https"
+      - "traefik.http.services.gitlab.loadbalancer.server.port=80"
+
+      - "traefik.http.routers.registry.rule=Host(`${REGISTRY_HOSTNAME}`)"
+      - "traefik.http.routers.registry.entrypoints=http,https"
+      - "traefik.http.services.registry.loadbalancer.server.port=80"
+
+      - "traefik.http.routers.mattermost.rule=Host(`${MATTERMOST_HOSTNAME}`)"
+      - "traefik.http.routers.mattermost.entrypoints=http,https"
+      - "traefik.http.services.mattermost.loadbalancer.server.port=3000"
     # I had problems with the health check. Sometimes it reported unhealthyness and therefore Traefik removed
     # the container, so I turned it off. Maybe it works by now.
     healthcheck:

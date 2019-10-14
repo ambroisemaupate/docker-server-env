@@ -23,42 +23,53 @@ services:
       - db
       - solr
     restart: always
-    networks: 
+    networks:
       - default
       - frontproxynet
-    # If using Traefik 
+    # If using Traefik
     # https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
     labels:
       - "traefik.enable=true"
-      - "traefik.port=80"
-      - "traefik.frontend.rule=Host:${HOSTNAME}"
-      - "traefik.frontend.passHostHeader=true"
-      # Add domain redirections (example non-www to www redir)
-      # - "traefik.frontend.redirect.regex=^https?://example.test/(.*)"
-      # - "traefik.frontend.redirect.replacement=http://www.example.test/$${1}"
+      # v2.x
+      - "traefik.http.services.example.loadbalancer.server.scheme=http"
+      - "traefik.http.services.example.loadbalancer.server.port=80"
+      - "traefik.http.services.example.loadbalancer.passhostheader=true"
+      # Listen HTTP
+      - "traefik.http.routers.example.entrypoints=http,https"
+      - "traefik.http.routers.example.rule=Host(`${HOSTNAME}`)"
+      # Apply middlewares
+      - "traefik.http.routers.example.middlewares=auth,redirectregex,redirectscheme"
+      # Define Middlewares
       # Add a Basic auth protection
-      # - "traefik.frontend.auth.basic=${AUTH_BASIC}"
-      - "traefik.backend=example"
+      - "traefik.http.middlewares.auth.basicauth.users=${AUTH_BASIC}"
+      # Add domain redirection (example non-www to www redir)
+      - "traefik.http.middlewares.redirectregex.redirectregex.regex=^https?://example.test/(.*)"
+      - "traefik.http.middlewares.redirectregex.redirectregex.replacement=http://www.example.test/$${1}"
+      - "traefik.http.middlewares.redirectregex.redirectregex.permanent=true"
+      # Add SSL redirection
+      - "traefik.http.middlewares.redirectscheme.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirectscheme.redirectscheme.permanent=true"
+
 
   db:
     hostname: db.example
     image: mysql:5.7
-    networks: 
+    networks:
       - default
     volumes:
-        - DBDATA:/var/lib/mysql
+      - DBDATA:/var/lib/mysql
     environment:
-        MYSQL_DATABASE: ${MYSQL_DATABASE}
-        MYSQL_USER: ${MYSQL_USER}
-        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-        MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
     restart: always
 
   solr:
     hostname: solr.example
     image: solr
     restart: always
-    networks: 
+    networks:
       - default
     volumes:
       - SOLRDATA:/opt/solr/server/solr/mycores
@@ -66,7 +77,7 @@ services:
       - docker-entrypoint.sh
       - solr-precreate
       - example
-      
+
   backup:
     image: ambroisemaupate/ftp-backup
     networks:
@@ -102,7 +113,7 @@ services:
       FTP_PASS:  ${FTP_PASS}
       STORE_DAYS: ${BACKUP_STORE_DAYS}
       FTP_PATH: ${FTP_REMOTE_PATH}
-      
+
 volumes:
   private_files:
   public_files:

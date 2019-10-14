@@ -7,15 +7,12 @@ It’s specialized for **my personal usage**, but if it fits your needs, feel fr
 * [Base installation](#base-installation)
 * [Some of the docker images I use in this environment](#some-of-the-docker-images-i-use-in-this-environment)
 * [Using *docker-compose*](#using--docker-compose-)
-* [Using Traefik as main front-end](#using-traefik-as-main-front-end)
+* [Using Traefik v2.x as main front-end](#using-traefik-v2-x-as-main-front-end)
 * [Back-up containers](#back-up-containers)
-  + [Using *docker-compose* services](#using--docker-compose--services)
 * [Clean-up FTP backups](#clean-up-ftp-backups)
-  + [Using *docker-compose* services](#using--docker-compose--services-1)
 * [Using custom Docker images for Roadiz](#using-custom-docker-images-for-roadiz)
   + [Update and restart your Roadiz image](#update-and-restart-your-roadiz-image)
 * [Rotating logs](#rotating-logs)
-
 
 ## Base path
 
@@ -58,16 +55,12 @@ DISTRIB="debian" bash ./install.sh
 ## Some of the docker images I use in this environment
 
 * *traefik*: as the main front proxy. It handles Let’s Encrypt certificates too.
-* *roadiz/standard-edition* (for PHP7 and Nginx 1.9.11+)
 * *solr* (I limit heap size to 256m because we don’t usually use big document data, and it can be painful on a small VPS server)
 * *ambroisemaupate/ftp-backup*: smart FTP/SFTP backup image
 * *ambroisemaupate/ftp-cleanup*: smart FTP/SFTP backup clean-up image than delete files older than your defined limit. It won’t delete older backup files if they are the only ones available.
 * *ambroisemaupate/light-ssh*, For SSH access directly inside your container with some useful command as `mysqldump`, `git` and `composer`.
-* *ambroisemaupate/mariadb*: for older *roadiz/standard-edition* and *roadiz/roadiz* images
 * *mariadb*: for latest php72-alpine-nginx images and all official docker images
 * *gitlab-ce*: If you want to setup your own Gitlab instance with a dedicated registry, all running on *docker*
-* *jwilder/nginx-proxy* (deprecated, use [Traefik](https://traefik.io/))
-* *alastaircoote/docker-letsencrypt-nginx-proxy-companion*: For automatic *Let’s encrypt* certificate issuing and configuration (deprecated, use [Traefik](https://traefik.io/))
 
 ## Using *docker-compose*
 
@@ -107,9 +100,9 @@ services:
       - default
 ```
 
-## Using Traefik as main front-end
+## Using Traefik v2.x as main front-end
 
-https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
+https://docs.traefik.io/providers/docker/
 
 If `install.sh` script did not setup traefik conf automatically, do:
 
@@ -204,66 +197,11 @@ Then add *docker-compose* lines to your host `crontab -e` (do not forget to spec
 
 *backup_cleanup* service uses a FTP/SFTP script that will check files older than `$STORE_DAYS` and delete them after. It will do nothing if there are only one of each *files* and *database* backup available. This is useful to prevent deletion of non-running services by keeping at least one backup. *backup_cleanup* does not use *sshftpfs* volume to perform file listing so you can use it with every FTP/SFTP account.
 
-### ~~[Deprecated] Using backup scripts~~
-
-In order to backup your containers to your FTP. Duplicate `./scripts/bck-mysite.sh.sample`
-file without `.sample` suffix for each of your websites and `./scripts/ftp-credentials.sh.sample` once.
-
-Fill all variables in the `scripts/ftp-credentials.sh`. Make sure you are using a volume to hold your site contents.
-For example, for `mysite` Roadiz container, all data must be stored in `mysite_DATA` volume.
-
-If you’re using *docker-compose*, check your volume name with `docker volume list`.
-If not, check your database link name: `--link ${NAME}_DB_1:mariadb` and remove the `_1` (added for *docker-compose* websites).
-
-Then add execution flag to your backup script: `chmod u+x ./scripts/bck-mysite.sh`.
-
-```bash
-# Crontab
-# m h  dom mon dow   command
-00 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysite.sh >> ~/docker-server-env/bckup_logs/bck-mysite.log
-20 0 * * * /bin/bash ~/docker-server-env/scripts/bck-mysecondsite.sh >> ~/docker-server-env/bckup_logs/bck-mysecondsite.log
-
-# If your system seems to be short in RAM because of linux file cache.
-# Claim cached memory
-# 00 7 * * * sync && echo 3 | tee /proc/sys/vm/drop_caches
-# etc
-```
-
 ## Clean-up FTP backups
 
 ### Using *docker-compose* services
 
 Backup clean-up is already handled by your *docker-compose* services (see above).
-
-### ~~[Deprecated] Using backup scripts~~
-
-#### Using *ftp-cleanup* docker image
-
-This method uses [a dedicated docker image](https://github.com/ambroisemaupate/docker/tree/master/ftp-cleanup) to remove
-old backup files based on their creation date. It won't delete any files if you only have 2 backup listed in your `FTP_PATH` directory.
-Use this method if you can’t use `sshftpfs` of if you want to handle each website backup separately with more control.
-
-Duplicate `./scripts/cleanup-bck-mysite.sh.sample` file without `.sample` suffix for each of your websites.
-
-**Make sure to fill your `FTP_PATH` correctly, if not, it could delete every files in your FTP account.**
-
-```bash
-# Crontab
-# m h  dom mon dow   command
-00 0 * * * /bin/bash ~/docker-server-env/scripts/cleanup-bck-mysite.sh >> ~/docker-server-env/bckup_logs/bck-mysite.log
-```
-
-#### Using *sshftpfs*
-
-`cleanup-bck.log` will automatically mount your FTP into `/mnt/ftpbackup` to find backups older than **15 days** and delete them.
-This script will perform deletions in `/mnt/ftpbackup/docker-bck` folder. If you want to backup permanently some files
-create another folder in your FTP.
-
-```bash
-# Crontab
-# m h  dom mon dow   command
-00 12 * * * /bin/bash ~/docker-server-env/scripts/cleanup-bck.sh >> ~/docker-server-env/bckup_logs/cleanup-bck.log
-```
 
 ## Using custom Docker images for Roadiz
 
@@ -287,35 +225,3 @@ docker-compose exec -u www-data app make cache;
 ## Rotating logs
 
 Add the `etc/logrotate.d/dockerbck` configuration to your real `logrotate.d` system folder.
-
-
-## [Deprecated] Naming conventions and containers creation *without docker-compose*
-
-For any *Roadiz* website, you should have:
-
-- One *data* container: `mysite_DATA` using `docker volume` command
-
-```bash
-docker volume create --name mysite_DATA;
-```
-
-- One database *data* container: `mysite_DBDATA` using `docker volume` command
-
-```bash
-docker volume create --name mysite_DBDATA;
-```
-
-- One database *process* container: `mysite_DB` using *maxexcloo/mariadb* image
-
-```bash
-docker run -d --name="mysite_DB" -v mysite_DBDATA:/data -e "MARIADB_USER=mysite" -e "MARIADB_PASS=password" --restart="always" ambroisemaupate/mariadb;
-```
-
-- One SSH *process* container: `mysite_SSH` using *ambroisemaupate/light-ssh* image. You’ll have to link
-your *MariaDB* container if you want to dump your database with `mysqldump`.
-
-```bash
-docker run -d --name="mysite_SSH" -e PASS=xxxxxxxx -v mysite_DATA:/data --link="mysite_DB:mariadb" -p 22 ambroisemaupate/light-ssh;
-```
-
-- One Roadiz *process* container: `mysite` using *ambroisemaupate/roadiz* or *roadiz/standard-edition* image — *see create-roadiz.sh.sample script*
