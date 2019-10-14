@@ -12,36 +12,42 @@ services:
     # Alias is needed for Mattermost
     # to be able to contact Gitlab SSO
     #
-    hostname: ${HOSTNAME}
+    hostname: ${GITLAB_HOSTNAME}
     # Using Traefik
     # https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.gitlab.rule=Host(`${HOSTNAME}`)"
-      - "traefik.http.routers.gitlab.entrypoints=http,https"
-      - "traefik.http.services.gitlab.loadbalancer.server.port=80"
+      - "traefik.http.routers.gitlab.rule=Host(`${GITLAB_HOSTNAME}`)"
+      - "traefik.http.routers.gitlab.entrypoints=http"
+      - "traefik.http.routers.gitlab.service=gitlab"
+      - "traefik.http.routers.gitlab.tls=true"
+      - "traefik.http.services.gitlab.loadbalancer.server.port=${GITLAB_PORT}"
 
       - "traefik.http.routers.registry.rule=Host(`${REGISTRY_HOSTNAME}`)"
-      - "traefik.http.routers.registry.entrypoints=http,https"
-      - "traefik.http.services.registry.loadbalancer.server.port=80"
+      - "traefik.http.routers.registry.entrypoints=http"
+      - "traefik.http.routers.registry.service=registry"
+      - "traefik.http.routers.registry.tls=true"
+      - "traefik.http.services.registry.loadbalancer.server.port=${REGISTRY_PORT}"
 
       - "traefik.http.routers.mattermost.rule=Host(`${MATTERMOST_HOSTNAME}`)"
-      - "traefik.http.routers.mattermost.entrypoints=http,https"
-      - "traefik.http.services.mattermost.loadbalancer.server.port=3000"
+      - "traefik.http.routers.mattermost.entrypoints=http"
+      - "traefik.http.routers.mattermost.service=mattermost"
+      - "traefik.http.routers.mattermost.tls=true"
+      - "traefik.http.services.mattermost.loadbalancer.server.port=${MATTERMOST_PORT}"
     # I had problems with the health check. Sometimes it reported unhealthyness and therefore Traefik removed
     # the container, so I turned it off. Maybe it works by now.
     healthcheck:
       disable: true
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'https://${HOSTNAME}'
+        external_url 'https://${GITLAB_HOSTNAME}'
         nginx['redirect_http_to_https'] = false
-        nginx['listen_port'] = 80
+        nginx['listen_port'] = ${GITLAB_PORT}
         nginx['listen_https'] = false
-        nginx['proxy_set_headers'] = {
-          'X-Forwarded-Proto' => 'https',
-          'X-Forwarded-Ssl' => 'on'
-        }
+        #nginx['proxy_set_headers'] = {
+        #  'X-Forwarded-Proto' => 'https',
+        #  'X-Forwarded-Ssl' => 'on'
+        #}
         nginx['client_max_body_size'] = '2G'
         gitlab_rails['smtp_enable'] = true
         gitlab_rails['smtp_address'] = "${SMTP_ADDRESS}"
@@ -70,7 +76,7 @@ services:
         #
         registry_external_url 'https://${REGISTRY_HOSTNAME}'
         gitlab_rails['registry_enabled'] = true
-        registry_nginx['listen_port'] = 80
+        registry_nginx['listen_port'] = ${REGISTRY_PORT}
         registry_nginx['listen_https'] = false
 
         #
@@ -80,13 +86,13 @@ services:
         mattermost_external_url 'https://${MATTERMOST_HOSTNAME}'
         mattermost['enable'] = true
         mattermost['service_site_url'] = 'https://${MATTERMOST_HOSTNAME}'
-        mattermost_nginx['listen_port'] = 3000
+        mattermost_nginx['listen_port'] = ${MATTERMOST_PORT}
         mattermost_nginx['listen_https'] = false
         mattermost_nginx['redirect_http_to_https'] = false
-        mattermost_nginx['proxy_set_headers'] = {
-          "X-Forwarded-Proto" => "https",
-          "X-Forwarded-Ssl" => "on",
-        }
+        #mattermost_nginx['proxy_set_headers'] = {
+        #  "X-Forwarded-Proto" => "https",
+        #  "X-Forwarded-Ssl" => "on",
+        #}
         mattermost['service_use_ssl'] = false
         mattermost['gitlab_id'] = "${MATTERMOST_GITLAB_ID}"
         mattermost['gitlab_secret'] = "${MATTERMOST_GITLAB_SECRET}"
@@ -95,13 +101,13 @@ services:
         # Need to contact Gitlab on HTTP
         # https://forum.mattermost.org/t/solved-mattermost-gitlab-token-request-failed/2628/6
         #
-        mattermost['gitlab_auth_endpoint'] = "http://${HOSTNAME}/oauth/authorize"
-        mattermost['gitlab_token_endpoint'] = "http://${HOSTNAME}/oauth/token"
-        mattermost['gitlab_user_api_endpoint'] = "http://${HOSTNAME}/api/v4/user"
+        mattermost['gitlab_auth_endpoint'] = "http://${GITLAB_HOSTNAME}/oauth/authorize"
+        mattermost['gitlab_token_endpoint'] = "http://${GITLAB_HOSTNAME}/oauth/token"
+        mattermost['gitlab_user_api_endpoint'] = "http://${GITLAB_HOSTNAME}/api/v4/user"
 
     ports:
       # Make sure your host 22 port is not already taken by SSH
-      # We encorage you to change you host SSH port to reserve it for Gitlab
+      # We encourage you to change you host SSH port to reserve it for Gitlab
       - '22:22'
     volumes:
       - config:/etc/gitlab

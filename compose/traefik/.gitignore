@@ -1,4 +1,5 @@
-/traefik.toml
-/acme.json
+traefik.toml
+acme.json
+.env
 /ssl
 !/ssl/.gitkeep

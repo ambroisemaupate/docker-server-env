@@ -1,40 +1,29 @@
-debug = false
+[log]
+  level = "ERROR"
 
-logLevel = "ERROR"
-defaultEntryPoints = ["https","http"]
+[global]
+  checkNewVersion = false
+  sendAnonymousUsage = true
 
 [entryPoints]
   [entryPoints.http]
     address = ":80"
-    [entryPoints.http.redirect]
-    entryPoint = "https"
 
   [entryPoints.https]
     address = ":443"
-    compress = true
-  [entryPoints.https.tls]
 
 [api]
+  insecure = false
+  dashboard = true
 
 [providers.docker]
   endpoint = "unix:///var/run/docker.sock"
   watch = true
   exposedByDefault = false
   network = "frontproxynet"
-  domain = "docker.test"
 
-[acme]
-  email = "xxxx@xxxx.com"
-  storage = "acme.json"
-  entryPoint = "https"
-  onHostRule = true
-  [acme.httpChallenge]
-  entryPoint = "http"
-
-# V2.x
 [certificatesResolvers.sample.acme]
   email = "xxxx@xxxx.com"
   storage = "acme.json"
   [certificatesResolvers.sample.acme.httpChallenge]
-    # used during the challenge
     entryPoint = "http"
