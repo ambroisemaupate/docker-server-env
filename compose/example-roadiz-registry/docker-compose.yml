@@ -56,7 +56,7 @@ services:
 
   solr:
     hostname: solr.example
-    image: solr
+    image: solr:7
     restart: always
     networks: 
       - default
