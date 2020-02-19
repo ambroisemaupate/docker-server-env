@@ -8,7 +8,8 @@ services:
     container_name: whoami
     labels:
       - "traefik.enable=true"
-      # Listen HTTP
+      - "traefik.http.services.whoami.loadbalancer.server.scheme=http"
+      - "traefik.http.services.whoami.loadbalancer.server.port=80"
       - "traefik.http.routers.whoami.rule=Host(${HOSTNAME})"
       - "traefik.http.routers.whoami.service=whoami"
 
