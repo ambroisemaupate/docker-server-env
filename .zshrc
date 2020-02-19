@@ -19,7 +19,7 @@ export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/g
 
 source $ZSH/oh-my-zsh.sh
 # Export FTP connection vars
-source ~/docker-server-env/scripts/ftp-credentials.sh
+# source ~/docker-server-env/scripts/ftp-credentials.sh
 
 # You may need to manually set your language environment
 #export LANG=en_US.UTF-8
@@ -42,3 +42,4 @@ alias dpsa="docker ps --format \"table{{.Names}}\\t{{.Image}}\\t{{.Ports}}\\t{{.
 alias dvls="docker volume ls"
 # Because it is too long to write it 500x a day
 alias dc="docker-compose"
+alias dcapp="docker-compose exec -u www-data app"
