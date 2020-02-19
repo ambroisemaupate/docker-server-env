@@ -5,6 +5,6 @@
 !/example-roadiz-registry
 !/example-gitlab-traefik
 !/example-gitlab
-!/whoiam
+!/whoami
 !/front-proxy
 !/traefik

@@ -38,7 +38,8 @@ services:
 
       # Use IP Whitelisting
       - "traefik.http.middlewares.apiIpWhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
-      - "traefik.http.middlewares.apiIpWhitelist.ipwhitelist.ipstrategy.depth=1"
+      # Only use depth if X-Forwarded_For is present (Cloudflare)
+      #- "traefik.http.middlewares.apiIpWhitelist.ipwhitelist.ipstrategy.depth=1"
 
       # Add SSL redirection
       - "traefik.http.middlewares.apiRedirectscheme.redirectscheme.scheme=https"
