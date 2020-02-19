@@ -22,8 +22,16 @@ services:
       - "traefik.http.routers.api.rule=Host(${MONITORING_HOST})"
       - "traefik.http.routers.api.service=api@internal"
 
+      # Listen HTTPS
+      - "traefik.http.routers.api-secure.entrypoints=https"
+      - "traefik.http.routers.api-secure.tls=true"
+      - "traefik.http.routers.api-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.api-secure.rule=Host(${MONITORING_HOST})"
+      - "traefik.http.routers.api-secure.service=api@internal"
+
       # Apply middlewares
-      - "traefik.http.routers.api.middlewares=apiAuth"
+      - "traefik.http.routers.api.middlewares=apiAuth,apiRedirectscheme"
+      - "traefik.http.routers.api-secure.middlewares=apiAuth"
 
       # Use Basic auth
       - "traefik.http.middlewares.apiAuth.basicauth.users=${MONITORING_AUTH_BASIC}"
@@ -31,7 +39,10 @@ services:
       # Use IP Whitelisting
       - "traefik.http.middlewares.apiIpWhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
       - "traefik.http.middlewares.apiIpWhitelist.ipwhitelist.ipstrategy.depth=1"
-
+      -
+      # Add SSL redirection
+      - "traefik.http.middlewares.apiRedirectscheme.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.apiRedirectscheme.redirectscheme.permanent=true"
 
   # Watch acme.json and dump certificates to files
   certdumper:
