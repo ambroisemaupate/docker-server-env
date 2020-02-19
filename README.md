@@ -21,7 +21,7 @@ Please, adapt them if you want to clone this git repository elsewhere.
 
 ## Base installation
 
-Skip this part if your hosting provider has already provisionned your server with latest
+Skip this part if your hosting provider has already provisioned your server with latest
 *docker* and *docker-compose* services.
 
 ```bash
