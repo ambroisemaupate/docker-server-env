@@ -39,7 +39,7 @@ services:
       # Use IP Whitelisting
       - "traefik.http.middlewares.apiIpWhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
       - "traefik.http.middlewares.apiIpWhitelist.ipwhitelist.ipstrategy.depth=1"
-      -
+
       # Add SSL redirection
       - "traefik.http.middlewares.apiRedirectscheme.redirectscheme.scheme=https"
       - "traefik.http.middlewares.apiRedirectscheme.redirectscheme.permanent=true"
