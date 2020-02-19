@@ -16,6 +16,7 @@ services:
       # Listen HTTPS
       - "traefik.http.routers.example-secure.entrypoints=https"
       - "traefik.http.routers.example-secure.tls=true"
+      - "traefik.http.routers.example-secure.tls.certresolver=letsencrypt"
       - "traefik.http.routers.example-secure.rule=Host(${HOSTNAME})"
       - "traefik.http.routers.example-secure.service=example"
       # Apply middlewares

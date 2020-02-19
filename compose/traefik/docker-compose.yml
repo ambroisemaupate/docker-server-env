@@ -23,14 +23,14 @@ services:
       - "traefik.http.routers.api.service=api@internal"
 
       # Apply middlewares
-      - "traefik.http.routers.api.middlewares=auth"
+      - "traefik.http.routers.api.middlewares=apiAuth"
 
       # Use Basic auth
-      - "traefik.http.middlewares.auth.basicauth.users=${MONITORING_AUTH_BASIC}"
+      - "traefik.http.middlewares.apiAuth.basicauth.users=${MONITORING_AUTH_BASIC}"
 
       # Use IP Whitelisting
-      - "traefik.http.middlewares.iPWhitelist.ipwhitelist.sourcerange=(${IP_RANGE})"
-      - "traefik.http.middlewares.iPWhitelist.ipwhitelist.ipstrategy.depth=1"
+      - "traefik.http.middlewares.apiIpWhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
+      - "traefik.http.middlewares.apiIpWhitelist.ipwhitelist.ipstrategy.depth=1"
 
 
   # Watch acme.json and dump certificates to files

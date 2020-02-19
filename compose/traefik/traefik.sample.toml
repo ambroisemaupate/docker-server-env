@@ -11,14 +11,20 @@
 
 [global]
   checkNewVersion = false
-  sendAnonymousUsage = true
+  sendAnonymousUsage = false
 
 [entryPoints]
   [entryPoints.http]
     address = ":80"
+    [entryPoints.http.forwardedHeaders]
+      insecure = true
+      trustedIPs = ["127.0.0.1", "192.168.0.1"]
 
   [entryPoints.https]
     address = ":443"
+    [entryPoints.https.forwardedHeaders]
+      insecure = true
+      trustedIPs = ["127.0.0.1", "192.168.0.1"]
 
 [api]
   debug = false
@@ -31,8 +37,10 @@
   exposedByDefault = false
   network = "frontproxynet"
 
-[certificatesResolvers.sample.acme]
+[certificatesResolvers.letsencrypt.acme]
   email = "xxxx@xxxx.com"
   storage = "acme.json"
-  [certificatesResolvers.sample.acme.httpChallenge]
+
+  [certificatesResolvers.letsencrypt.acme.httpChallenge]
+    # used during the challenge
     entryPoint = "http"
