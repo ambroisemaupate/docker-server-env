@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  traefik:
+    image: containous/whoami
+    networks:
+      - frontproxynet
+    container_name: whoami
+    labels:
+      - "traefik.enable=true"
+      # Listen HTTP
+      - "traefik.http.routers.whoami.rule=Host(${HOSTNAME})"
+      - "traefik.http.routers.whoami.service=whoami"
+
+networks:
+  frontproxynet:
+    external: true

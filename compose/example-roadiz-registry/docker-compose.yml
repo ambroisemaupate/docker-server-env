@@ -5,6 +5,7 @@ services:
     image: varnish:6.3
     tmpfs: /usr/local/var/varnish:exec
     labels:
+      # Replace example by your service name
       - "traefik.enable=true"
       - "traefik.http.services.example.loadbalancer.server.scheme=http"
       - "traefik.http.services.example.loadbalancer.server.port=80"
