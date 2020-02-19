@@ -5,10 +5,6 @@ services:
     # Application is a packaged docker image
     # hosted on Gitlab Registry (or hub.docker.com)
     image: registry.gitlab.com/example/example
-    environment:
-      VIRTUAL_HOST: ${HOSTNAME}
-      LETSENCRYPT_HOST: ${HOSTNAME}
-      LETSENCRYPT_EMAIL: postmaster@example.com
     # These volumes contain all user DATA
     # and will be backuped if your backup container
     # uses --volumes-from option.
@@ -30,7 +26,6 @@ services:
     # https://docs.traefik.io/user-guide/docker-and-lets-encrypt/
     labels:
       - "traefik.enable=true"
-
       - "traefik.http.services.example.loadbalancer.server.scheme=http"
       - "traefik.http.services.example.loadbalancer.server.port=80"
       - "traefik.http.services.example.loadbalancer.passhostheader=true"
@@ -50,13 +45,12 @@ services:
       # Add a Basic auth protection
       - "traefik.http.middlewares.auth.basicauth.users=${AUTH_BASIC}"
       # Add domain redirection (example non-www to www redir)
-      - "traefik.http.middlewares.redirectregex.redirectregex.regex=^(https?)://example.test/(.*)"
-      - "traefik.http.middlewares.redirectregex.redirectregex.replacement=$${1}://www.example.test/$${2}"
+      - "traefik.http.middlewares.redirectregex.redirectregex.regex=${REDIRECT_REGEX}"
+      - "traefik.http.middlewares.redirectregex.redirectregex.replacement=${REDIRECT_REPLACEMENT}"
       - "traefik.http.middlewares.redirectregex.redirectregex.permanent=true"
       # Add SSL redirection
       - "traefik.http.middlewares.redirectscheme.redirectscheme.scheme=https"
       - "traefik.http.middlewares.redirectscheme.redirectscheme.permanent=true"
-
 
   db:
     hostname: db.example

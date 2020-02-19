@@ -6,3 +6,11 @@
     notifempty
     nocreate
 }
+/root/docker-server-env/compose/traefik/access.log {
+    weekly
+    missingok
+    rotate 7
+    compress
+    notifempty
+    nocreate
+}

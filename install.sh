@@ -70,6 +70,7 @@ cp ./etc/logrotate.d/dockerbck /etc/logrotate.d/dockerbck;
 cp ./compose/traefik/traefik.sample.toml ./compose/traefik/traefik.toml;
 cp ./compose/traefik/.env.dist ./compose/traefik/.env;
 touch ./compose/traefik/acme.json;
+touch ./compose/traefik/access.log;
 chmod 0600 ./compose/traefik/acme.json;
 
 #

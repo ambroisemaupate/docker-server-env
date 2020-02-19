@@ -2,7 +2,7 @@ version: '3'
 
 services:
   traefik:
-    image: traefik:v2.0
+    image: traefik:2.1
     restart: always
     ports:
       - 80:80
@@ -13,15 +13,24 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik.toml:/traefik.toml
       - ./acme.json:/acme.json
+      - ./access.log:/access.log
     container_name: traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`${MONITORING_HOST}`)"
-      - "traefik.http.routers.api.entrypoints=https"
+
+      # Listen HTTP
+      - "traefik.http.routers.api.rule=Host(${MONITORING_HOST})"
       - "traefik.http.routers.api.service=api@internal"
-      - "traefik.http.routers.api.middlewares=apiAuth"
-      - "traefik.http.routers.api.tls"
-      - "traefik.http.middlewares.apiAuth.basicauth.users=${MONITORING_AUTH_BASIC}"
+
+      # Apply middlewares
+      - "traefik.http.routers.api.middlewares=auth"
+
+      # Use Basic auth
+      - "traefik.http.middlewares.auth.basicauth.users=${MONITORING_AUTH_BASIC}"
+
+      # Use IP Whitelisting
+      - "traefik.http.middlewares.iPWhitelist.ipwhitelist.sourcerange=(${IP_RANGE})"
+      - "traefik.http.middlewares.iPWhitelist.ipwhitelist.ipstrategy.depth=1"
 
 
   # Watch acme.json and dump certificates to files
