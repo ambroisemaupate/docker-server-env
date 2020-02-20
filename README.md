@@ -122,6 +122,9 @@ docker-compose pull && docker-compose up -d --force-recreate;
 
 Traefik *dashboard* will be available on a dedicated domain name: edit `./compose/traefik/.env` file to choose a monitoring **host** and **password**. We strongly encourage you to change default *user and password* using `htpasswd -n`.
 
+**Warning**: IP whitelisting won’t work correctly if you enabled AAAA (ipv6) record for your domains. Traefik won’t see 
+`X-Real-IP`. For the moment, if you need to get correct IP address, just use ipv4. 
+
 ## Back-up containers
 
 ### Using *docker-compose* services

@@ -1,12 +1,18 @@
-version: '3'
+version: '3.6'
 
 services:
   traefik:
     image: traefik:2.1
     restart: always
     ports:
-      - 80:80
-      - 443:443
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
     networks:
       - frontproxynet
     volumes:
@@ -37,6 +43,7 @@ services:
       - "traefik.http.middlewares.apiAuth.basicauth.users=${MONITORING_AUTH_BASIC}"
 
       # Use IP Whitelisting
+      # BECAREFUL, if you are using IPv6, Traefik wont see X-Real-IP
       - "traefik.http.middlewares.apiIpWhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
       # Only use depth if X-Forwarded_For is present (Cloudflare)
       #- "traefik.http.middlewares.apiIpWhitelist.ipwhitelist.ipstrategy.depth=1"
