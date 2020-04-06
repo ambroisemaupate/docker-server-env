@@ -2,7 +2,7 @@ version: '3.6'
 
 services:
   traefik:
-    image: traefik:2.1
+    image: traefik:2.2
     restart: always
     ports:
       - target: 80
