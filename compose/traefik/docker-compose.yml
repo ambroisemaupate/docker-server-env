@@ -14,9 +14,11 @@ services:
         protocol: tcp
         mode: host
     networks:
+      - default
       - frontproxynet
+    privileged: yes
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik.toml:/traefik.toml
       - ./acme.json:/acme.json
       - ./access.log:/access.log
@@ -56,6 +58,8 @@ services:
   certdumper:
     container_name: traefik_certdumper
     image: alpine:latest
+    networks:
+      - default
     depends_on:
       - traefik
     restart: unless-stopped
