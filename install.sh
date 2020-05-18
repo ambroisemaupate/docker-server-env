@@ -10,8 +10,8 @@ if [ "$DISTRIB" != "debian" -a "$DISTRIB" != "ubuntu" ]; then
     exit 1
 fi
 
-apt-get update;
-apt-get install -y \
+apt update;
+apt install -y \
     ntp \
     ntpdate \
     nano \
@@ -32,8 +32,8 @@ apt-get install -y \
 curl -fsSL https://download.docker.com/linux/$DISTRIB/gpg | apt-key add -;
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$DISTRIB $(lsb_release -cs) stable";
 
-apt-get update;
-apt-get install -y docker-ce;
+apt update;
+apt install -y docker-ce;
 groupadd docker;
 
 # Add your user to docker group
