@@ -16,7 +16,7 @@ It’s specialized for **my personal usage**, but if it fits your needs, feel fr
 
 ## Base path
 
-All scripts and configurations files are written in order to perform **in** `/root/docker-server-env` folder.
+All scripts and configurations files are written in order to perform **in** `~/docker-server-env` folder.
 Please, adapt them if you want to clone this git repository elsewhere.
 
 ## Base installation
@@ -28,8 +28,8 @@ Skip this part if your hosting provider has already provisioned your server with
 #
 # Base apps
 #
-apt-get update;
-apt-get install sudo curl nano git zsh;
+sudo apt update;
+sudo apt install sudo curl nano git zsh;
 
 #
 # Install oh-my-zsh
@@ -37,19 +37,31 @@ apt-get install sudo curl nano git zsh;
 sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
 #
+# If you don’t have any password (public key only)
+# Change your shell manually…
+#
+sudo chsh -s /bin/zsh
+
+#
 # Clone this repository in root’s home
 #
-git clone https://github.com/ambroisemaupate/docker-server-env.git /root/docker-server-env;
+git clone https://github.com/ambroisemaupate/docker-server-env.git ~/docker-server-env;
 
 #
 # Execute base installation
 # It will install more lib, secure postfix and pull base docker images
 #
-cd /path/to/docker-server-env
+cd ~/docker-server-env
 #
 # Pass DISTRIB env to install [ubuntu/debian]
 # sudo DISTRIB="debian" bash ./install.sh if not root
-DISTRIB="debian" bash ./install.sh
+sudo DISTRIB="debian" bash ./install.sh
+```
+
+If you are not `root` user, do not forget to add your user to `docker` group.
+
+```
+sudo usermod -aG docker myuser
 ```
 
 ## Some of the docker images I use in this environment
