@@ -55,27 +55,27 @@ services:
       - "traefik.http.middlewares.apiRedirectscheme.redirectscheme.permanent=true"
 
   # Watch acme.json and dump certificates to files
-  certdumper:
-    container_name: traefik_certdumper
-    image: alpine:latest
-    networks:
-      - default
-    depends_on:
-      - traefik
-    restart: unless-stopped
-    volumes:
-      - ./:/traefik
-    command: >
-      ash -c " \
-        apk --no-cache add inotify-tools jq openssl util-linux bash && \
-        wget https://raw.githubusercontent.com/containous/traefik/v1.7/contrib/scripts/dumpcerts.sh -O dumpcerts.sh && \
-        mkdir -p /traefik/ssl/ && \
-        while true; do \
-          inotifywait -e modify /traefik/acme.json && \
-            bash dumpcerts.sh /traefik/acme.json /traefik/ssl/ && \
-            ln -f /traefik/ssl/certs/* /traefik/ssl/ && \
-            ln -f /traefik/ssl/private/* /traefik/ssl/; \
-        done"
+  #certdumper:
+  #  container_name: traefik_certdumper
+  #  image: alpine:latest
+  #  networks:
+  #    - default
+  #  depends_on:
+  #    - traefik
+  #  restart: unless-stopped
+  #  volumes:
+  #    - ./:/traefik
+  #  command: >
+  #    ash -c " \
+  #      apk --no-cache add inotify-tools jq openssl util-linux bash && \
+  #      wget https://raw.githubusercontent.com/containous/traefik/v1.7/contrib/scripts/dumpcerts.sh -O dumpcerts.sh && \
+  #      mkdir -p /traefik/ssl/ && \
+  #      while true; do \
+  #        inotifywait -e modify /traefik/acme.json && \
+  #          bash dumpcerts.sh /traefik/acme.json /traefik/ssl/ && \
+  #          ln -f /traefik/ssl/certs/* /traefik/ssl/ && \
+  #          ln -f /traefik/ssl/private/* /traefik/ssl/; \
+  #      done"
 
 networks:
   frontproxynet:
