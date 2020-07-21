@@ -128,7 +128,8 @@ services:
   
   # Automatically update when new images are available
   watchtower:
-    image: containrrr/watchtower
+    image: containrrr/watchtower]
+    restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # Share private registry credentials
