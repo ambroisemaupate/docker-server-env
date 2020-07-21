@@ -1,7 +1,6 @@
 version: '3'
 services:
   varnish:
-    hostname: varnish-example
     image: varnish:6.3
     tmpfs: /usr/local/var/varnish:exec
     labels:
@@ -45,7 +44,6 @@ services:
       - ./default.vcl:/etc/varnish/default.vcl:ro
 
   app:
-    hostname: example
     # Application is a packaged docker image
     # hosted on Gitlab Registry (or hub.docker.com)
     image: registry.gitlab.com/example/example
@@ -65,9 +63,10 @@ services:
     restart: always
     networks:
       - default
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   db:
-    hostname: db.example
     image: mysql:5.7
     networks:
       - default
@@ -81,17 +80,15 @@ services:
     restart: always
 
   solr:
-    hostname: solr.example
-    image: solr:7
+    image: solr:8-slim
     restart: always
     networks:
       - default
     volumes:
-      - SOLRDATA:/opt/solr/server/solr/mycores
-    entrypoint:
-      - docker-entrypoint.sh
+      - SOLRDATA:/var/solr
+    command:
       - solr-precreate
-      - example
+      - roadiz
 
   backup:
     image: ambroisemaupate/ftp-backup
@@ -128,6 +125,19 @@ services:
       FTP_PASS:  ${FTP_PASS}
       STORE_DAYS: ${BACKUP_STORE_DAYS}
       FTP_PATH: ${FTP_REMOTE_PATH}
+  
+  # Automatically update when new images are available
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Share private registry credentials
+      - /root/.docker/config.json:/config.json
+    # checks every 30 secs
+    command: --interval 30
+    environment:
+      #WATCHTOWER_DEBUG: "true"
+      WATCHTOWER_LABEL_ENABLE: "true"
 
 volumes:
   private_files:
