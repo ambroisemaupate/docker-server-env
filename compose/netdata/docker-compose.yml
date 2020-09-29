@@ -1,0 +1,42 @@
+#
+# https://learn.netdata.cloud/docs/agent/packaging/docker
+#
+version: '3'
+services:
+    netdata:
+        image: netdata/netdata
+        container_name: netdata
+        hostname: example.com # set to fqdn of host
+        # No need with https://app.netdata.cloud/
+        #ports:
+        #  - 19999:19999
+        restart: always
+        cap_add:
+            - SYS_PTRACE
+        security_opt:
+            - apparmor:unconfined
+        volumes:
+            - ./netdataconfig/netdata:/etc/netdata:ro
+            - netdatalib:/var/lib/netdata
+            - netdatacache:/var/cache/netdata
+            - /etc/passwd:/host/etc/passwd:ro
+            - /etc/group:/host/etc/group:ro
+            - /proc:/host/proc:ro
+            - /sys:/host/sys:ro
+            - /etc/os-release:/host/etc/os-release:ro
+        environment:
+            - DOCKER_HOST=proxy:2375
+            # This group number can be found by running the following (if socket group ownership is docker):
+            # grep docker /etc/group | cut -d ':' -f 3
+            - PGID=998
+
+    proxy:
+        image: tecnativa/docker-socket-proxy
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        environment:
+            - CONTAINERS=1
+
+volumes:
+    netdatalib:
+    netdatacache:
