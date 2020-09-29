@@ -9,3 +9,8 @@
 !/front-proxy
 !/traefik
 !/netdata
+
+
+netdata/netdataconfig/netdata/*
+!netdata/netdataconfig/netdata/.gitkeep
+
