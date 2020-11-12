@@ -25,6 +25,8 @@ services:
       # Define Middlewares
       # Add a Basic auth protection
       - "traefik.http.middlewares.exampleAuth.basicauth.users=${AUTH_BASIC}"
+      # IP Whitelist
+      - "traefik.http.middlewares.exampleIpwhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
       # Add domain redirection (example non-www to www redir)
       - "traefik.http.middlewares.exampleRedirectregex.redirectregex.regex=${REDIRECT_REGEX}"
       - "traefik.http.middlewares.exampleRedirectregex.redirectregex.replacement=${REDIRECT_REPLACEMENT}"
