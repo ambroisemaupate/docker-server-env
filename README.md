@@ -194,7 +194,7 @@ services:
       FTP_PATH: /home/example/backups/site
 ```
 
-Test if your credentials are valid: `docker-compose --no-deps --force-recreate up backup backup_cleanup`. This should launch the 2 services cleaning up older backups and
+Test if your credentials are valid: `docker-compose run --rm --no-deps backup && docker-compose run --rm --no-deps backup_cleanup`. This should launch the 2 services cleaning up older backups and
 creating new ones. One for your files stored in `/var/www/html` (check that you are using your main service volumes here), and a second one for your database dump.
 
 ℹ️ *You can use a `.env` file in your project path to avoid typing FTP and DB credential twice.*
@@ -206,9 +206,11 @@ Then add *docker-compose* lines to your host `crontab -e` (do not forget to spec
 
 # You must change directory in order to access .env file
 # Clean and backup "site_a" files and database at midnight
-0  0 * * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose up --no-deps --force-recreate backup backup_cleanup
+0  0 * * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup
+0  1 * * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup_cleanup
 # Clean and backup "site_b" files and database 15 minutes later
-15 0 * * * cd /root/docker-server-env/compose/site_b && /usr/local/bin/docker-compose up --no-deps --force-recreate backup backup_cleanup
+15 0 * * * cd /root/docker-server-env/compose/site_b && /usr/local/bin/docker-compose run --rm --no-deps backup
+15 1 * * * cd /root/docker-server-env/compose/site_b && /usr/local/bin/docker-compose run --rm --no-deps backup_cleanup
 ```
 
 *backup_cleanup* service uses a FTP/SFTP script that will check files older than `$STORE_DAYS` and delete them after. It will do nothing if there are only one of each *files* and *database* backup available. This is useful to prevent deletion of non-running services by keeping at least one backup. *backup_cleanup* does not use *sshftpfs* volume to perform file listing so you can use it with every FTP/SFTP account.
@@ -324,11 +326,14 @@ then launch them once a day, once a week, once a month from your crontab:
 ```shell
 # Rolling backups (do not use same hour of night to save CPU)
 # Daily
-00 2 * * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose up -d --no-deps --force-recreate backup_daily backup_cleanup_daily
+00 2 * * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup_daily
+30 2 * * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup_cleanup_daily
 # Weekly (on Monday early morning)
-00 3 * * 1 cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose up -d --no-deps --force-recreate backup_weekly backup_cleanup_weekly
+00 3 * * 1 cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup_weekly
+30 3 * * 1 cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup_cleanup_weekly
 # Monthly (on each 1st day)
-00 4 1 * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose up -d --no-deps --force-recreate backup_monthly backup_cleanup_monthly
+00 4 1 * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup_monthly
+30 4 1 * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup_cleanup_monthly
 ```
 
 ## Using custom Docker images for Roadiz
