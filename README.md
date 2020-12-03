@@ -65,6 +65,13 @@ If you are not `root` user, do not forget to add your user to `docker` group.
 sudo usermod -aG docker myuser
 ```
 
+### Enable IPv6 networking
+
+Copy `etc/docker/deamon.json` to your server and restart `docker` to enable ipv6 networking to resolve *Traefik*
+`X-Forwarded-For` issues with IPv6 clients.
+Make sure to generate a unique local IPv6 range.
+Check your network configuration with `compose/whoami` service which prints your client information.
+
 ## Some of the docker images I use in this environment
 
 * *traefik*: as the main front proxy. It handles Let’s Encrypt certificates too.

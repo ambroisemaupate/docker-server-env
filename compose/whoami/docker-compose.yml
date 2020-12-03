@@ -10,8 +10,16 @@ services:
       - "traefik.enable=true"
       - "traefik.http.services.whoami.loadbalancer.server.scheme=http"
       - "traefik.http.services.whoami.loadbalancer.server.port=80"
+      # Listen HTTP
+      - "traefik.http.routers.whoami.entrypoints=http"
       - "traefik.http.routers.whoami.rule=Host(${HOSTNAME})"
       - "traefik.http.routers.whoami.service=whoami"
+      # Listen HTTPS
+      - "traefik.http.routers.whoami_secure.entrypoints=https"
+      - "traefik.http.routers.whoami_secure.tls=true"
+      - "traefik.http.routers.whoami_secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.whoami_secure.rule=Host(${HOSTNAME})"
+      - "traefik.http.routers.whoami_secure.service=whoami"
 
 networks:
   frontproxynet:
