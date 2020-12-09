@@ -4,6 +4,8 @@
 !/example-se
 !/example-roadiz-registry
 !/example-gitlab-traefik
+!/example-gitlab-runner
+!/registry-mirror
 !/example-gitlab
 !/whoami
 !/front-proxy

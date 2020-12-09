@@ -65,12 +65,41 @@ If you are not `root` user, do not forget to add your user to `docker` group.
 sudo usermod -aG docker myuser
 ```
 
-### Enable IPv6 networking
+### Enable IPv6 networking and hub.docker.com mirroring
 
-Copy `etc/docker/deamon.json` to your server and restart `docker` to enable ipv6 networking to resolve *Traefik*
-`X-Forwarded-For` issues with IPv6 clients.
+Since November 2020, *hub.docker.com* introduced rate limit on API, if you often pull images you'll need to setup a 
+Registry mirror. Install and launch `compose/registry-mirror` service with your own *hub.docker.com* credentials in `.env`.
+
+Then copy `etc/docker/daemon.json` to your server and restart `docker`, this will:
+
+- enable ipv6 networking to resolve *Traefik* `X-Forwarded-For` issues with IPv6 clients;
+- setup an insecure Registry mirror on localhost:6000
+
 Make sure to generate a unique local IPv6 range.
 Check your network configuration with `compose/whoami` service which prints your client information.
+
+**Only use Registry mirror on private network machines or do not forget to restrict your host access to port 6000.**
+
+#### Use registry mirror inside your Gitlab Runners on same host
+
+Once your Registry mirror is running on `localhost:6000` you may want to use it inside your Gitlab Runners. 
+
+```toml
+# /etc/gitlab-runner/config/config.toml
+[runners.docker]
+    volumes = ["/opt/docker/daemon.json:/etc/docker/daemon.json:ro"]
+```
+
+Then configure `/opt/docker/daemon.json` to use your host' local network IP
+
+```json
+{
+  "registry-mirrors": ["http://192.168.1.xx:6000"],
+  "insecure-registries" : ["192.168.1.xx:6000"]
+}
+```
+
+That way, all gitlab runners will pull Docker image through your host mirror and save precious bandwidth and rate limit.
 
 ## Some of the docker images I use in this environment
 

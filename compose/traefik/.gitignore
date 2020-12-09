@@ -4,3 +4,4 @@ acme.json
 .env
 /ssl
 !/ssl/.gitkeep
+docker-compose.yml

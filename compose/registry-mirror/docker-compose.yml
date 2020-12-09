@@ -1,0 +1,12 @@
+version: "3"
+services:
+    mirror:
+        image: registry:2
+        restart: always
+        environment:
+            REGISTRY_PROXY_REMOTEURL: ${REGISTRY_PROXY_REMOTEURL}
+            REGISTRY_PROXY_USERNAME: ${REGISTRY_PROXY_USERNAME}
+            REGISTRY_PROXY_PASSWORD: ${REGISTRY_PROXY_PASSWORD}
+        ports:
+            - 6000:5000
+
