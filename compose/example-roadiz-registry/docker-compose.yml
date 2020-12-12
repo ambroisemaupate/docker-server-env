@@ -127,6 +127,31 @@ services:
       FTP_PASS:  ${FTP_PASS}
       STORE_DAYS: ${BACKUP_STORE_DAYS}
       FTP_PATH: ${FTP_REMOTE_PATH}
+      
+#   backup:
+#     image: ambroisemaupate/s3-backup
+#     networks:
+#       - default
+#     depends_on:
+#       - db
+#     environment:
+#       LOCAL_PATH: /var/www/html
+#       DB_USER: ${MYSQL_USER}
+#       DB_HOST: db
+#       DB_PASS: ${MYSQL_PASSWORD}
+#       DB_NAME: ${MYSQL_DATABASE}
+#       S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+#       S3_SECRET_KEY: ${S3_SECRET_KEY}
+#       S3_SIGNATURE: ${S3_SIGNATURE}
+#       S3_BUCKET_LOCATION: ${S3_BUCKET_LOCATION}
+#       S3_HOST_BASE: ${S3_HOST_BASE}
+#       S3_HOST_BUCKET: ${S3_HOST_BUCKET}
+#       S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+#       S3_FOLDER_NAME: ${S3_FOLDER_NAME}
+#     volumes:
+#       - private_files:/var/www/html/files:ro
+#       - public_files:/var/www/html/web/files:ro
+#       - gen_src:/var/www/html/app/gen-src:ro
   
   # Automatically update when new images are available
   watchtower:
