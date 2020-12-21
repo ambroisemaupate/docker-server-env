@@ -15,6 +15,7 @@ apt install -y \
     ntp \
     ntpdate \
     nano \
+    gnupg \
     htop \
     curl \
     curlftpfs \
