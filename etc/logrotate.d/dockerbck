@@ -6,11 +6,12 @@
     notifempty
     nocreate
 }
+# Change here your traefik access.log path and user
 /root/docker-server-env/compose/traefik/access.log {
     weekly
     missingok
     rotate 7
     compress
     notifempty
-    nocreate
+    create 644 root root
 }
