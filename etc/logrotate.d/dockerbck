@@ -7,10 +7,10 @@
     nocreate
 }
 /root/docker-server-env/compose/traefik/access.log {
-    weekly
+    daily
     missingok
-    rotate 7
+    rotate 14
     compress
     notifempty
-    nocreate
+    create 644 root root
 }
