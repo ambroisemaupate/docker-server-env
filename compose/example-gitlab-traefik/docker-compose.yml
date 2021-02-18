@@ -35,7 +35,6 @@ services:
 
       - "traefik.http.services.gitlab.loadbalancer.server.port=${GITLAB_PORT}"
       - "traefik.http.services.gitlab.loadbalancer.server.scheme=http"
-      - "traefik.http.services.gitlab.loadbalancer.server.port=80"
       - "traefik.http.services.gitlab.loadbalancer.passhostheader=true"
 
       - "traefik.http.routers.registry.rule=Host(`${REGISTRY_HOSTNAME}`)"
@@ -58,7 +57,6 @@ services:
 
       - "traefik.http.services.mattermost.loadbalancer.server.port=${MATTERMOST_PORT}"
       - "traefik.http.services.mattermost.loadbalancer.server.scheme=http"
-      - "traefik.http.services.mattermost.loadbalancer.server.port=80"
       - "traefik.http.services.mattermost.loadbalancer.passhostheader=true"
     # I had problems with the health check. Sometimes it reported unhealthyness and therefore Traefik removed
     # the container, so I turned it off. Maybe it works by now.
