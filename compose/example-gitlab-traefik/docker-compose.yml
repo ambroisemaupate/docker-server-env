@@ -100,8 +100,10 @@ services:
         #
         registry_external_url 'https://${REGISTRY_HOSTNAME}'
         gitlab_rails['registry_enabled'] = true
+        gitlab_rails['registry_issuer'] = "omnibus-gitlab-issuer"
         registry_nginx['listen_port'] = ${REGISTRY_PORT}
         registry_nginx['listen_https'] = false
+        registry_nginx['redirect_http_to_https'] = false
 
         #
         # First run this stack before
