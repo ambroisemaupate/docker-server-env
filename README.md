@@ -63,6 +63,7 @@ If you are not `root` user, do not forget to add your user to `docker` group.
 
 ```
 sudo usermod -aG docker myuser
+sudo chown -R myuser:myuser ~/docker-server-env
 ```
 
 ### Enable IPv6 networking and hub.docker.com mirroring
