@@ -83,5 +83,6 @@ service fail2ban restart;
 
 #
 # create default bridge network
+# TODO: Generate a new random private subnet
 #
-docker network create --driver bridge frontproxynet;
+docker network create --ipv6 --driver bridge --subnet="fd01:846c:3ae6:fe92::/64" frontproxynet;
