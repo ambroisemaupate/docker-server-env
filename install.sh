@@ -68,6 +68,7 @@ cd "$(dirname "$0")";
 cp ./.zshrc $HOME/.zshrc;
 cp ./etc/fail2ban/jail.d/defaults-${DISTRIB}.conf /etc/fail2ban/jail.d/defaults-${DISTRIB}.conf;
 cp ./etc/logrotate.d/dockerbck /etc/logrotate.d/dockerbck;
+cp ./etc/docker/daemon.json /etc/docker/daemon.json;
 cp ./compose/traefik/traefik.sample.toml ./compose/traefik/traefik.toml;
 cp ./compose/traefik/docker-compose.yml.dist ./compose/traefik/docker-compose.yml;
 cp ./compose/traefik/.env.dist ./compose/traefik/.env;
