@@ -76,10 +76,22 @@ Then copy `etc/docker/daemon.json` to your server and restart `docker`, this wil
 - enable ipv6 networking to resolve *Traefik* `X-Forwarded-For` issues with IPv6 clients;
 - setup an insecure Registry mirror on localhost:6000
 
-Make sure to generate a unique local IPv6 range.
+Make sure to [generate a unique local IPv6 range](https://simpledns.plus/private-ipv6).
 Check your network configuration with `compose/whoami` service which prints your client information.
 
 **Only use Registry mirror on private network machines or do not forget to restrict your host access to port 6000.**
+
+You can verify if IPv6 is enabled by testing if **traefik** is listening on both interfaces, make sure `frontproxynet` is also
+configured with `--ipv6` option to allow traefik listening on ipv4 and ipv6:
+
+```
+netstat -tnlp
+
+tcp        0      0 0.0.0.0:443             0.0.0.0:*               LISTEN      2377/docker-proxy   
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      2398/docker-proxy   
+tcp6       0      0 :::443                  :::*                    LISTEN      2383/docker-proxy   
+tcp6       0      0 :::80                   :::*                    LISTEN      2404/docker-proxy 
+```
 
 #### Use registry mirror inside your Gitlab Runners on same host
 
