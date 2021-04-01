@@ -5,15 +5,17 @@ It’s specialized for **my personal usage**, but if it fits your needs, feel fr
 
 * [Base path](#base-path)
 * [Base installation](#base-installation)
+  + [Enable IPv6 networking](#enable-ipv6-networking)
+  + [hub.docker.com mirroring](#hubdockercom-mirroring)
 * [Some of the docker images I use in this environment](#some-of-the-docker-images-i-use-in-this-environment)
-* [Using *docker-compose*](#using-docker-compose)
+* [Using *docker-compose*](#using--docker-compose)
 * [Using Traefik v2.x as main front-end](#using-traefik-v2x-as-main-front-end)
 * [Back-up containers](#back-up-containers)
 * [Clean-up FTP backups](#clean-up-ftp-backups)
 * [Rolling backups](#rolling-backups)
 * [Using custom Docker images for Roadiz](#using-custom-docker-images-for-roadiz)
-  + [Update and restart your Roadiz image](#update-and-restart-your-roadiz-image)
 * [Rotating logs](#rotating-logs)
+
 
 ## Base path
 
@@ -66,25 +68,19 @@ sudo usermod -aG docker myuser
 sudo chown -R myuser:myuser ~/docker-server-env
 ```
 
-### Enable IPv6 networking and hub.docker.com mirroring
+### Enable IPv6 networking
 
-Since November 2020, *hub.docker.com* introduced rate limit on API, if you often pull images you'll need to setup a 
-Registry mirror. Install and launch `compose/registry-mirror` service with your own *hub.docker.com* credentials in `.env`.
+If you registered IPv6 and AAAA DNS records for your services, you must enable *Docker* ipv6 networking and make sure
+*Traefik* is running on a IPv6 enabled network.
 
-Then copy `etc/docker/daemon.json` to your server and restart `docker`, this will:
-
-- enable ipv6 networking to resolve *Traefik* `X-Forwarded-For` issues with IPv6 clients;
-- setup an insecure Registry mirror on localhost:6000
-
-Make sure to [generate a unique local IPv6 range](https://simpledns.plus/private-ipv6).
+Make sure to [generate a unique local IPv6 range](https://simpledns.plus/private-ipv6) and edit `etc/docker/daemon.json` **before
+running** `install.sh` script.
 Check your network configuration with `compose/whoami` service which prints your client information.
 
-**Only use Registry mirror on private network machines or do not forget to restrict your host access to port 6000.**
-
 You can verify if IPv6 is enabled by testing if **traefik** is listening on both interfaces, make sure `frontproxynet` is also
-configured with `--ipv6` option to allow traefik listening on ipv4 and ipv6:
+configured with `--ipv6` option to allow traefik listening on `tcp` and `tcp6`:
 
-```
+```bash
 netstat -tnlp
 
 tcp        0      0 0.0.0.0:443             0.0.0.0:*               LISTEN      2377/docker-proxy   
@@ -92,6 +88,15 @@ tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      
 tcp6       0      0 :::443                  :::*                    LISTEN      2383/docker-proxy   
 tcp6       0      0 :::80                   :::*                    LISTEN      2404/docker-proxy 
 ```
+
+### hub.docker.com mirroring
+
+Since November 2020, *hub.docker.com* introduced rate limit on API, if you often pull images you'll need to setup a 
+Registry mirror. Install and launch `compose/registry-mirror` service with your own *hub.docker.com* credentials in `.env`.
+
+**Only use Registry mirror on private network machines or do not forget to restrict your host access to port 6000.**
+
+Copy `etc/docker/daemon_with_registry.json` to your server `/etc/docker/daemon.json` and restart `docker`, this will setup an insecure Registry mirror on localhost:6000.
 
 #### Use registry mirror inside your Gitlab Runners on same host
 
