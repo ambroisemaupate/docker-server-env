@@ -55,6 +55,8 @@ services:
       - ./config.docker.yml:/var/www/html/app/conf/config.yml
       - private_files:/var/www/html/files
       - public_files:/var/www/html/web/files
+      # Save image thumbnails between restart to save CPU
+      - assets_files:/var/www/html/web/assets
       - gen_src:/var/www/html/app/gen-src/GeneratedNodeSources
       - proxies:/var/www/html/app/gen-src/Proxies
       - compiled:/var/www/html/app/gen-src/Compiled
@@ -169,6 +171,7 @@ services:
 volumes:
   private_files:
   public_files:
+  assets_files:
   gen_src:
   proxies:
   compiled:
