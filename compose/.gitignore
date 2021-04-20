@@ -8,6 +8,7 @@
 !/registry-mirror
 !/example-gitlab
 !/whoami
+!/nextcloud
 !/front-proxy
 !/traefik
 !/netdata

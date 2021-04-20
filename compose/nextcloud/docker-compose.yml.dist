@@ -1,0 +1,114 @@
+version: '3'
+
+services:
+  nextcloud:
+    build:
+      context: .
+      args:
+        USER_UID: ${USER_UID}
+        GROUP_UID: ${GROUP_UID}
+    networks:
+      frontproxynet:
+      default:
+    container_name: nextcloud
+    extra_hosts:
+      - "${HOSTNAME}:${GATEWAY}"
+      - "${COLLABORA_HOSTNAME}:${GATEWAY}"
+    restart: always
+    depends_on:
+      - db
+      - redis
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_HOST: db
+      NEXTCLOUD_DATA_DIR: /data
+      REDIS_HOST: redis
+      REDIS_HOST_PORT: 6379
+      APACHE_DISABLE_REWRITE_IP: 1
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES}
+    volumes:
+      # docker-compose exec nextcloud chown -R www-data:www-data /data
+      - data:/data
+      - config:/var/www/html/config
+      - apps:/var/www/html/custom_apps
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.nextcloud.loadbalancer.server.scheme=http"
+      - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
+      # Listen HTTP
+      - "traefik.http.routers.nextcloud.entrypoints=http"
+      - "traefik.http.routers.nextcloud.rule=Host(`${HOSTNAME}`)"
+      - "traefik.http.routers.nextcloud.service=nextcloud"
+      # Listen HTTPS
+      - "traefik.http.routers.nextcloud_secure.entrypoints=https"
+      - "traefik.http.routers.nextcloud_secure.tls=true"
+      - "traefik.http.routers.nextcloud_secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.nextcloud_secure.rule=Host(`${HOSTNAME}`)"
+      - "traefik.http.routers.nextcloud_secure.service=nextcloud"
+
+  collabora:
+    image: collabora/code
+    restart: always
+    extra_hosts:
+      - "${HOSTNAME}:${GATEWAY}"
+      - "${COLLABORA_HOSTNAME}:${GATEWAY}"
+    environment:
+      DONT_GEN_SSL_CERT: 1
+      server_name: ${COLLABORA_HOSTNAME}
+      domain: ${HOSTNAME}
+      extra_params: "--o:ssl.enable=false"
+    networks:
+      - frontproxynet
+      - default
+    cap_add:
+      - MKNOD
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.collabora_nextcloud.loadbalancer.server.scheme=http"
+      - "traefik.http.services.collabora_nextcloud.loadbalancer.server.port=9980"
+      # Listen HTTP
+      - "traefik.http.routers.collabora_nextcloud.entrypoints=http"
+      - "traefik.http.routers.collabora_nextcloud.rule=Host(`${COLLABORA_HOSTNAME}`)"
+      - "traefik.http.routers.collabora_nextcloud.service=collabora_nextcloud"
+      # Listen HTTPS
+      - "traefik.http.routers.collabora_nextcloud_secure.entrypoints=https"
+      - "traefik.http.routers.collabora_nextcloud_secure.tls=true"
+      - "traefik.http.routers.collabora_nextcloud_secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.collabora_nextcloud_secure.rule=Host(`${COLLABORA_HOSTNAME}`)"
+      - "traefik.http.routers.collabora_nextcloud_secure.service=collabora_nextcloud"
+
+  db:
+    image: mysql:8.0
+    networks:
+      - default
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    restart: always
+
+  redis:
+    container_name: nextcloud_redis
+    image: redis:6-alpine
+    restart: always
+    volumes:
+      - redis:/data
+    networks:
+      - default
+
+volumes:
+  data:
+  config:
+  apps:
+  theme:
+  db:
+  redis:
+
+networks:
+  frontproxynet:
+    external: true
