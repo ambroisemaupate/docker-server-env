@@ -1,0 +1,105 @@
+version: "3.3"
+services:
+  plausible_db:
+    image: postgres:12
+    restart: always
+    networks:
+      - default
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  plausible_events_db:
+    image: yandex/clickhouse-server:21.3.2.5
+    restart: always
+    volumes:
+      - event-data:/var/lib/clickhouse
+      - ./clickhouse/clickhouse-config.xml:/etc/clickhouse-server/config.d/logging.xml:ro
+      - ./clickhouse/clickhouse-user-config.xml:/etc/clickhouse-server/users.d/logging.xml:ro
+    networks:
+      - default
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+
+  plausible:
+    image: plausible/analytics:latest
+    restart: always
+    command: sh -c "sleep 10 && /entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh db init-admin && /entrypoint.sh run"
+    depends_on:
+      - plausible_db
+      - plausible_events_db
+    networks:
+      - default
+      - frontproxynet
+    env_file:
+      - plausible-conf.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.scheme=http"
+      - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.port=${APP_PORT}"
+      - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.passhostheader=true"
+      # Listen HTTP
+      - "traefik.http.routers.${APP_NAMESPACE}.entrypoints=http"
+      - "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME})"
+      - "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
+      # Listen HTTPS
+      - "traefik.http.routers.${APP_NAMESPACE}-secure.entrypoints=https"
+      - "traefik.http.routers.${APP_NAMESPACE}-secure.tls=true"
+      - "traefik.http.routers.${APP_NAMESPACE}-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.${APP_NAMESPACE}-secure.rule=Host(${HOSTNAME})"
+      - "traefik.http.routers.${APP_NAMESPACE}-secure.service=${APP_NAMESPACE}"
+      # Apply middlewares
+      - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Redirectscheme"
+      # Add SSL redirection
+      - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.permanent=true"
+
+  backup:
+    image: ambroisemaupate/s3-backup
+    networks:
+      - default
+    environment:
+      LOCAL_PATH: /var/www/html
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_SIGNATURE: ${S3_SIGNATURE}
+      S3_BUCKET_LOCATION: ${S3_BUCKET_LOCATION}
+      S3_HOST_BASE: ${S3_HOST_BASE}
+      S3_HOST_BUCKET: ${S3_HOST_BUCKET}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      S3_FOLDER_NAME: ${S3_FOLDER_NAME}
+    volumes:
+      # For the moment we need to backup db as files
+      - db-data:/var/www/html/postgresql:ro
+      - event-data:/var/www/html/clickhouse:ro
+
+# For localhost testing
+#  mailer:
+#    image: mailhog/mailhog
+#    networks:
+#      - frontproxynet
+#      - default
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.services.${APP_NAMESPACE}_mailer.loadbalancer.server.scheme=http"
+#      - "traefik.http.services.${APP_NAMESPACE}_mailer.loadbalancer.server.port=8025"
+#      - "traefik.http.services.${APP_NAMESPACE}_mailer.loadbalancer.passhostheader=true"
+#      # Listen HTTP
+#      - "traefik.http.routers.${APP_NAMESPACE}_mailer.entrypoints=http"
+#      - "traefik.http.routers.${APP_NAMESPACE}_mailer.rule=Host(${HOSTNAME_MAILER})"
+#      - "traefik.http.routers.${APP_NAMESPACE}_mailer.service=${APP_NAMESPACE}_mailer"
+
+volumes:
+  db-data:
+    driver: local
+  event-data:
+    driver: local
+  geoip:
+    driver: local
+
+networks:
+  frontproxynet:
+    external: true

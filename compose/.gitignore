@@ -5,6 +5,7 @@
 !/example-roadiz-registry
 !/example-gitlab-traefik
 !/example-gitlab-runner
+!/example-plausible
 !/registry-mirror
 !/example-gitlab
 !/whoami

@@ -124,10 +124,12 @@ That way, all gitlab runners will pull Docker image through your host mirror and
 * *traefik*: as the main front proxy. It handles Let’s Encrypt certificates too.
 * *solr* (I limit heap size to 256m because we don’t usually use big document data, and it can be painful on a small VPS server)
 * *ambroisemaupate/ftp-backup*: smart FTP/SFTP backup image
+* *ambroisemaupate/s3-backup*: smart S3 Object Storage backup image (no need to clean-up, configure lifecycle on your S3 provider)
 * *ambroisemaupate/ftp-cleanup*: smart FTP/SFTP backup clean-up image than delete files older than your defined limit. It won’t delete older backup files if they are the only ones available.
 * *ambroisemaupate/light-ssh*, For SSH access directly inside your container with some useful command as `mysqldump`, `git` and `composer`.
-* *mariadb*: for latest php72-alpine-nginx images and all official docker images
+* *mysql*: for latest php80-alpine-nginx images and all official docker images
 * *gitlab-ce*: If you want to setup your own Gitlab instance with a dedicated registry, all running on *docker*
+* *plausible/analytics*: Awesome open-source and privacy-friendly analytics tool. Based on https://github.com/plausible/hosting.
 
 ## Using *docker-compose*
 
