@@ -71,9 +71,12 @@ services:
       S3_HOST_BUCKET: ${S3_HOST_BUCKET}
       S3_BUCKET_NAME: ${S3_BUCKET_NAME}
       S3_FOLDER_NAME: ${S3_FOLDER_NAME}
+      # Backup PGSQL
+      PGDATABASE: plausible_dev
+      PGHOST: plausible_db
+      PGPASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       # For the moment we need to backup db as files
-      - db-data:/var/www/html/postgresql:ro
       - event-data:/var/www/html/clickhouse:ro
 
 # For localhost testing
