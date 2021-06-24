@@ -40,6 +40,8 @@
 [certificatesResolvers.letsencrypt.acme]
   email = "xxxx@xxxx.com"
   storage = "acme.json"
+  # Use staging server during tests
+  #caServer = "https://acme-staging-v02.api.letsencrypt.org/directory"
 
   [certificatesResolvers.letsencrypt.acme.httpChallenge]
     # used during the challenge
