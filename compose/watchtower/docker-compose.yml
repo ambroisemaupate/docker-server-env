@@ -1,0 +1,15 @@
+version: '3'
+services:
+	
+  watchtower:
+    image: containrrr/watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Share private registry credentials
+      - /root/.docker/config.json:/config.json
+    # checks every 1 min
+    command: --interval 60
+    environment:
+      #WATCHTOWER_DEBUG: "true"
+      WATCHTOWER_LABEL_ENABLE: "true"

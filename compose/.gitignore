@@ -6,6 +6,7 @@
 !/example-gitlab-traefik
 !/example-gitlab-runner
 !/example-plausible
+!/watchtower
 !/registry-mirror
 !/example-gitlab
 !/whoami
