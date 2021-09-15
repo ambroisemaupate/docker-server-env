@@ -139,12 +139,15 @@ services:
       - config:/etc/gitlab
       - logs:/var/log/gitlab
       - data:/var/opt/gitlab
-      - './../traefik/certs/certs/${REGISTRY_HOSTNAME}.crt:/etc/gitlab/ssl/${REGISTRY_HOSTNAME}.crt:ro'
-      - './../traefik/certs/private/${REGISTRY_HOSTNAME}.key:/etc/gitlab/ssl/${REGISTRY_HOSTNAME}.key:ro'
-      - './../traefik/certs/certs/${GITLAB_HOSTNAME}.crt:/etc/gitlab/ssl/${GITLAB_HOSTNAME}.crt:ro'
-      - './../traefik/certs/private/${GITLAB_HOSTNAME}.key:/etc/gitlab/ssl/${GITLAB_HOSTNAME}.key:ro'
-      - './../traefik/certs/certs/${MATTERMOST_HOSTNAME}.crt:/etc/gitlab/ssl/${MATTERMOST_HOSTNAME}.crt:ro'
-      - './../traefik/certs/private/${MATTERMOST_HOSTNAME}.key:/etc/gitlab/ssl/${MATTERMOST_HOSTNAME}.key:ro'
+      # Use this repo traefik configuration to export SSL certs into distincts files
+      # You should enable following line only after you started Gitlab to let Traefik
+      # generate SSL certs from Let's encrypt, then uncomment and launch Gitlab again
+      #- './../traefik/certs/certs/${REGISTRY_HOSTNAME}.crt:/etc/gitlab/ssl/${REGISTRY_HOSTNAME}.crt:ro'
+      #- './../traefik/certs/private/${REGISTRY_HOSTNAME}.key:/etc/gitlab/ssl/${REGISTRY_HOSTNAME}.key:ro'
+      #- './../traefik/certs/certs/${GITLAB_HOSTNAME}.crt:/etc/gitlab/ssl/${GITLAB_HOSTNAME}.crt:ro'
+      #- './../traefik/certs/private/${GITLAB_HOSTNAME}.key:/etc/gitlab/ssl/${GITLAB_HOSTNAME}.key:ro'
+      #- './../traefik/certs/certs/${MATTERMOST_HOSTNAME}.crt:/etc/gitlab/ssl/${MATTERMOST_HOSTNAME}.crt:ro'
+      #- './../traefik/certs/private/${MATTERMOST_HOSTNAME}.key:/etc/gitlab/ssl/${MATTERMOST_HOSTNAME}.key:ro'
 
 
 networks:
