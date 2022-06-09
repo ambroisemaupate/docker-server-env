@@ -94,6 +94,31 @@ services:
         gitlab_rails['backup_keep_time'] = 172600
         gitlab_ci['backup_keep_time'] = 172600
         gitlab_rails['time_zone'] = "${TIMEZONE}"
+        
+        #
+        # Consolidated object storage configuration for S3 compatible such as Scaleway
+        # https://docs.gitlab.com/15.0/ee/administration/object_storage.html
+        #
+        gitlab_rails['object_store']['enabled'] = true
+        gitlab_rails['object_store']['proxy_download'] = true
+        gitlab_rails['object_store']['connection'] = {
+          'provider' => 'AWS',
+          'region' => '${OBJECT_STORE_S3_REGION}',
+          'aws_access_key_id' => '${OBJECT_STORE_ACCESS_KEY_ID}',
+          'aws_secret_access_key' => '${OBJECT_STORE_SECRET_ACCESS_KEY}',
+          'host' => 's3.${OBJECT_STORE_S3_REGION}.scw.cloud',
+          'endpoint' => 'https://${OBJECT_STORE_BUCKET_NAME}.s3.nl-ams.scw.cloud',
+          'path_style' => true,
+          'enable_signature_v4_streaming' => false
+        }
+        gitlab_rails['object_store']['objects']['artifacts']['bucket'] = 'gitlab-artifacts'
+        gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = 'gitlab-external-diffs'
+        gitlab_rails['object_store']['objects']['lfs']['bucket'] = 'gitlab-lfs'
+        gitlab_rails['object_store']['objects']['uploads']['bucket'] = 'gitlab-uploads'
+        gitlab_rails['object_store']['objects']['packages']['bucket'] = 'gitlab-packages'
+        gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = 'gitlab-dependency-proxy'
+        gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = 'gitlab-terraform-state'
+        gitlab_rails['object_store']['objects']['pages']['bucket'] = 'gitlab-pages'
 
         #
         # Docker registry
