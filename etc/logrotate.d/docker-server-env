@@ -9,8 +9,11 @@
 /root/docker-server-env/compose/traefik/access.log {
     daily
     missingok
-    rotate 14
+    rotate 7
     compress
     notifempty
     create 644 root root
+    postrotate
+    cd /root/docker-server-env/compose/traefik && /usr/local/bin/docker-compose up -d --force-recreate --no-deps traefik
+    endscript
 }
