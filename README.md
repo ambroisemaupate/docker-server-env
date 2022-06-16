@@ -413,4 +413,16 @@ docker-compose exec -u www-data app make cache;
 
 ## Rotating logs
 
-Add the `etc/logrotate.d/dockerbck` configuration to your real `logrotate.d` system folder.
+Add the `etc/logrotate.d/docker-server-env` configuration to your real `logrotate.d` system folder.
+
+## Ban IPs
+
+Fail2Ban is configured with a special *jail* `traefik-auth` to block FORWARD rules for IP that trigger
+too much 401 errors in `./compose/traefik/access.log` file. If you need to manually ban an IP
+you must use this *chain* because it will prevent FORWARD rules to docker.
+
+Make sure to edit `/etc/fail2ban/jail.d/traefik.conf` with the right `logpath` to *Traefik* `access.log` file.
+
+```dotenv
+fail2ban-client set traefik-auth banip <IP>
+```
