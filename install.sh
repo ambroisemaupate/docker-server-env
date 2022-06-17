@@ -72,6 +72,7 @@ cp ./etc/docker/daemon.json /etc/docker/daemon.json;
 cp ./compose/traefik/traefik.sample.toml ./compose/traefik/traefik.toml;
 cp ./compose/traefik/docker-compose.yml.dist ./compose/traefik/docker-compose.yml;
 cp ./compose/traefik/.env.dist ./compose/traefik/.env;
+cp ./compose/netdata/.env.dist ./compose/netdata/.env;
 touch ./compose/traefik/acme.json;
 touch ./compose/traefik/access.log;
 chmod 0600 ./compose/traefik/acme.json;

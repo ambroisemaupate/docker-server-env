@@ -6,17 +6,14 @@ services:
     netdata:
         image: netdata/netdata
         container_name: netdata
-        hostname: example.com # set to fqdn of host
-        # No need with https://app.netdata.cloud/
-        #ports:
-        #  - 19999:19999
+        hostname: ${NETDATA_HOSTNAME} # set to fqdn of host
         restart: always
         cap_add:
             - SYS_PTRACE
         security_opt:
             - apparmor:unconfined
         volumes:
-            - ./netdataconfig/netdata:/etc/netdata:ro
+            - ./netdataconfig/netdata:/etc/netdata
             - netdatalib:/var/lib/netdata
             - netdatacache:/var/cache/netdata
             - /etc/passwd:/host/etc/passwd:ro
@@ -26,9 +23,10 @@ services:
             - /etc/os-release:/host/etc/os-release:ro
         environment:
             - DOCKER_HOST=proxy:2375
-            # This group number can be found by running the following (if socket group ownership is docker):
-            # grep docker /etc/group | cut -d ':' -f 3
-            - PGID=998
+            - PGID=${PGID}
+            - NETDATA_CLAIM_TOKEN=${NETDATA_CLAIM_TOKEN}
+            - NETDATA_CLAIM_URL=${NETDATA_CLAIM_URL}
+            - NETDATA_CLAIM_ROOMS=${NETDATA_CLAIM_ROOMS}
 
     proxy:
         image: tecnativa/docker-socket-proxy
