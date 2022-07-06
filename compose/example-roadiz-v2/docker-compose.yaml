@@ -1,0 +1,145 @@
+version: '3.8'
+services:
+    db:
+        image: mysql:8.0
+        restart: always
+        cap_add:
+            - SYS_NICE  # CAP_SYS_NICE
+        networks:
+            default:
+        volumes:
+            - db_data:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+    varnish:
+        restart: always
+        image: ${APP_REGISTRY_IMAGE}/varnish:latest
+        tmpfs: /var/lib/varnish/varnishd:exec
+        environment:
+            VARNISH_SIZE: 2G
+        depends_on:
+            - app
+        links:
+            - app:app
+        networks:
+            - frontproxynet
+            - default
+        labels:
+            - "traefik.enable=true"
+            - "com.centurylinklabs.watchtower.enable=true"
+            # Traefik v2 -----------------------------------------------------
+            - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.scheme=http"
+            - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.port=80"
+            - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.passhostheader=true"
+            # Enable healthcheck to prevent routing traffic to not-ready service
+            #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.healthcheck.path=/health-check"
+            #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.healthcheck.interval=10s"
+            #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.healthcheck.timeout=3s"
+            #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.healthcheck.headers.x-health-check=${APP_HEALTH_CHECK_TOKEN}"
+            # Listen HTTP
+            - "traefik.http.routers.${APP_NAMESPACE}.entrypoints=http"
+            - "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME})"
+            - "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
+            # Listen HTTPS
+            - "traefik.http.routers.${APP_NAMESPACE}_secure.entrypoints=https"
+            - "traefik.http.routers.${APP_NAMESPACE}_secure.tls=true"
+            - "traefik.http.routers.${APP_NAMESPACE}_secure.tls.certresolver=letsencrypt"
+            - "traefik.http.routers.${APP_NAMESPACE}_secure.rule=Host(${HOSTNAME})"
+            - "traefik.http.routers.${APP_NAMESPACE}_secure.service=${APP_NAMESPACE}"
+            # Apply middlewares
+            - "traefik.http.routers.${APP_NAMESPACE}_secure.middlewares=${APP_NAMESPACE}Redirectregex"
+            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Redirectscheme"
+            # Define Middlewares
+            # Add a Basic auth protection
+            #- "traefik.http.middlewares.${APP_NAMESPACE}Auth.basicauth.users=${AUTH_BASIC}"
+            # IP Whitelist
+            #- "traefik.http.middlewares.${APP_NAMESPACE}Ipwhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
+            # Add domain redirection (${APP_NAMESPACE} non-www to www redir)
+            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.regex=${REDIRECT_REGEX}"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.replacement=${REDIRECT_REPLACEMENT}"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.permanent=true"
+            # Add SSL redirection
+            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.scheme=https"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.permanent=true"
+
+
+    app:
+        restart: always
+        image: ${APP_REGISTRY_IMAGE}:latest
+        depends_on:
+            - db
+        #dns:
+        #    - 1.1.1.1
+        #    - 1.0.0.1
+        volumes:
+            - app_file_data:/var/www/html/public/files
+            - app_assets_data:/var/www/html/public/assets
+            - app_private_file_data:/var/www/html/var/files
+            - ./robots.txt:/var/www/html/public/robots.txt:ro
+            - ./.env:/var/www/html/.env.local:ro
+            - ./private.pem:/var/www/html/config/jwt/private.pem:ro
+            - ./public.pem:/var/www/html/config/jwt/public.pem:ro
+            - ./default.pub.key:/var/www/html/var/secret/default.pub.key:ro
+            - ./default.key:/var/www/html/var/secret/default.key:ro
+
+        networks:
+            - default
+        labels:
+            - "com.centurylinklabs.watchtower.enable=true"
+
+    solr:
+        image: ${APP_REGISTRY_IMAGE}/solr:latest
+        volumes:
+            - "solr_data:/var/solr:delegated"
+        command:
+            - solr-precreate
+            - ${SOLR_CORE_NAME}
+        restart: always
+        networks:
+            - default
+
+    backup:
+        image: ambroisemaupate/s3-backup
+        networks:
+            - default
+        depends_on:
+            - db
+        environment:
+            LOCAL_PATH: /var/www/html
+            DB_USER: ${MYSQL_USER}
+            DB_HOST: db
+            DB_PASS: ${MYSQL_PASSWORD}
+            DB_NAME: ${MYSQL_DATABASE}
+            S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+            S3_SECRET_KEY: ${S3_SECRET_KEY}
+            S3_SIGNATURE: ${S3_SIGNATURE}
+            S3_BUCKET_LOCATION: ${S3_BUCKET_LOCATION}
+            S3_HOST_BASE: ${S3_HOST_BASE}
+            S3_HOST_BUCKET: ${S3_HOST_BUCKET}
+            S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+            S3_FOLDER_NAME: ${S3_FOLDER_NAME}
+            COMPRESS: 0
+        volumes:
+            - app_file_data:/var/www/html/public/files:ro
+            - app_assets_data:/var/www/html/public/assets:ro
+            - app_private_file_data:/var/www/html/var/files:ro
+
+volumes:
+    app_file_data:
+    app_assets_data:
+    app_private_file_data:
+    db_data:
+    solr_data:
+
+networks:
+    frontproxynet:
+        external: true
+    default:
+        ipam:
+            driver: default
+            config:
+                -   subnet: ${DEFAULT_GATEWAY}/16
