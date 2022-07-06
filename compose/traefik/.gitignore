@@ -1,6 +1,7 @@
 traefik.toml
 acme.json
 *.log
+*.gz
 .env
 /ssl
 !/ssl/.gitkeep
