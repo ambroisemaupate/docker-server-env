@@ -19,6 +19,8 @@ services:
         restart: always
         image: ${APP_REGISTRY_IMAGE}/varnish:latest
         tmpfs: /var/lib/varnish/varnishd:exec
+        # https://github.com/varnish/docker-varnish/issues/53
+        user: root
         environment:
             VARNISH_SIZE: 2G
         depends_on:
