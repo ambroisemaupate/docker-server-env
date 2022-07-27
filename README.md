@@ -56,9 +56,9 @@ git clone https://github.com/ambroisemaupate/docker-server-env.git ~/docker-serv
 #
 cd ~/docker-server-env
 #
-# Pass DISTRIB env to install [ubuntu/debian]
-# sudo DISTRIB="debian" bash ./install.sh if not root
-sudo DISTRIB="debian" bash ./install.sh
+# Pass DISTRIB env to install [ubuntu/debian] and EMAIL for Postfix aliases
+# sudo DISTRIB="debian" EMAIL="ambroise@rezo-zero.com" bash ./install.sh if not root
+sudo DISTRIB="debian" EMAIL="ambroise@rezo-zero.com bash ./install.sh
 ```
 
 If you are not `root` user, do not forget to add your user to `docker` group.
