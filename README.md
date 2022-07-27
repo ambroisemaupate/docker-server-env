@@ -258,6 +258,7 @@ creating new ones. One for your files stored in `/var/www/html` (check that you 
 Then add *docker-compose* lines to your host `crontab -e` (do not forget to specify your `docker-compose.yml` path):
 
 ```bash
+MAILTO=""
 # crontab
 
 # You must change directory in order to access .env file
