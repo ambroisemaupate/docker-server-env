@@ -1,5 +1,10 @@
 #!/bin/bash
 #
+if [ -z "$EMAIL" ]; then
+    echo "Need to set EMAIL env variable for Postfix aliases."
+    exit 1
+fi
+
 if [ -z "$DISTRIB" ]; then
     echo "Need to set DISTRIB env variable [debian|ubuntu]."
     exit 1
@@ -53,7 +58,7 @@ chmod +x /usr/local/bin/docker-compose
 # Listen only localhost for Postfix
 #
 sed -i -e "s/inet\_interfaces = all/inet\_interfaces = loopback-only/" /etc/postfix/main.cf;
-echo "root: ambroise@rezo-zero.com" >> /etc/aliases;
+echo "root: $EMAIL" >> /etc/aliases;
 newaliases;
 service postfix restart;
 
