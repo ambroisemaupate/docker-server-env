@@ -53,8 +53,8 @@ services:
             - "traefik.http.routers.${APP_NAMESPACE}_secure.rule=Host(${HOSTNAME})"
             - "traefik.http.routers.${APP_NAMESPACE}_secure.service=${APP_NAMESPACE}"
             # Apply middlewares
-            - "traefik.http.routers.${APP_NAMESPACE}_secure.middlewares=${APP_NAMESPACE}Redirectregex"
-            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Redirectscheme"
+            - "traefik.http.routers.${APP_NAMESPACE}_secure.middlewares=defaultCompress,${APP_NAMESPACE}Redirectregex"
+            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=defaultCompress,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Redirectscheme"
             # Define Middlewares
             # Add a Basic auth protection
             #- "traefik.http.middlewares.${APP_NAMESPACE}Auth.basicauth.users=${AUTH_BASIC}"

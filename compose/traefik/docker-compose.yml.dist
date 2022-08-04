@@ -54,6 +54,10 @@ services:
       - "traefik.http.middlewares.apiRedirectscheme.redirectscheme.scheme=https"
       - "traefik.http.middlewares.apiRedirectscheme.redirectscheme.permanent=true"
 
+      # Add Gzip globally
+      - "traefik.http.middlewares.defaultCompress.compress=true"
+      - "traefik.http.middlewares.defaultCompress.compress.excludedcontenttypes=${EXCLUDED_COMPRESS_TYPES}"
+
   # Watch acme.json and dump certificates to files
   #traefik-certs-dumper:
   #  image: ldez/traefik-certs-dumper:v2.7.4
