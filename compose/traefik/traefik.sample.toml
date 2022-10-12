@@ -13,6 +13,9 @@
   checkNewVersion = false
   sendAnonymousUsage = false
 
+[experimental]
+  http3 = true
+
 [entryPoints]
   [entryPoints.http]
     address = ":80"
@@ -22,6 +25,7 @@
 
   [entryPoints.https]
     address = ":443"
+    [entryPoints.https.http3]
     [entryPoints.https.forwardedHeaders]
       insecure = true
       trustedIPs = ["127.0.0.1", "192.168.0.1"]
