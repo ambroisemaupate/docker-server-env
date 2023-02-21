@@ -122,7 +122,20 @@ services:
         gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = 'gitlab-dependency-proxy'
         gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = 'gitlab-terraform-state'
         gitlab_rails['object_store']['objects']['pages']['bucket'] = 'gitlab-pages'
-
+        
+        #
+        # Send backups to Object Storage
+        # Use a different DC or region if possible
+        #
+        gitlab_rails['backup_upload_connection'] = {
+          'provider' => 'AWS',
+          'region' => '${BACKUP_OBJECT_STORE_S3_REGION}',
+          'aws_access_key_id' => '${BACKUP_OBJECT_STORE_ACCESS_KEY_ID}',
+          'aws_secret_access_key' => '${BACKUP_OBJECT_STORE_SECRET_ACCESS_KEY}',
+          'endpoint' => 'https://s3.${BACKUP_OBJECT_STORE_S3_REGION}.scw.cloud',
+        }
+        gitlab_rails['backup_upload_remote_directory'] = 'gitlab-backups'
+        
         #
         # Docker registry
         #
