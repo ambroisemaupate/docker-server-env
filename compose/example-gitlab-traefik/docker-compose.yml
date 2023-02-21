@@ -109,11 +109,11 @@ services:
           'region' => '${OBJECT_STORE_S3_REGION}',
           'aws_access_key_id' => '${OBJECT_STORE_ACCESS_KEY_ID}',
           'aws_secret_access_key' => '${OBJECT_STORE_SECRET_ACCESS_KEY}',
-          'host' => 's3.${OBJECT_STORE_S3_REGION}.scw.cloud',
-          'endpoint' => 'https://${OBJECT_STORE_BUCKET_NAME}.s3.nl-ams.scw.cloud',
-          'path_style' => true,
+          'endpoint' => 'https://s3.${OBJECT_STORE_S3_REGION}.scw.cloud',
+          'path_style' => false,
           'enable_signature_v4_streaming' => false
         }
+        # One bucket = one type
         gitlab_rails['object_store']['objects']['artifacts']['bucket'] = 'gitlab-artifacts'
         gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = 'gitlab-external-diffs'
         gitlab_rails['object_store']['objects']['lfs']['bucket'] = 'gitlab-lfs'
