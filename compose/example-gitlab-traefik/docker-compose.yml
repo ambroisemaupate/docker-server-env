@@ -32,6 +32,7 @@ services:
       - "traefik.http.routers.gitlab-secure.rule=Host(`${GITLAB_HOSTNAME}`)"
       - "traefik.http.routers.gitlab-secure.entrypoints=https"
       - "traefik.http.routers.gitlab-secure.service=gitlab"
+      - "traefik.http.routers.gitlab-secure.tls.certresolver=letsencrypt"
       - "traefik.http.routers.gitlab-secure.tls=true"
 
       - "traefik.http.services.gitlab.loadbalancer.server.port=${GITLAB_PORT}"
@@ -41,6 +42,7 @@ services:
       - "traefik.http.routers.registry.rule=Host(`${REGISTRY_HOSTNAME}`)"
       - "traefik.http.routers.registry.entrypoints=http,https"
       - "traefik.http.routers.registry.service=registry"
+      - "traefik.http.routers.registry.tls.certresolver=letsencrypt"
       - "traefik.http.routers.registry.tls=true"
       - "traefik.http.services.registry.loadbalancer.server.port=${REGISTRY_PORT}"
 
@@ -54,6 +56,7 @@ services:
       - "traefik.http.routers.mattermost-secure.rule=Host(`${MATTERMOST_HOSTNAME}`)"
       - "traefik.http.routers.mattermost-secure.entrypoints=https"
       - "traefik.http.routers.mattermost-secure.service=mattermost"
+      - "traefik.http.routers.mattermost-secure.tls.certresolver=letsencrypt"
       - "traefik.http.routers.mattermost-secure.tls=true"
 
       - "traefik.http.services.mattermost.loadbalancer.server.port=${MATTERMOST_PORT}"
@@ -136,8 +139,9 @@ services:
           'enable_signature_v4_streaming' => false,
           'path_style' => false
         }
+        # One bucket = one type
         gitlab_rails['object_store']['objects']['artifacts']['bucket'] = 'gitlab-artifacts'
-        gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = 'gitlab-mr-diffs'
+        gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = 'gitlab-external-diffs'
         gitlab_rails['object_store']['objects']['lfs']['bucket'] = 'gitlab-lfs'
         gitlab_rails['object_store']['objects']['uploads']['bucket'] = 'gitlab-uploads'
         gitlab_rails['object_store']['objects']['packages']['bucket'] = 'gitlab-packages'

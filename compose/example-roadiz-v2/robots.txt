@@ -1,3 +1,3 @@
-UserAgent: *
+User-agent: *
 Disallow: /api
 Disallow: /rz-admin/
