@@ -1,4 +1,6 @@
-version: '3.8'
+# Production template
+# Replace “my-registry/roadiz_skeleton” with your own project registry URL
+version: '3.7'
 services:
     db:
         image: mysql:8.0
@@ -15,18 +17,28 @@ services:
             MYSQL_USER: ${MYSQL_USER}
             MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
-    varnish:
+    # Use Redis for Cache, Messaging and Sessions
+    redis:
+        image: redis:7-alpine
         restart: always
-        image: ${APP_REGISTRY_IMAGE}/varnish:latest
+        networks:
+            - default
+
+    varnish:
+        image: my-registry/roadiz_skeleton/varnish:latest
+        restart: always
         tmpfs: /var/lib/varnish/varnishd:exec
         # https://github.com/varnish/docker-varnish/issues/53
         user: root
-        environment:
-            VARNISH_SIZE: 2G
         depends_on:
-            - app
+            - nginx
         links:
+            - nginx:nginx
             - app:app
+            - cron:cron
+            - worker:worker
+        environment:
+            VARNISH_SIZE: ${VARNISH_SIZE}
         networks:
             - frontproxynet
             - default
@@ -38,28 +50,27 @@ services:
             - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.port=80"
             - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.passhostheader=true"
             # Enable healthcheck to prevent routing traffic to not-ready service
-            #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.healthcheck.path=/health-check"
-            #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.healthcheck.interval=10s"
-            #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.healthcheck.timeout=3s"
-            #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.healthcheck.headers.x-health-check=${APP_HEALTH_CHECK_TOKEN}"
+            # - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.healthcheck.path=/health-check"
+            # - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.healthcheck.interval=10s"
+            # - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.healthcheck.timeout=3s"
+            # - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.healthcheck.headers.x-health-check=${APP_HEALTH_CHECK_TOKEN}"
             # Listen HTTP
             - "traefik.http.routers.${APP_NAMESPACE}.entrypoints=http"
-            - "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME})"
+            # Combine Host and PathPrefix to allow API and Frontend to share same domain name
+            - "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME}) && PathPrefix(${PATH_PREFIX})"
             - "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
             # Listen HTTPS
             - "traefik.http.routers.${APP_NAMESPACE}_secure.entrypoints=https"
             - "traefik.http.routers.${APP_NAMESPACE}_secure.tls=true"
             - "traefik.http.routers.${APP_NAMESPACE}_secure.tls.certresolver=letsencrypt"
-            - "traefik.http.routers.${APP_NAMESPACE}_secure.rule=Host(${HOSTNAME})"
+            # Combine Host and PathPrefix to allow API and Frontend to share same domain name
+            - "traefik.http.routers.${APP_NAMESPACE}_secure.rule=Host(${HOSTNAME}) && PathPrefix(${PATH_PREFIX})"
             - "traefik.http.routers.${APP_NAMESPACE}_secure.service=${APP_NAMESPACE}"
+            #
             # Apply middlewares
-            - "traefik.http.routers.${APP_NAMESPACE}_secure.middlewares=defaultCompress,${APP_NAMESPACE}Redirectregex"
-            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=defaultCompress,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Redirectscheme"
-            # Define Middlewares
-            # Add a Basic auth protection
-            #- "traefik.http.middlewares.${APP_NAMESPACE}Auth.basicauth.users=${AUTH_BASIC}"
-            # IP Whitelist
-            #- "traefik.http.middlewares.${APP_NAMESPACE}Ipwhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
+            #
+            - "traefik.http.routers.${APP_NAMESPACE}_secure.middlewares=${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Sts"
+            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Redirectscheme"
             # Add domain redirection (${APP_NAMESPACE} non-www to www redir)
             - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.regex=${REDIRECT_REGEX}"
             - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.replacement=${REDIRECT_REPLACEMENT}"
@@ -67,42 +78,105 @@ services:
             # Add SSL redirection
             - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.scheme=https"
             - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.permanent=true"
+            # HSTS headers
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsincludesubdomains=false"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stspreload=true"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsseconds=31536000"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.isdevelopment=false"
 
+
+    nginx:
+        image: my-registry/roadiz_skeleton/nginx:latest
+        restart: always
+        depends_on:
+            - app
+        # Nginx does not resolve `app` hostname correctly
+        links:
+            - app:app
+        networks:
+            - default
+        volumes:
+            - ./robots.txt:/var/www/html/public/robots.txt:ro
+            - app_file_data:/var/www/html/public/files:ro
+            - app_assets_data:/var/www/html/public/assets:ro
+        labels:
+            - "com.centurylinklabs.watchtower.enable=true"
+            # Force Watchtower to restart varnish after app update
+            - "com.centurylinklabs.watchtower.depends-on=varnish"
 
     app:
+        image: my-registry/roadiz_skeleton:latest
         restart: always
-        image: ${APP_REGISTRY_IMAGE}:latest
         depends_on:
             - db
-        #dns:
-        #    - 1.1.1.1
-        #    - 1.0.0.1
+            - redis
+            #- solr
         volumes:
             - app_file_data:/var/www/html/public/files
             - app_assets_data:/var/www/html/public/assets
             - app_private_file_data:/var/www/html/var/files
-            - ./robots.txt:/var/www/html/public/robots.txt:ro
+            - app_secret_data:/var/www/html/config/secrets
+            ## Use docker-compose env file as .env.local in container
             - ./.env:/var/www/html/.env.local:ro
-            - ./private.pem:/var/www/html/config/jwt/private.pem:ro
-            - ./public.pem:/var/www/html/config/jwt/public.pem:ro
-            - ./default.pub.key:/var/www/html/var/secret/default.pub.key:ro
-            - ./default.key:/var/www/html/var/secret/default.key:ro
-
+            ## Generate JWT certificates on your host and share them to docker container
+            ## openssl genpkey -out jwt_private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096;
+            - ./jwt_private.pem:/var/www/html/config/jwt/private.pem:ro
+            ## openssl pkey -in jwt_private.pem -out jwt_public.pem -pubout;
+            - ./jwt_public.pem:/var/www/html/config/jwt/public.pem:ro
+            ##
+            ## Do not add volume for src/GeneratedEntity, they are versioned since Roadiz v2
+            ## Uncomment these if you DO want to persist and edit node-types on production env
+            ##
+            #- app_node_types_api:/var/www/html/config/api_resources
+            #- app_node_types_resource:/var/www/html/src/Resources
+            #- app_node_types_entities:/var/www/html/src/GeneratedEntity
         networks:
             - default
+        environment:
+            MYSQL_HOST: ${MYSQL_HOST}
+            MYSQL_PORT: ${MYSQL_PORT}
+            # Can only override env in docker environment
+            # because these are hardcoded in Docker image definition
+            APP_ENV: prod
+            APP_RUNTIME_ENV: prod
+            APP_DEBUG: 0
+        labels:
+            - "com.centurylinklabs.watchtower.enable=true"
+            # Force Watchtower to restart nginx after app update
+            - "com.centurylinklabs.watchtower.depends-on=nginx"
+
+    worker:
+        extends:
+            service: app
+        deploy:
+            # Do not use more than 1 replica if you're using Varnish and need to purge/ban cache
+            # from your workers. Varnish ACL hostnames won't be resolved correctly.
+            replicas: 1
+        entrypoint: [ "php", "/var/www/html/bin/console", "messenger:consume", "async", "--time-limit=1800" ]
+        restart: always
         labels:
             - "com.centurylinklabs.watchtower.enable=true"
 
-    solr:
-        image: ${APP_REGISTRY_IMAGE}/solr:latest
-        volumes:
-            - "solr_data:/var/solr:delegated"
-        command:
-            - solr-precreate
-            - ${SOLR_CORE_NAME}
+    cron:
+        extends:
+            service: app
+        # https://github.com/dubiousjim/dcron/issues/13#issuecomment-1406937781
+        init: true
+        entrypoint: [ "crond", "-f", "-L", "15" ]
         restart: always
-        networks:
-            - default
+        labels:
+            - "com.centurylinklabs.watchtower.enable=true"
+
+    #solr:
+    #    image: my-registry/roadiz_skeleton/solr:latest
+    #    volumes:
+    #        - "solr_data:/var/solr:delegated"
+    #    command:
+    #        - solr-precreate
+    #        - ${SOLR_CORE_NAME}
+    #    restart: always
+    #    networks:
+    #        - default
 
     backup:
         image: ambroisemaupate/s3-backup
@@ -124,18 +198,27 @@ services:
             S3_HOST_BUCKET: ${S3_HOST_BUCKET}
             S3_BUCKET_NAME: ${S3_BUCKET_NAME}
             S3_FOLDER_NAME: ${S3_FOLDER_NAME}
+            S3_STORAGE_CLASS: ${S3_STORAGE_CLASS}
             COMPRESS: 0
         volumes:
-            - app_file_data:/var/www/html/public/files:ro
+            - app_file_data:/var/www/html/var/files:ro
             - app_assets_data:/var/www/html/public/assets:ro
-            - app_private_file_data:/var/www/html/var/files:ro
+            - app_private_file_data:/var/www/html/public/files:ro
 
 volumes:
     app_file_data:
     app_assets_data:
     app_private_file_data:
+    app_secret_data:
+    ##
+    ## Do not add volume for src/GeneratedEntity, they are versioned since Roadiz v2
+    ## Uncomment these if you DO want to persist and edit node-types on production env
+    ##
+    #app_node_types_api:
+    #app_node_types_resource:
+    #app_node_types_entities:
     db_data:
-    solr_data:
+    #solr_data:
 
 networks:
     frontproxynet:

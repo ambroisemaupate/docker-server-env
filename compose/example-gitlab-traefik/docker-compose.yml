@@ -13,6 +13,7 @@ services:
     # to be able to contact Gitlab SSO
     #
     hostname: ${GITLAB_HOSTNAME}
+    privileged: true
     networks:
       - default
       - frontproxynet
@@ -73,6 +74,10 @@ services:
         #  'X-Forwarded-Ssl' => 'on'
         #}
         nginx['client_max_body_size'] = '2G'
+
+        #
+        # Emails
+        #
         gitlab_rails['smtp_enable'] = true
         gitlab_rails['smtp_address'] = "${SMTP_ADDRESS}"
         gitlab_rails['smtp_port'] = ${SMTP_PORT}
@@ -81,20 +86,41 @@ services:
         gitlab_rails['smtp_domain'] = "${SMTP_DOMAIN}"
         gitlab_rails['smtp_authentication'] = "login"
         gitlab_rails['smtp_enable_starttls_auto'] = true
+        gitlab_rails['incoming_email_enabled'] = false
+        gitlab_rails['gitlab_email_enabled'] = true
         gitlab_rails['gitlab_email_from'] = 'gitlab-notifications@${SMTP_DOMAIN}'
         gitlab_rails['gitlab_email_display_name'] = 'Gitlab'
         gitlab_rails['gitlab_email_reply_to'] = 'noreply@${SMTP_DOMAIN}'
-        unicorn['worker_timeout'] = 60
-        unicorn['worker_processes'] = 2
-        sidekiq['concurrency'] = 15
-        postgresql['shared_buffers'] = "512MB"
-        gitlab_rails['artifacts_enabled'] = true
-        gitlab_rails['artifacts_path'] = "/var/opt/gitlab/gitlab-artifacts"
-        gitlab_rails['lfs_enabled'] = true
-        gitlab_rails['backup_keep_time'] = 172600
-        gitlab_ci['backup_keep_time'] = 172600
-        gitlab_rails['time_zone'] = "${TIMEZONE}"
         
+        # Puma config (ex. Unicorn)
+        # https://docs.gitlab.com/omnibus/settings/puma.html#configuring-puma-settings
+        puma['worker_processes'] = 7
+
+        #
+        # Send backups to Object Storage
+        #
+        gitlab_rails['backup_upload_connection'] = {
+          'provider' => 'AWS',
+          'region' => '${OBJECT_STORE_S3_REGION}',
+          'endpoint' => 'https://${OBJECT_STORE_BUCKET_NAME}.s3.${OBJECT_STORE_S3_REGION}.scw.cloud',
+          'aws_access_key_id' => '${OBJECT_STORE_ACCESS_KEY_ID}',
+          'aws_secret_access_key' => '${OBJECT_STORE_SECRET_ACCESS_KEY}'
+        }
+        gitlab_rails['backup_upload_remote_directory'] = 'gitlab-backups'
+        gitlab_rails['backup_keep_time'] = 172800
+        gitlab_ci['backup_keep_time'] = 172800
+        gitlab_rails['time_zone'] = "${TIMEZONE}"
+
+        #
+        # https://docs.gitlab.com/ee/administration/packages/container_registry.html#disable-container-registry-for-new-projects-site-wide
+        #
+        gitlab_rails['gitlab_default_projects_features_issues'] = false
+        gitlab_rails['gitlab_default_projects_features_merge_requests'] = false
+        gitlab_rails['gitlab_default_projects_features_wiki'] = false
+        gitlab_rails['gitlab_default_projects_features_snippets'] = false
+        gitlab_rails['gitlab_default_projects_features_builds'] = true
+        gitlab_rails['gitlab_default_projects_features_builds'] = false
+
         #
         # Consolidated object storage configuration for S3 compatible such as Scaleway
         # https://docs.gitlab.com/15.0/ee/administration/object_storage.html
@@ -104,20 +130,20 @@ services:
         gitlab_rails['object_store']['connection'] = {
           'provider' => 'AWS',
           'region' => '${OBJECT_STORE_S3_REGION}',
+          'endpoint' => 'https://${OBJECT_STORE_BUCKET_NAME}.s3.${OBJECT_STORE_S3_REGION}.scw.cloud',
           'aws_access_key_id' => '${OBJECT_STORE_ACCESS_KEY_ID}',
           'aws_secret_access_key' => '${OBJECT_STORE_SECRET_ACCESS_KEY}',
-          'host' => 's3.${OBJECT_STORE_S3_REGION}.scw.cloud',
-          'endpoint' => 'https://${OBJECT_STORE_BUCKET_NAME}.s3.nl-ams.scw.cloud',
-          'path_style' => true,
-          'enable_signature_v4_streaming' => false
+          'enable_signature_v4_streaming' => false,
+          'path_style' => false
         }
         gitlab_rails['object_store']['objects']['artifacts']['bucket'] = 'gitlab-artifacts'
-        gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = 'gitlab-external-diffs'
+        gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = 'gitlab-mr-diffs'
         gitlab_rails['object_store']['objects']['lfs']['bucket'] = 'gitlab-lfs'
         gitlab_rails['object_store']['objects']['uploads']['bucket'] = 'gitlab-uploads'
         gitlab_rails['object_store']['objects']['packages']['bucket'] = 'gitlab-packages'
         gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = 'gitlab-dependency-proxy'
         gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = 'gitlab-terraform-state'
+        gitlab_rails['object_store']['objects']['ci_secure_files']['bucket'] = 'gitlab-ci-secure-files'
         gitlab_rails['object_store']['objects']['pages']['bucket'] = 'gitlab-pages'
 
         #
