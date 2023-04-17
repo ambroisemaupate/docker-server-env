@@ -1,0 +1,110 @@
+version: '3'
+
+services:
+    db:
+        image: mariadb:10.5
+        command: --max-allowed-packet=64MB
+        restart: always
+        networks:
+            - default
+        volumes:
+            - db:/var/lib/mysql
+        environment:
+            MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+        env_file:
+            - ./.env
+
+    app:
+        image: matomo:fpm-alpine
+        restart: always
+        networks:
+            - default
+        links:
+            - db
+        volumes:
+            - matomo:/var/www/html
+        environment:
+            - MATOMO_DATABASE_HOST=db
+        env_file:
+            - ./.env
+
+    web:
+        image: nginx:alpine
+        env_file:
+            - ./.env
+        networks:
+            - default
+            - frontproxynet
+        restart: always
+        volumes:
+            - matomo:/var/www/html:ro
+            # see https://github.com/matomo-org/matomo-nginx
+            - ./matomo.conf:/etc/nginx/conf.d/default.conf:ro
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.scheme=http"
+            - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.port=80"
+            - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.passhostheader=true"
+            # Listen HTTP
+            - "traefik.http.routers.${APP_NAMESPACE}.entrypoints=http"
+            - "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME})"
+            - "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
+            # Listen HTTPS
+            - "traefik.http.routers.${APP_NAMESPACE}-secure.entrypoints=https"
+            - "traefik.http.routers.${APP_NAMESPACE}-secure.tls=true"
+            - "traefik.http.routers.${APP_NAMESPACE}-secure.tls.certresolver=letsencrypt"
+            - "traefik.http.routers.${APP_NAMESPACE}-secure.rule=Host(${HOSTNAME})"
+            - "traefik.http.routers.${APP_NAMESPACE}-secure.service=${APP_NAMESPACE}"
+            # Apply middlewares
+            - "traefik.http.routers.${APP_NAMESPACE}-secure.middlewares=${APP_NAMESPACE}Sts"
+            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Redirectscheme"
+            # Define Middlewares
+            # Add a Basic auth protection
+            # - "traefik.http.middlewares.${APP_NAMESPACE}Auth.basicauth.users=${AUTH_BASIC}"
+            # # IP Whitelist
+            # - "traefik.http.middlewares.${APP_NAMESPACE}Ipwhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
+            # Add domain redirection (${APP_NAMESPACE} non-www to www redir)
+            # - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.regex=${REDIRECT_REGEX}"
+            # - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.replacement=${REDIRECT_REPLACEMENT}"
+            # - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.permanent=true"
+            # Add SSL redirection
+            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.scheme=https"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.permanent=true"
+            # HSTS headers
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsincludesubdomains=false"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stspreload=true"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsseconds=31536000"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.isdevelopment=false"
+
+    backup:
+        image: ambroisemaupate/s3-backup
+        networks:
+            - default
+        env_file:
+            - ./.env
+        depends_on:
+            - db
+        environment:
+            LOCAL_PATH: /var/www/html
+            DB_USER: ${MYSQL_USER}
+            DB_HOST: db
+            DB_PASS: ${MYSQL_PASSWORD}
+            DB_NAME: ${MYSQL_DATABASE}
+            S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+            S3_SECRET_KEY: ${S3_SECRET_KEY}
+            S3_SIGNATURE: ${S3_SIGNATURE}
+            S3_BUCKET_LOCATION: ${S3_BUCKET_LOCATION}
+            S3_HOST_BASE: ${S3_HOST_BASE}
+            S3_HOST_BUCKET: ${S3_HOST_BUCKET}
+            S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+            S3_FOLDER_NAME: ${S3_FOLDER_NAME}
+        volumes:
+            - matomo:/var/www/html:ro
+
+volumes:
+    db:
+    matomo:
+
+networks:
+    frontproxynet:
+        external: true

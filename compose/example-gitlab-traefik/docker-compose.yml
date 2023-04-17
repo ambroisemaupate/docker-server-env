@@ -27,6 +27,10 @@ services:
       - "traefik.http.routers.gitlab.service=gitlab"
       - "traefik.http.middlewares.gitlab-redirectscheme.redirectscheme.scheme=https"
       - "traefik.http.middlewares.gitlab-redirectscheme.redirectscheme.permanent=false"
+      - "traefik.http.middlewares.gitlab-sts.headers.stsincludesubdomains=false"
+      - "traefik.http.middlewares.gitlab-sts.headers.stspreload=true"
+      - "traefik.http.middlewares.gitlab-sts.headers.stsseconds=31536000"
+      - "traefik.http.middlewares.gitlab-sts.headers.isdevelopment=false"
       - "traefik.http.routers.gitlab.middlewares=gitlab-redirectscheme"
 
       - "traefik.http.routers.gitlab-secure.rule=Host(`${GITLAB_HOSTNAME}`)"
@@ -34,6 +38,7 @@ services:
       - "traefik.http.routers.gitlab-secure.service=gitlab"
       - "traefik.http.routers.gitlab-secure.tls.certresolver=letsencrypt"
       - "traefik.http.routers.gitlab-secure.tls=true"
+      - "traefik.http.routers.gitlab-secure.middlewares=gitlab-sts"
 
       - "traefik.http.services.gitlab.loadbalancer.server.port=${GITLAB_PORT}"
       - "traefik.http.services.gitlab.loadbalancer.server.scheme=http"
@@ -58,6 +63,7 @@ services:
       - "traefik.http.routers.mattermost-secure.service=mattermost"
       - "traefik.http.routers.mattermost-secure.tls.certresolver=letsencrypt"
       - "traefik.http.routers.mattermost-secure.tls=true"
+      - "traefik.http.routers.mattermost-secure.middlewares=gitlab-sts"
 
       - "traefik.http.services.mattermost.loadbalancer.server.port=${MATTERMOST_PORT}"
       - "traefik.http.services.mattermost.loadbalancer.server.scheme=http"

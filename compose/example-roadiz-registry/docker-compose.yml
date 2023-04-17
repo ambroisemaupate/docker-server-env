@@ -19,7 +19,7 @@ services:
       - "traefik.http.routers.${APP_NAMESPACE}-secure.rule=Host(${HOSTNAME})"
       - "traefik.http.routers.${APP_NAMESPACE}-secure.service=${APP_NAMESPACE}"
       # Apply middlewares
-      - "traefik.http.routers.${APP_NAMESPACE}-secure.middlewares=defaultCompress,${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex"
+      - "traefik.http.routers.${APP_NAMESPACE}-secure.middlewares=defaultCompress,${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Sts"
       - "traefik.http.routers.${APP_NAMESPACE}.middlewares=defaultCompress,${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Redirectscheme"
       # Define Middlewares
       # Add a Basic auth protection
@@ -33,6 +33,11 @@ services:
       # Add SSL redirection
       - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.scheme=https"
       - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.permanent=true"
+      # HSTS headers
+      - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsincludesubdomains=false"
+      - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stspreload=true"
+      - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsseconds=31536000"
+      - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.isdevelopment=false"
     depends_on:
       - app
     restart: always
