@@ -17,3 +17,10 @@ You still can check who is registered to your instance:
 ```
 docker-compose exec plausible_db psql -U postgres --password -d plausible_dev -c "SELECT * FROM users"
 ```
+
+## Backup
+
+```crontab
+# Plausible
+30 4 * * * cd /path/to/docker-server-env/compose/plausible.test; /usr/local/bin/docker-compose run --rm --no-deps backup;
+```
