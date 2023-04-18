@@ -83,7 +83,13 @@ services:
         #  'X-Forwarded-Ssl' => 'on'
         #}
         nginx['client_max_body_size'] = '2G'
-
+        
+        #
+        # PlantUML
+        # https://docs.gitlab.com/ee/administration/integration/plantuml.html
+        #
+        nginx['custom_gitlab_server_config'] = "location /-/plantuml/ { \n    rewrite ^/-/plantuml/(.*) /$1 break;\n proxy_cache off; \n    proxy_pass  http://plantuml:8080/; \n}\n"
+        
         #
         # Emails
         #
@@ -210,6 +216,12 @@ services:
       #- './../traefik/certs/certs/${MATTERMOST_HOSTNAME}.crt:/etc/gitlab/ssl/${MATTERMOST_HOSTNAME}.crt:ro'
       #- './../traefik/certs/private/${MATTERMOST_HOSTNAME}.key:/etc/gitlab/ssl/${MATTERMOST_HOSTNAME}.key:ro'
 
+  plantuml:
+    image: 'plantuml/plantuml-server:tomcat'
+    restart: always
+    container_name: plantuml
+    networks:
+      - default
 
 networks:
   frontproxynet:
