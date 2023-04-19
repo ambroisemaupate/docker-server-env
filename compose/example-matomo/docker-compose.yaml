@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 
 services:
     db:
@@ -27,6 +27,14 @@ services:
             - MATOMO_DATABASE_HOST=db
         env_file:
             - ./.env
+
+    # https://matomo.org/faq/on-premise/how-to-set-up-auto-archiving-of-your-reports/
+    # Change you domain url in the entrypoint
+    cron:
+        extends:
+            service: app
+        entrypoint: "sh -c 'while true; do php console core:archive --url=https://mat.yourdomain.com/; sleep 3600; done'"
+        restart: always
 
     web:
         image: nginx:alpine
@@ -98,6 +106,7 @@ services:
             S3_HOST_BUCKET: ${S3_HOST_BUCKET}
             S3_BUCKET_NAME: ${S3_BUCKET_NAME}
             S3_FOLDER_NAME: ${S3_FOLDER_NAME}
+            S3_STORAGE_CLASS: ${S3_STORAGE_CLASS}
         volumes:
             - matomo:/var/www/html:ro
 

@@ -3,6 +3,13 @@
 - [Official Matomo image](https://hub.docker.com/_/matomo/)
 - [Matomo documentation](https://matomo.org/docs/)
 
+## Installation
+
+- Copy `.env.dist` to `.env` and configure it.
+- Launch Matomo installation from website interface.
+- Disable browser archiving in `Administration / Système / Paramètres d'archivage` as it is already done by the cron job.
+- Configure email sending in `Administration / Système / Paramètres du serveur de courriels`
+
 ## Upgrading Matomo
 
 Upgrade Matomo from website interface, then run the following command:
