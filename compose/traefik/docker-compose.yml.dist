@@ -25,6 +25,7 @@ services:
     container_name: traefik
     labels:
       - "traefik.enable=true"
+      - "com.centurylinklabs.watchtower.enable=true"
 
       # Listen HTTP
       - "traefik.http.routers.api.rule=Host(${MONITORING_HOST})"
