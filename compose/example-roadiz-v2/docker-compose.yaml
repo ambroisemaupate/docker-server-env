@@ -201,9 +201,9 @@ services:
             S3_STORAGE_CLASS: ${S3_STORAGE_CLASS}
             COMPRESS: 0
         volumes:
-            - app_file_data:/var/www/html/var/files:ro
+            - app_file_data:/var/www/html/public/files:ro
             - app_assets_data:/var/www/html/public/assets:ro
-            - app_private_file_data:/var/www/html/public/files:ro
+            - app_private_file_data:/var/www/html/var/files:ro
 
 volumes:
     app_file_data:
