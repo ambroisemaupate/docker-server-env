@@ -68,6 +68,15 @@ service postfix restart;
 cd "$(dirname "$0")";
 
 #
+# Download ip block list for known attacker sources
+#
+curl https://gitlab.rezo-zero.com/-/snippets/29/raw/main/add-ip-blacklist.sh > ./add-ip-blacklist.sh
+curl https://gitlab.rezo-zero.com/-/snippets/29/raw/main/ip-blacklist.txt > ./ip-blacklist.txt
+chmod +x ./add-ip-blacklist.sh
+# Added ip block list into iptables
+./add-ip-blacklist.sh
+
+#
 # Copy sample config files
 #
 cp ./.zshrc $HOME/.zshrc;
