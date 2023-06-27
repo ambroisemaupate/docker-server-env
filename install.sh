@@ -72,9 +72,14 @@ cd "$(dirname "$0")";
 #
 curl https://gitlab.rezo-zero.com/-/snippets/29/raw/main/add-ip-blacklist.sh > ./add-ip-blacklist.sh
 curl https://gitlab.rezo-zero.com/-/snippets/29/raw/main/ip-blacklist.txt > ./ip-blacklist.txt
+curl https://gitlab.rezo-zero.com/-/snippets/29/raw/main/etc/systemd/system/add-ip-blacklist.service > /etc/systemd/system/add-ip-blacklist.service
 chmod +x ./add-ip-blacklist.sh
+chmod 644 /etc/systemd/system/add-ip-blacklist.service
+## EDIT script path
+sed -i 's@/root/@'"$HOME"'/@gi' /etc/systemd/system/add-ip-blacklist.service
 # Added ip block list into iptables
 ./add-ip-blacklist.sh
+systemctl enable add-ip-blacklist.service
 
 #
 # Copy sample config files
