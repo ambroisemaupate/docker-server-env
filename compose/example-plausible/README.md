@@ -24,3 +24,7 @@ docker-compose exec plausible_db psql -U postgres --password -d plausible_dev -c
 # Plausible
 30 4 * * * cd /path/to/docker-server-env/compose/plausible.test; /usr/local/bin/docker-compose run --rm --no-deps backup;
 ```
+
+## Upgrading from v1 to v2
+
+Follow changelog steps: https://github.com/plausible/analytics/releases/tag/v2.0.0
