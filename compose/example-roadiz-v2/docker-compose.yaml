@@ -102,7 +102,7 @@ services:
         labels:
             - "com.centurylinklabs.watchtower.enable=true"
             # Force Watchtower to restart varnish after app update
-            - "com.centurylinklabs.watchtower.depends-on=exampleroadizv2-varnish-1"
+            - "com.centurylinklabs.watchtower.depends-on=/exampleroadizv2-varnish-1"
 
     app:
         image: my-registry/roadiz_skeleton:latest
@@ -143,7 +143,7 @@ services:
         labels:
             - "com.centurylinklabs.watchtower.enable=true"
             # Force Watchtower to restart nginx after app update
-            - "com.centurylinklabs.watchtower.depends-on=exampleroadizv2-nginx-1"
+            - "com.centurylinklabs.watchtower.depends-on=/exampleroadizv2-nginx-1,/exampleroadizv2-varnish-1"
 
     worker:
         extends:
