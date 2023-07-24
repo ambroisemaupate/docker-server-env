@@ -23,16 +23,18 @@ apt install -y \
     gnupg \
     htop \
     curl \
-    curlftpfs \
-    lftp \
-    sshfs \
     zsh \
     fail2ban \
     postfix \
     mailutils \
     apt-transport-https \
     ca-certificates \
-    software-properties-common;
+    software-properties-common \
+    clamav \
+    clamav-daemon;
+
+# Configure ClamAV
+clamconf;
 
 # Install latest docker
 curl -fsSL https://download.docker.com/linux/$DISTRIB/gpg | apt-key add -;

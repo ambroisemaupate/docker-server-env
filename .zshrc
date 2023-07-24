@@ -30,12 +30,6 @@ source $ZSH/oh-my-zsh.sh
 alias zshconfig="mate ~/.zshrc"
 alias ohmyzsh="mate ~/.oh-my-zsh"
 
-# Alias to mount external FTP backup volume
-alias ftpmount="curlftpfs ${FTP_USER}:${FTP_PASS}@${FTP_HOST}:${FTP_PORT} /mnt/ftpbackup/"
-
-# Alias to mount external SFTP backup volume
-alias sftpmount="echo \"${FTP_PASS}\" | sshfs -p ${FTP_PORT} -o password_stdin ${FTP_USER}@${FTP_HOST}:. /mnt/ftpbackup"
-
 # Alias for pretty docker ps output
 alias dps="docker ps --format \"table{{.Names}}\\t{{.Image}}\\t{{.Ports}}\\t{{.Status}}\""
 alias dpsa="docker ps --format \"table{{.Names}}\\t{{.Image}}\\t{{.Ports}}\\t{{.Status}}\" -a"

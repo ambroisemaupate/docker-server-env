@@ -68,6 +68,24 @@ sudo usermod -aG docker myuser
 sudo chown -R myuser:myuser ~/docker-server-env
 ```
 
+Installation script `install.sh` will install:
+
+- ntp
+- ntpdate
+- nano
+- gnupg
+- htop
+- curl
+- zsh
+- fail2ban
+- postfix
+- mailutils
+- apt-transport-https
+- ca-certificates
+- software-properties-common
+- clamav
+- clamav-daemon
+
 ### Enable IPv6 networking
 
 If you registered IPv6 and AAAA DNS records for your services, you must enable *Docker* ipv6 networking and make sure
