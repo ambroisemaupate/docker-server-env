@@ -18,7 +18,7 @@ fi
 apt update;
 apt install -y \
     ntp \
-    ntpdate \
+    cron \
     nano \
     gnupg \
     htop \
