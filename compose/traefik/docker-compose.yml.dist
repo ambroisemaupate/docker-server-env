@@ -16,7 +16,7 @@ services:
     networks:
       - default
       - frontproxynet
-    privileged: yes
+    privileged: true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik.toml:/traefik.toml
