@@ -149,22 +149,22 @@ That way, all gitlab runners will pull Docker image through your host mirror and
 * *gitlab-ce*: If you want to setup your own Gitlab instance with a dedicated registry, all running on *docker*
 * *plausible/analytics*: Awesome open-source and privacy-friendly analytics tool. Based on https://github.com/plausible/hosting.
 
-## Using *docker-compose*
+## Using *docker compose*
 
-This server environment is optimized to work with *docker-compose* for declaring your services.
+This server environment is optimized to work with *docker compose* for declaring your services.
 
-You’ll find examples to launch *front-proxy* and *Roadiz* based containers with *docker-compose*
+You’ll find examples to launch *front-proxy* and *Roadiz* based containers with *docker compose*
 in `compose/` folder. Just copy the sample `example-se/` folder naming it with your website reference.
 
 ```bash
 cp -a ./compose/example-se ./compose/mywebsite.tld
 ```
 
-Then, use `docker-compose up -d --force-recreate` to create in background all your websites containers.
+Then, use `docker compose up -d --force-recreate` to create in background all your websites containers.
 
-We need to use the same *network* with *docker-compose* to be able
+We need to use the same *network* with *docker compose* to be able
 to discover your containers from other global containers, such as the `front-proxy` and your daily backups.
-See https://docs.docker.com/compose/networking/#configure-the-default-network for further details. Here is the additional lines to append to your custom docker-compose applications:
+See https://docs.docker.com/compose/networking/#configure-the-default-network for further details. Here is the additional lines to append to your custom docker compose applications:
 
 ```yaml
 networks:
@@ -200,11 +200,11 @@ touch ./compose/traefik/acme.json;
 chmod 0600 ./compose/traefik/acme.json;
 ```
 
-Then you can start *traefik* service with *docker-compose*
+Then you can start *traefik* service with *docker compose*
 
 ```bash
 cd ./compose/traefik;
-docker-compose pull && docker-compose up -d --force-recreate;
+docker compose pull && docker compose up -d --force-recreate;
 ```
 
 Traefik *dashboard* will be available on a dedicated domain name: edit `./compose/traefik/.env` file to choose a monitoring **host** and **password**. We strongly encourage you to change default *user and password* using `htpasswd -n`.
@@ -214,7 +214,7 @@ Traefik *dashboard* will be available on a dedicated domain name: edit `./compos
 
 ## Back-up containers
 
-### Using *docker-compose* services
+### Using *docker compose* services
 
 Added *backup* and *backup_cleanup* services to your docker-compose.yml file:
 
@@ -268,12 +268,12 @@ services:
       FTP_PATH: /home/example/backups/site
 ```
 
-Test if your credentials are valid: `docker-compose run --rm --no-deps backup && docker-compose run --rm --no-deps backup_cleanup`. This should launch the 2 services cleaning up older backups and
+Test if your credentials are valid: `docker compose run --rm --no-deps backup && docker compose run --rm --no-deps backup_cleanup`. This should launch the 2 services cleaning up older backups and
 creating new ones. One for your files stored in `/var/www/html` (check that you are using your main service volumes here), and a second one for your database dump.
 
 ℹ️ *You can use a `.env` file in your project path to avoid typing FTP and DB credential twice.*
 
-Then add *docker-compose* lines to your host `crontab -e` (do not forget to specify your `docker-compose.yml` path):
+Then add *docker compose* lines to your host `crontab -e` (do not forget to specify your `docker-compose.yml` path):
 
 ```bash
 MAILTO=""
@@ -281,20 +281,20 @@ MAILTO=""
 
 # You must change directory in order to access .env file
 # Clean and backup "site_a" files and database at midnight
-0  0 * * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup
-0  1 * * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup_cleanup
+0  0 * * * cd /root/docker-server-env/compose/site_a && /usr/bin/docker compose run --rm --no-deps backup
+0  1 * * * cd /root/docker-server-env/compose/site_a && /usr/bin/docker compose run --rm --no-deps backup_cleanup
 # Clean and backup "site_b" files and database 15 minutes later
-15 0 * * * cd /root/docker-server-env/compose/site_b && /usr/local/bin/docker-compose run --rm --no-deps backup
-15 1 * * * cd /root/docker-server-env/compose/site_b && /usr/local/bin/docker-compose run --rm --no-deps backup_cleanup
+15 0 * * * cd /root/docker-server-env/compose/site_b && /usr/bin/docker compose run --rm --no-deps backup
+15 1 * * * cd /root/docker-server-env/compose/site_b && /usr/bin/docker compose run --rm --no-deps backup_cleanup
 ```
 
 *backup_cleanup* service uses a FTP/SFTP script that will check files older than `$STORE_DAYS` and delete them after. It will do nothing if there are only one of each *files* and *database* backup available. This is useful to prevent deletion of non-running services by keeping at least one backup. *backup_cleanup* does not use *sshftpfs* volume to perform file listing so you can use it with every FTP/SFTP account.
 
 ## Clean-up FTP backups
 
-### Using *docker-compose* services
+### Using *docker compose* services
 
-Backup clean-up is already handled by your *docker-compose* services (see above).
+Backup clean-up is already handled by your *docker compose* services (see above).
 
 ## Rolling backups
 
@@ -401,14 +401,14 @@ then launch them once a day, once a week, once a month from your crontab:
 ```shell
 # Rolling backups (do not use same hour of night to save CPU)
 # Daily
-00 2 * * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup_daily
-30 2 * * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup_cleanup_daily
+00 2 * * * cd /root/docker-server-env/compose/site_a && /usr/bin/docker compose run --rm --no-deps backup_daily
+30 2 * * * cd /root/docker-server-env/compose/site_a && /usr/bin/docker compose run --rm --no-deps backup_cleanup_daily
 # Weekly (on Monday early morning)
-00 3 * * 1 cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup_weekly
-30 3 * * 1 cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup_cleanup_weekly
+00 3 * * 1 cd /root/docker-server-env/compose/site_a && /usr/bin/docker compose run --rm --no-deps backup_weekly
+30 3 * * 1 cd /root/docker-server-env/compose/site_a && /usr/bin/docker compose run --rm --no-deps backup_cleanup_weekly
 # Monthly (on each 1st day)
-00 4 1 * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup_monthly
-30 4 1 * * cd /root/docker-server-env/compose/site_a && /usr/local/bin/docker-compose run --rm --no-deps backup_cleanup_monthly
+00 4 1 * * cd /root/docker-server-env/compose/site_a && /usr/bin/docker compose run --rm --no-deps backup_monthly
+30 4 1 * * cd /root/docker-server-env/compose/site_a && /usr/bin/docker compose run --rm --no-deps backup_cleanup_monthly
 ```
 
 ## Using custom Docker images for Roadiz
@@ -423,11 +423,11 @@ Copy `.env.dist` to `.env` to store your secrets at one place.
 After you update your website image:
 
 ```bash
-docker-compose pull app;
+docker compose pull app;
 # use --no-deps to avoid recreating db and solr service too.
-docker-compose up -d --force-recreate --no-deps app;
+docker compose up -d --force-recreate --no-deps app;
 # if you created a Makefile in your docker image
-docker-compose exec -u www-data app make cache;
+docker compose exec -u www-data app make cache;
 ```
 
 ## Rotating logs
