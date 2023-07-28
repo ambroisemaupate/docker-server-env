@@ -17,6 +17,7 @@ fi
 
 apt update;
 apt install -y \
+    ntpdate \
     cron \
     nano \
     gnupg \
