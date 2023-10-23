@@ -45,6 +45,8 @@ services:
         labels:
             - "traefik.enable=true"
             - "com.centurylinklabs.watchtower.enable=true"
+            # Force Watchtower to restart nginx after app update
+            - "com.centurylinklabs.watchtower.depends-on=/exampleroadizv2-nginx-1"
             # Traefik v2 -----------------------------------------------------
             - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.scheme=http"
             - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.port=80"
@@ -102,7 +104,7 @@ services:
         labels:
             - "com.centurylinklabs.watchtower.enable=true"
             # Force Watchtower to restart varnish after app update
-            - "com.centurylinklabs.watchtower.depends-on=/exampleroadizv2-varnish-1"
+            - "com.centurylinklabs.watchtower.depends-on=/exampleroadizv2-app-1"
 
     app:
         image: my-registry/roadiz_skeleton:latest
@@ -142,8 +144,8 @@ services:
             APP_DEBUG: 0
         labels:
             - "com.centurylinklabs.watchtower.enable=true"
-            # Force Watchtower to restart nginx after app update
-            - "com.centurylinklabs.watchtower.depends-on=/exampleroadizv2-nginx-1,/exampleroadizv2-varnish-1"
+            # Force Watchtower to restart varnish after app update
+            #- "com.centurylinklabs.watchtower.depends-on=/exampleroadizv2-solr-1"
 
     worker:
         extends:
@@ -178,32 +180,57 @@ services:
     #    networks:
     #        - default
 
-    backup:
-        image: ambroisemaupate/s3-backup
+
+    # RESTIC incremental backup services
+    restic:
+        # Keep the same hostname for all Restic services
+        hostname: restic-api-backup
+        image: restic/restic:latest
         networks:
             - default
+        environment:
+            AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY}
+            AWS_SECRET_ACCESS_KEY: ${S3_SECRET_KEY}
+            S3_STORAGE_CLASS: ${S3_STORAGE_CLASS}
+            RESTIC_REPOSITORY: ${RESTIC_REPOSITORY}
+            RESTIC_PASSWORD: ${RESTIC_PASSWORD}
+        volumes:
+            # If no restore needed, this volume should remain read-only
+            - app_file_data:/srv/public/files:ro
+            - app_assets_data:/srv/public/assets:ro
+            - app_private_file_data:/srv/var/files:ro
+            - restic_cache:/root/.cache/restic
+    backup_files:
+        # Keep the same hostname for all Restic services
+        extends:
+            service: restic
+        command: 'backup -o s3.storage-class=${S3_STORAGE_CLASS} --tag files /srv'
+    backup_mysql:
+        # Keep the same hostname for all Restic services
+        hostname: restic-api-backup
+        image: ambroisemaupate/restic-database
+        environment:
+            AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY}
+            AWS_SECRET_ACCESS_KEY: ${S3_SECRET_KEY}
+            S3_STORAGE_CLASS: ${S3_STORAGE_CLASS}
+            RESTIC_REPOSITORY: ${RESTIC_REPOSITORY}
+            RESTIC_PASSWORD: ${RESTIC_PASSWORD}
+            # MySQL credentials
+            MYSQL_HOST: ${MYSQL_HOST}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_DUMP_FILENAME: ${MYSQL_DUMP_FILENAME}
+        volumes:
+            - restic_cache:/root/.cache/restic
         depends_on:
             - db
-        environment:
-            LOCAL_PATH: /var/www/html
-            DB_USER: ${MYSQL_USER}
-            DB_HOST: db
-            DB_PASS: ${MYSQL_PASSWORD}
-            DB_NAME: ${MYSQL_DATABASE}
-            S3_ACCESS_KEY: ${S3_ACCESS_KEY}
-            S3_SECRET_KEY: ${S3_SECRET_KEY}
-            S3_SIGNATURE: ${S3_SIGNATURE}
-            S3_BUCKET_LOCATION: ${S3_BUCKET_LOCATION}
-            S3_HOST_BASE: ${S3_HOST_BASE}
-            S3_HOST_BUCKET: ${S3_HOST_BUCKET}
-            S3_BUCKET_NAME: ${S3_BUCKET_NAME}
-            S3_FOLDER_NAME: ${S3_FOLDER_NAME}
-            S3_STORAGE_CLASS: ${S3_STORAGE_CLASS}
-            COMPRESS: 0
-        volumes:
-            - app_file_data:/var/www/html/public/files:ro
-            - app_assets_data:/var/www/html/public/assets:ro
-            - app_private_file_data:/var/www/html/var/files:ro
+        command: 'backup -o s3.storage-class=${S3_STORAGE_CLASS} --tag db ${MYSQL_DUMP_FILENAME}'
+    forget:
+        extends:
+            service: restic
+        # Forget all snapshots older than 7 days and keep 12 monthly snapshots
+        command: 'forget -o s3.storage-class=${S3_STORAGE_CLASS} --keep-daily 7 --keep-monthly 12 --prune'
 
 volumes:
     app_file_data:
@@ -219,6 +246,7 @@ volumes:
     #app_node_types_entities:
     db_data:
     #solr_data:
+    restic_cache:
 
 networks:
     frontproxynet:

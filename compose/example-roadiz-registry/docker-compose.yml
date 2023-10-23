@@ -1,205 +1,201 @@
 version: '3'
 services:
-  varnish:
-    image: varnish:6.3
-    tmpfs: /usr/local/var/varnish:exec
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.scheme=http"
-      - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.port=80"
-      - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.passhostheader=true"
-      # Listen HTTP
-      - "traefik.http.routers.${APP_NAMESPACE}.entrypoints=http"
-      - "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME})"
-      - "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
-      # Listen HTTPS
-      - "traefik.http.routers.${APP_NAMESPACE}-secure.entrypoints=https"
-      - "traefik.http.routers.${APP_NAMESPACE}-secure.tls=true"
-      - "traefik.http.routers.${APP_NAMESPACE}-secure.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.${APP_NAMESPACE}-secure.rule=Host(${HOSTNAME})"
-      - "traefik.http.routers.${APP_NAMESPACE}-secure.service=${APP_NAMESPACE}"
-      # Apply middlewares
-      - "traefik.http.routers.${APP_NAMESPACE}-secure.middlewares=defaultCompress,${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Sts"
-      - "traefik.http.routers.${APP_NAMESPACE}.middlewares=defaultCompress,${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Redirectscheme"
-      # Define Middlewares
-      # Add a Basic auth protection
-      - "traefik.http.middlewares.${APP_NAMESPACE}Auth.basicauth.users=${AUTH_BASIC}"
-      # IP Whitelist
-      - "traefik.http.middlewares.${APP_NAMESPACE}Ipwhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
-      # Add domain redirection (${APP_NAMESPACE} non-www to www redir)
-      - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.regex=${REDIRECT_REGEX}"
-      - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.replacement=${REDIRECT_REPLACEMENT}"
-      - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.permanent=true"
-      # Add SSL redirection
-      - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.permanent=true"
-      # HSTS headers
-      - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsincludesubdomains=false"
-      - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stspreload=true"
-      - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsseconds=31536000"
-      - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.isdevelopment=false"
-    depends_on:
-      - app
-    restart: always
-    links:
-      - app:app
-    networks:
-      - default
-      - frontproxynet
-    volumes:
-      - ./default.vcl:/etc/varnish/default.vcl:ro
+    varnish:
+        image: varnish:6.3
+        tmpfs: /usr/local/var/varnish:exec
+        labels:
+            - "traefik.enable=true"
+            # Force Watchtower to restart nginx after app update
+            - "com.centurylinklabs.watchtower.depends-on=/exampleroadizregistry-app-1"
+            - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.scheme=http"
+            - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.port=80"
+            - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.passhostheader=true"
+            # Listen HTTP
+            - "traefik.http.routers.${APP_NAMESPACE}.entrypoints=http"
+            - "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME})"
+            - "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
+            # Listen HTTPS
+            - "traefik.http.routers.${APP_NAMESPACE}-secure.entrypoints=https"
+            - "traefik.http.routers.${APP_NAMESPACE}-secure.tls=true"
+            - "traefik.http.routers.${APP_NAMESPACE}-secure.tls.certresolver=letsencrypt"
+            - "traefik.http.routers.${APP_NAMESPACE}-secure.rule=Host(${HOSTNAME})"
+            - "traefik.http.routers.${APP_NAMESPACE}-secure.service=${APP_NAMESPACE}"
+            # Apply middlewares
+            - "traefik.http.routers.${APP_NAMESPACE}-secure.middlewares=defaultCompress,${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Sts"
+            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=defaultCompress,${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Redirectscheme"
+            # Define Middlewares
+            # Add a Basic auth protection
+            - "traefik.http.middlewares.${APP_NAMESPACE}Auth.basicauth.users=${AUTH_BASIC}"
+            # IP Whitelist
+            - "traefik.http.middlewares.${APP_NAMESPACE}Ipwhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
+            # Add domain redirection (${APP_NAMESPACE} non-www to www redir)
+            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.regex=${REDIRECT_REGEX}"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.replacement=${REDIRECT_REPLACEMENT}"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.permanent=true"
+            # Add SSL redirection
+            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.scheme=https"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.permanent=true"
+            # HSTS headers
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsincludesubdomains=false"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stspreload=true"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsseconds=31536000"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.isdevelopment=false"
+        depends_on:
+            - app
+        restart: always
+        links:
+            - app:app
+        networks:
+            - default
+            - frontproxynet
+        volumes:
+            - ./default.vcl:/etc/varnish/default.vcl:ro
 
-  app:
-    # Application is a packaged docker image
-    # hosted on Gitlab Registry (or hub.docker.com)
-    image: registry.gitlab.com/example/example
-    volumes:
-      - ./config.docker.yml:/var/www/html/app/conf/config.yml
-      - private_files:/var/www/html/files
-      - public_files:/var/www/html/web/files
-      # Save image thumbnails between restart to save CPU
-      - assets_files:/var/www/html/web/assets
-      - gen_src:/var/www/html/app/gen-src/GeneratedNodeSources
-      - proxies:/var/www/html/app/gen-src/Proxies
-      - compiled:/var/www/html/app/gen-src/Compiled
-    depends_on:
-      - db
-      - solr
-    restart: always
-    networks:
-      - default
-      # Uncomment if not using Varnish
-      #- frontproxynet
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-      # Uncomment if not using Varnish
-      #- "traefik.enable=true"
-      #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.scheme=http"
-      #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.port=80"
-      #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.passhostheader=true"
-      ## Listen HTTP
-      #- "traefik.http.routers.${APP_NAMESPACE}.entrypoints=http"
-      #- "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME})"
-      #- "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
-      ## Listen HTTPS
-      #- "traefik.http.routers.${APP_NAMESPACE}-secure.entrypoints=https"
-      #- "traefik.http.routers.${APP_NAMESPACE}-secure.tls=true"
-      #- "traefik.http.routers.${APP_NAMESPACE}-secure.tls.certresolver=letsencrypt"
-      #- "traefik.http.routers.${APP_NAMESPACE}-secure.rule=Host(${HOSTNAME})"
-      #- "traefik.http.routers.${APP_NAMESPACE}-secure.service=${APP_NAMESPACE}"
-      ## Apply middlewares
-      #- "traefik.http.routers.${APP_NAMESPACE}-secure.middlewares=defaultCompress,${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex"
-      #- "traefik.http.routers.${APP_NAMESPACE}.middlewares=defaultCompress,${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Redirectscheme"
-      ## Define Middlewares
-      ## Add a Basic auth protection
-      #- "traefik.http.middlewares.${APP_NAMESPACE}Auth.basicauth.users=${AUTH_BASIC}"
-      ## IP Whitelist
-      #- "traefik.http.middlewares.${APP_NAMESPACE}Ipwhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
-      ## Add domain redirection (${APP_NAMESPACE} non-www to www redir)
-      #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.regex=${REDIRECT_REGEX}"
-      #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.replacement=${REDIRECT_REPLACEMENT}"
-      #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.permanent=true"
-      ## Add SSL redirection
-      #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.scheme=https"
-      #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.permanent=true"
+    app:
+        # Application is a packaged docker image
+        # hosted on Gitlab Registry (or hub.docker.com)
+        image: registry.gitlab.com/example/example
+        volumes:
+            - ./config.docker.yml:/var/www/html/app/conf/config.yml
+            - private_files:/var/www/html/files
+            - public_files:/var/www/html/web/files
+            # Save image thumbnails between restart to save CPU
+            - assets_files:/var/www/html/web/assets
+            - gen_src:/var/www/html/app/gen-src/GeneratedNodeSources
+            - proxies:/var/www/html/app/gen-src/Proxies
+            - compiled:/var/www/html/app/gen-src/Compiled
+        depends_on:
+            - db
+            - solr
+        restart: always
+        networks:
+            - default
+            # Uncomment if not using Varnish
+            #- frontproxynet
+        labels:
+            - "com.centurylinklabs.watchtower.enable=true"
+            # Force Watchtower to restart nginx after app update
+            #- "com.centurylinklabs.watchtower.depends-on=/exampleroadizregistry-solr-1"
+            # Uncomment if not using Varnish
+            #- "traefik.enable=true"
+            #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.scheme=http"
+            #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.port=80"
+            #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.passhostheader=true"
+            ## Listen HTTP
+            #- "traefik.http.routers.${APP_NAMESPACE}.entrypoints=http"
+            #- "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME})"
+            #- "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
+            ## Listen HTTPS
+            #- "traefik.http.routers.${APP_NAMESPACE}-secure.entrypoints=https"
+            #- "traefik.http.routers.${APP_NAMESPACE}-secure.tls=true"
+            #- "traefik.http.routers.${APP_NAMESPACE}-secure.tls.certresolver=letsencrypt"
+            #- "traefik.http.routers.${APP_NAMESPACE}-secure.rule=Host(${HOSTNAME})"
+            #- "traefik.http.routers.${APP_NAMESPACE}-secure.service=${APP_NAMESPACE}"
+            ## Apply middlewares
+            #- "traefik.http.routers.${APP_NAMESPACE}-secure.middlewares=defaultCompress,${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex"
+            #- "traefik.http.routers.${APP_NAMESPACE}.middlewares=defaultCompress,${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Redirectscheme"
+            ## Define Middlewares
+            ## Add a Basic auth protection
+            #- "traefik.http.middlewares.${APP_NAMESPACE}Auth.basicauth.users=${AUTH_BASIC}"
+            ## IP Whitelist
+            #- "traefik.http.middlewares.${APP_NAMESPACE}Ipwhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
+            ## Add domain redirection (${APP_NAMESPACE} non-www to www redir)
+            #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.regex=${REDIRECT_REGEX}"
+            #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.replacement=${REDIRECT_REPLACEMENT}"
+            #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.permanent=true"
+            ## Add SSL redirection
+            #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.scheme=https"
+            #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.permanent=true"
 
-  db:
-    image: mysql:8.0
-    networks:
-      - default
-    volumes:
-      - DBDATA:/var/lib/mysql
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-    restart: always
+    db:
+        image: mysql:8.0
+        networks:
+            - default
+        volumes:
+            - DBDATA:/var/lib/mysql
+        environment:
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+        restart: always
 
-  solr:
-    image: solr:8-slim
-    restart: always
-    networks:
-      - default
-    volumes:
-      - SOLRDATA:/var/solr
-    command:
-      - solr-precreate
-      - roadiz
+    solr:
+        image: solr:8-slim
+        restart: always
+        networks:
+            - default
+        volumes:
+            - SOLRDATA:/var/solr
+        command:
+            - solr-precreate
+            - roadiz
 
-  backup:
-    image: ambroisemaupate/ftp-backup
-    networks:
-      - default
-    depends_on:
-      - db
-    environment:
-      LOCAL_PATH: /var/www/html
-      DB_USER: ${MYSQL_USER}
-      DB_HOST: db
-      DB_PASS: ${MYSQL_PASSWORD}
-      DB_NAME: ${MYSQL_DATABASE}
-      FTP_PROTO: ${FTP_PROTO}
-      FTP_PORT: ${FTP_PORT}
-      FTP_HOST: ${FTP_HOST}
-      FTP_USER: ${FTP_USER}
-      FTP_PASS: ${FTP_PASS}
-      REMOTE_PATH: ${FTP_REMOTE_PATH}
-      COMPRESS: 0
-      CHUNK_SIZE: 512
-    volumes:
-      - private_files:/var/www/html/files:ro
-      - public_files:/var/www/html/web/files:ro
-      - gen_src:/var/www/html/app/gen-src:ro
 
-  backup_cleanup:
-    image: ambroisemaupate/ftp-cleanup
-    networks:
-      - default
-    environment:
-      FTP_PROTO: ${FTP_PROTO}
-      FTP_PORT: ${FTP_PORT}
-      FTP_HOST: ${FTP_HOST}
-      FTP_USER: ${FTP_USER}
-      FTP_PASS:  ${FTP_PASS}
-      STORE_DAYS: ${BACKUP_STORE_DAYS}
-      FTP_PATH: ${FTP_REMOTE_PATH}
-
-#   backup:
-#     image: ambroisemaupate/s3-backup
-#     networks:
-#       - default
-#     depends_on:
-#       - db
-#     environment:
-#       LOCAL_PATH: /var/www/html
-#       DB_USER: ${MYSQL_USER}
-#       DB_HOST: db
-#       DB_PASS: ${MYSQL_PASSWORD}
-#       DB_NAME: ${MYSQL_DATABASE}
-#       S3_ACCESS_KEY: ${S3_ACCESS_KEY}
-#       S3_SECRET_KEY: ${S3_SECRET_KEY}
-#       S3_SIGNATURE: ${S3_SIGNATURE}
-#       S3_BUCKET_LOCATION: ${S3_BUCKET_LOCATION}
-#       S3_HOST_BASE: ${S3_HOST_BASE}
-#       S3_HOST_BUCKET: ${S3_HOST_BUCKET}
-#       S3_BUCKET_NAME: ${S3_BUCKET_NAME}
-#       S3_FOLDER_NAME: ${S3_FOLDER_NAME}
-#     volumes:
-#       - private_files:/var/www/html/files:ro
-#       - public_files:/var/www/html/web/files:ro
-#       - gen_src:/var/www/html/app/gen-src:ro
+    # RESTIC incremental backup services
+    restic:
+        # Keep the same hostname for all Restic services
+        hostname: restic-api-backup
+        image: restic/restic:latest
+        networks:
+            - default
+        environment:
+            AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY}
+            AWS_SECRET_ACCESS_KEY: ${S3_SECRET_KEY}
+            S3_STORAGE_CLASS: ${S3_STORAGE_CLASS}
+            RESTIC_REPOSITORY: ${RESTIC_REPOSITORY}
+            RESTIC_PASSWORD: ${RESTIC_PASSWORD}
+        volumes:
+            # If no restore needed, this volume should remain read-only
+            - private_files:/srv/files:ro
+            - public_files:/srv/web/files:ro
+            # Save image thumbnails between restart to save CPU
+            - assets_files:/srv/web/assets:ro
+            - gen_src:/srv/app/gen-src/GeneratedNodeSources:ro
+            - restic_cache:/root/.cache/restic
+    backup_files:
+        # Keep the same hostname for all Restic services
+        extends:
+            service: restic
+        command: 'backup -o s3.storage-class=${S3_STORAGE_CLASS} --tag files /srv'
+    backup_mysql:
+        # Keep the same hostname for all Restic services
+        hostname: restic-api-backup
+        image: ambroisemaupate/restic-database
+        environment:
+            AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY}
+            AWS_SECRET_ACCESS_KEY: ${S3_SECRET_KEY}
+            S3_STORAGE_CLASS: ${S3_STORAGE_CLASS}
+            RESTIC_REPOSITORY: ${RESTIC_REPOSITORY}
+            RESTIC_PASSWORD: ${RESTIC_PASSWORD}
+            # MySQL credentials
+            MYSQL_HOST: ${MYSQL_HOST}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_DUMP_FILENAME: ${MYSQL_DUMP_FILENAME}
+        volumes:
+            - restic_cache:/root/.cache/restic
+        depends_on:
+            - db
+        command: 'backup -o s3.storage-class=${S3_STORAGE_CLASS} --tag db ${MYSQL_DUMP_FILENAME}'
+    forget:
+        extends:
+            service: restic
+        # Forget all snapshots older than 7 days and keep 12 monthly snapshots
+        command: 'forget -o s3.storage-class=${S3_STORAGE_CLASS} --keep-daily 7 --keep-monthly 12 --prune'
 
 volumes:
-  private_files:
-  public_files:
-  assets_files:
-  gen_src:
-  proxies:
-  compiled:
-  DBDATA:
-  SOLRDATA:
+    private_files:
+    public_files:
+    assets_files:
+    gen_src:
+    proxies:
+    compiled:
+    DBDATA:
+    SOLRDATA:
+    restic_cache:
 
 networks:
-  frontproxynet:
-    external: true
+    frontproxynet:
+        external: true
