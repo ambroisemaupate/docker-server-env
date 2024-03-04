@@ -1,6 +1,9 @@
 [log]
   level = "ERROR"
 
+# https://doc.traefik.io/traefik/operations/ping/
+[ping]
+
 # Limiting the Logs to Specific Fields
 [accessLog]
   filePath = "/access.log"
