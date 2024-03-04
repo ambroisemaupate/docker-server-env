@@ -23,6 +23,12 @@ services:
       - ./acme.json:/acme.json
       - ./access.log:/access.log
     container_name: traefik
+    healthcheck:
+      test: [ "CMD", "traefik", "healthcheck" ]
+      interval: 1m30s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
     labels:
       - "traefik.enable=true"
       - "com.centurylinklabs.watchtower.enable=true"
