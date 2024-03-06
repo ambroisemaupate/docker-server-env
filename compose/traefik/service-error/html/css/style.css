@@ -15,6 +15,8 @@ p {
 img {
     display: block;
     margin: 0 auto;
+    max-height: 40px;
+    width: auto;
 }
 .button {
     display: inline-block;
