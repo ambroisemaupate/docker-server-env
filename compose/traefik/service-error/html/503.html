@@ -1,0 +1,25 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Website under maintenance</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="maintenance">
+    <img width="40" src="/img/logo.png" alt="Logo">
+    <h1>Website under maintenance</h1>
+    <p>Sorry for the inconvenience, we are currently performing some maintenance on our website.</p>
+    <button type="button" class="button" id="refresh">Refresh page</button>
+</div>
+<script>
+    document.getElementById('refresh').addEventListener('click', function (e) {
+        e.preventDefault();
+        window.location.reload();
+    });
+</script>
+</body>
+</html>

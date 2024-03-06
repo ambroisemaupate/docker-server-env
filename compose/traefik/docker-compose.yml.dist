@@ -34,6 +34,7 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
 
       # Listen HTTP
+      - "traefik.http.routers.api.entrypoints=http"
       - "traefik.http.routers.api.rule=Host(${MONITORING_HOST})"
       - "traefik.http.routers.api.service=api@internal"
 
@@ -64,6 +65,30 @@ services:
       # Add Gzip globally
       - "traefik.http.middlewares.defaultCompress.compress=true"
       - "traefik.http.middlewares.defaultCompress.compress.excludedcontenttypes=${EXCLUDED_COMPRESS_TYPES}"
+
+  traefik-service-error:
+    image: nginx:alpine
+    networks:
+      - default
+      - frontproxynet
+    container_name: traefik-service-error
+    volumes:
+      - ./service-error/html:/usr/share/nginx/html:ro
+      - ./service-error/default.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik-service-error-traefik.priority=1"
+      - "traefik.http.routers.traefik-service-error-traefik.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.traefik-service-error-traefik.entrypoints=http"
+
+      - "traefik.http.routers.traefik-service-error-traefik-secure.priority=1"
+      - "traefik.http.routers.traefik-service-error-traefik-secure.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.traefik-service-error-traefik-secure.entrypoints=https"
+      - "traefik.http.routers.traefik-service-error-traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-service-error-traefik-secure.tls.certresolver=letsencrypt"
+
+      - "traefik.http.services.traefik-service-error-traefik.loadbalancer.server.port=80"
 
   # Watch acme.json and dump certificates to files
   #traefik-certs-dumper:

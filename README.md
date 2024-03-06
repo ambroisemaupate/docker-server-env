@@ -445,3 +445,47 @@ Make sure to edit `/etc/fail2ban/jail.d/traefik.conf` with the right `logpath` t
 ```dotenv
 fail2ban-client set traefik-auth banip <IP>
 ```
+
+## Error pages service
+
+You can add [custom error pages](https://doc.traefik.io/traefik/middlewares/http/errorpages/#service) to your *traefik* 
+services by adding labels to your `docker-compose.yml` file.
+
+All `html` files are stored in `compose/traefik/service-error/html` folder, and served by Nginx in `traefik-service-error` service.
+Behind the scene, it is an *Nginx* docker container running with a custom `compose/traefik/service-error/default.conf` configuration: 
+all requests except for `/css`, `/img` are redirected to `/404.html` or `/503.html` files.
+
+You can use a custom folder by changing volume path in `docker-compose.yml` file: 
+
+```yaml
+volumes:
+  - ./service-error/html:/usr/share/nginx/html:ro
+  - ./service-error/default.conf:/etc/nginx/conf.d/default.conf:ro
+labels:
+    # Custom error pages
+    - "traefik.http.middlewares.${APP_NAMESPACE}_errors.errors.status=500-599"
+    - "traefik.http.middlewares.${APP_NAMESPACE}_errors.errors.service=traefik-service-error-traefik"
+    - "traefik.http.middlewares.${APP_NAMESPACE}_errors.errors.query=/{status}.html"
+```
+
+### Catch-all error page
+
+Traefik is configured to serve a catch-all error page for all other errors and non-existing services.
+It will serve `compose/traefik/service-error/503.html` file.
+
+You can change the catch-all behaviour in `compose/traefik/docker-compose.yml` file by editing `traefik-service-error` service labels.
+
+```yaml
+labels:
+    - "traefik.enable=true"
+    # Serve catch-all error pages on HTTP
+    - "traefik.http.routers.traefik-service-error-traefik.priority=1"
+    - "traefik.http.routers.traefik-service-error-traefik.rule=HostRegexp(`{host:.+}`)"
+    - "traefik.http.routers.traefik-service-error-traefik.entrypoints=http"
+    # Serve catch-all error pages on HTTPS
+    - "traefik.http.routers.traefik-service-error-traefik-secure.priority=1"
+    - "traefik.http.routers.traefik-service-error-traefik-secure.rule=HostRegexp(`{host:.+}`)"
+    - "traefik.http.routers.traefik-service-error-traefik-secure.entrypoints=https"
+    - "traefik.http.routers.traefik-service-error-traefik-secure.tls=true"
+    - "traefik.http.routers.traefik-service-error-traefik-secure.tls.certresolver=letsencrypt"
+```

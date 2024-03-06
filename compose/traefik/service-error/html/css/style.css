@@ -1,0 +1,33 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+h1 {
+    font-size: 40px;
+}
+p {
+    font-size: 16px;
+}
+img {
+    display: block;
+    margin: 0 auto;
+}
+.button {
+    display: inline-block;
+    text-decoration: none;
+    font-size: 16px;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+#maintenance {
+    max-width: 700px;
+    margin: 0 auto;
+}
