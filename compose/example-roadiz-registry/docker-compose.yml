@@ -12,10 +12,12 @@ services:
             - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.passhostheader=true"
             # Listen HTTP
             - "traefik.http.routers.${APP_NAMESPACE}.entrypoints=http"
+            - "traefik.http.routers.${APP_NAMESPACE}.priority=10"
             - "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME})"
             - "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
             # Listen HTTPS
             - "traefik.http.routers.${APP_NAMESPACE}-secure.entrypoints=https"
+            - "traefik.http.routers.${APP_NAMESPACE}_secure.priority=10"
             - "traefik.http.routers.${APP_NAMESPACE}-secure.tls=true"
             - "traefik.http.routers.${APP_NAMESPACE}-secure.tls.certresolver=letsencrypt"
             - "traefik.http.routers.${APP_NAMESPACE}-secure.rule=Host(${HOSTNAME})"
