@@ -255,4 +255,5 @@ networks:
         ipam:
             driver: default
             config:
-                -   subnet: ${DEFAULT_GATEWAY}/16
+                # Use a /24 network for your containers
+                -   subnet: ${DEFAULT_GATEWAY}/24
