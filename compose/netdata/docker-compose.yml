@@ -1,7 +1,6 @@
 #
 # https://learn.netdata.cloud/docs/agent/packaging/docker
 #
-version: '3'
 services:
     netdata:
         image: netdata/netdata

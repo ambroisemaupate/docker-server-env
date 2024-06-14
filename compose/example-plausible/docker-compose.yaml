@@ -1,19 +1,20 @@
 services:
   plausible_db:
-    image: postgres:12
+    # Plausible v2.1.1 was tested against PostgreSQL versions 15 and 16
+    # https://github.com/plausible/analytics/blob/v2.1.1/.github/workflows/elixir.yml#L21-L32
+    image: postgres:16-alpine
     restart: always
-    networks:
-      - default
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
   plausible_events_db:
-    image: clickhouse/clickhouse-server:22.6-alpine
+    image: clickhouse/clickhouse-server:24.3.3.102-alpine
     restart: always
     volumes:
       - event-data:/var/lib/clickhouse
+      - event-logs:/var/log/clickhouse-server
       - ./clickhouse/clickhouse-config.xml:/etc/clickhouse-server/config.d/logging.xml:ro
       - ./clickhouse/clickhouse-user-config.xml:/etc/clickhouse-server/users.d/logging.xml:ro
     networks:
@@ -24,9 +25,9 @@ services:
         hard: 262144
 
   plausible:
-    image: plausible/analytics:v2
+    image: ghcr.io/plausible/community-edition:v2.1
     restart: always
-    command: sh -c "sleep 10 && /entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh db init-admin && /entrypoint.sh run"
+    command: sh -c "sleep 10 && /entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh run"
     depends_on:
       - plausible_db
       - plausible_events_db
@@ -84,6 +85,7 @@ services:
     volumes:
       # For the moment we need to backup db as files
       - event-data:/var/www/html/clickhouse:ro
+      - event-logs:/var/www/html/clickhouse-server:ro
 
 # For localhost testing
 #  mailer:
@@ -105,6 +107,8 @@ volumes:
   db-data:
     driver: local
   event-data:
+    driver: local
+  event-logs:
     driver: local
   geoip:
     driver: local

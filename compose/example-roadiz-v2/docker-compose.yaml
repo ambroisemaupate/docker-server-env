@@ -1,6 +1,5 @@
 # Production template
 # Replace “my-registry/roadiz_skeleton” with your own project registry URL
-version: '3.7'
 services:
     db:
         image: mysql:8.0
