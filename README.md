@@ -434,6 +434,8 @@ docker compose exec -u www-data app make cache;
 
 Add the `etc/logrotate.d/docker-server-env` configuration to your real `logrotate.d` system folder.
 
+**Make sure to adapt `/etc/logrotate.d/docker-server-env` file with your traefik folder location.**
+
 ## Ban IPs
 
 Fail2Ban is configured with a special *jail* `traefik-auth` to block FORWARD rules for IP that trigger
