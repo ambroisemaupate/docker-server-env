@@ -8,7 +8,7 @@ It’s specialized for **my personal usage**, but if it fits your needs, feel fr
   + [Enable IPv6 networking](#enable-ipv6-networking)
   + [hub.docker.com mirroring](#hubdockercom-mirroring)
 * [Some of the docker images I use in this environment](#some-of-the-docker-images-i-use-in-this-environment)
-* [Using *docker-compose*](#using--docker-compose)
+* [Using *docker compose*](#using--docker-compose)
 * [Using Traefik v2.x as main front-end](#using-traefik-v2x-as-main-front-end)
 * [Back-up containers](#back-up-containers)
 * [Clean-up FTP backups](#clean-up-ftp-backups)
@@ -25,7 +25,7 @@ Please, adapt them if you want to clone this git repository elsewhere.
 ## Base installation
 
 Skip this part if your hosting provider has already provisioned your server with latest
-*docker* and *docker-compose* services.
+*docker* and *docker compose* services.
 
 ```bash
 #
@@ -216,7 +216,7 @@ Traefik *dashboard* will be available on a dedicated domain name: edit `./compos
 
 ### Using *docker compose* services
 
-Added *backup* and *backup_cleanup* services to your docker-compose.yml file:
+Added *backup* and *backup_cleanup* services to your `compose.yml` file:
 
 ```yaml
 services:
@@ -273,7 +273,7 @@ creating new ones. One for your files stored in `/var/www/html` (check that you 
 
 ℹ️ *You can use a `.env` file in your project path to avoid typing FTP and DB credential twice.*
 
-Then add *docker compose* lines to your host `crontab -e` (do not forget to specify your `docker-compose.yml` path):
+Then add *docker compose* lines to your host `crontab -e` (do not forget to specify your `compose.yml` path):
 
 ```bash
 MAILTO=""
@@ -434,7 +434,7 @@ docker compose exec -u www-data app make cache;
 
 Add the `etc/logrotate.d/docker-server-env` configuration to your real `logrotate.d` system folder.
 
-**Make sure to adapt `/etc/logrotate.d/docker-server-env` file with your traefik folder location.**
+**Make sure to adapt `/etc/logrotate.d/docker-server-env` file with your traefik folder location and user.**
 
 ## Ban IPs
 
@@ -451,13 +451,13 @@ fail2ban-client set traefik-auth banip <IP>
 ## Error pages service
 
 You can add [custom error pages](https://doc.traefik.io/traefik/middlewares/http/errorpages/#service) to your *traefik* 
-services by adding labels to your `docker-compose.yml` file.
+services by adding labels to your `compose.yml` file.
 
 All `html` files are stored in `compose/traefik/service-error/html` folder, and served by Nginx in `traefik-service-error` service.
 Behind the scene, it is an *Nginx* docker container running with a custom `compose/traefik/service-error/default.conf` configuration: 
 all requests except for `/css`, `/img` are redirected to `/404.html` or `/503.html` files.
 
-You can use a custom folder by changing volume path in `docker-compose.yml` file: 
+You can use a custom folder by changing volume path in `compose.yml` file: 
 
 ```yaml
 volumes:
@@ -475,7 +475,7 @@ labels:
 Traefik is configured to serve a catch-all error page for all other errors and non-existing services.
 It will serve `compose/traefik/service-error/503.html` file.
 
-You can change the catch-all behaviour in `compose/traefik/docker-compose.yml` file by editing `traefik-service-error` service labels.
+You can change the catch-all behaviour in `compose/traefik/compose.yml` file by editing `traefik-service-error` service labels.
 
 ```yaml
 labels:
@@ -491,3 +491,18 @@ labels:
     - "traefik.http.routers.traefik-service-error-traefik-secure.tls=true"
     - "traefik.http.routers.traefik-service-error-traefik-secure.tls.certresolver=letsencrypt"
 ```
+
+### Adapt kernel parameters
+
+If you are hosting multiple database servers on the same server using Docker, you may want to increase the number of
+[`fs.aio-max-nr`](https://www.man7.org/linux/man-pages//man5/proc_sys_fs.5.html) to avoid `EAGAIN` errors.
+
+```shell
+# Check current value
+sudo cat /proc/sys/fs/aio-max-nr
+
+# Set new value (not persistent)
+sudo sysctl -w fs.aio-max-nr=200000
+```
+
+If you want this value to be persisted, you can add it in `/etc/sysctl.conf` or any `/etc/sysctl.d/*.conf` file.

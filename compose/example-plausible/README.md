@@ -15,14 +15,14 @@ pass `DISABLE_REGISTRATION` variable to `true` in  `plausible-conf.env` file.
 You still can check who is registered to your instance:
 
 ```
-docker-compose exec plausible_db psql -U postgres --password -d plausible_dev -c "SELECT * FROM users"
+docker compose exec plausible_db psql -U postgres --password -d plausible_dev -c "SELECT * FROM users"
 ```
 
 ## Backup
 
 ```crontab
 # Plausible
-30 4 * * * cd /path/to/docker-server-env/compose/plausible.test; /usr/local/bin/docker-compose run --rm --no-deps backup;
+30 4 * * * cd /path/to/docker-server-env/compose/plausible.test; /usr/bin/docker compose run --rm --no-deps backup;
 ```
 
 ## Upgrading from v1 to v2

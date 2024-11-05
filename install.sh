@@ -94,10 +94,22 @@ cp ./etc/logrotate.d/docker-server-env /etc/logrotate.d/docker-server-env;
 sed -i 's@/root/@'"$HOME"'/@gi' /etc/logrotate.d/docker-server-env;
 sed -i 's@root@'"$USER"'@gi' /etc/logrotate.d/docker-server-env;
 cp ./etc/docker/daemon.json /etc/docker/daemon.json;
+
+# Copy defaults for traefik
 cp ./compose/traefik/traefik.sample.toml ./compose/traefik/traefik.toml;
-cp ./compose/traefik/docker-compose.yml.dist ./compose/traefik/docker-compose.yml;
+cp ./compose/traefik/compose.yml.dist ./compose/traefik/compose.yml;
 cp ./compose/traefik/.env.dist ./compose/traefik/.env;
+
+# Copy defaults for netdata
 cp ./compose/netdata/.env.dist ./compose/netdata/.env;
+
+# Copy defaults for whoami
+cp ./compose/whoami/.env.dist ./compose/whoami/.env;
+
+# Copy defaults for watchtower
+cp ./compose/watchtower/.env.dist ./compose/watchtower/.env;
+cp ./compose/watchtower/compose.yml.dist ./compose/watchtower/compose.yml;
+
 touch ./compose/traefik/acme.json;
 touch ./compose/traefik/access.log;
 chmod 0600 ./compose/traefik/acme.json;

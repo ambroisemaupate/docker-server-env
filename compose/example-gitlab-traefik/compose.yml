@@ -3,7 +3,6 @@
 #
 # Copy .env.dist to .env to customize your domain names.
 #
-version: '3'
 services:
   web:
     image: 'gitlab/gitlab-ce:latest'

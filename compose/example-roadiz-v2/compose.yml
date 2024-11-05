@@ -117,7 +117,7 @@ services:
             - app_assets_data:/var/www/html/public/assets
             - app_private_file_data:/var/www/html/var/files
             - app_secret_data:/var/www/html/config/secrets
-            ## Use docker-compose env file as .env.local in container
+            ## Use docker compose env file as .env.local in container
             - ./.env:/var/www/html/.env.local:ro
             ## Generate JWT certificates on your host and share them to docker container
             ## openssl genpkey -out jwt_private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096;

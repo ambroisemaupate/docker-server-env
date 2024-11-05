@@ -1,0 +1,20 @@
+services:
+  watchtower:
+    image: containrrr/watchtower
+    restart: always
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Share private registry credentials
+      - /root/.docker/config.json:/config.json
+    environment:
+      #WATCHTOWER_DEBUG: "true"
+      # Checks every 10 minutes
+      WATCHTOWER_POLL_INTERVAL: 600
+      WATCHTOWER_LABEL_ENABLE: "true"
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_NO_STARTUP_MESSAGE: "true"
+      #WATCHTOWER_NOTIFICATION_URL: "${WATCHTOWER_NOTIFICATION_URL}"
+      # Checks every day at 12:00 UTC
+      #WATCHTOWER_SCHEDULE: "0 0 12 * * *"
+      #WATCHTOWER_NOTIFICATION_TEMPLATE: "{{range .}}{{.Time.Format \"2006-01-02 15:04:05\"}} ({{.Level}}): {{.Message}}{{println}}{{end}}"

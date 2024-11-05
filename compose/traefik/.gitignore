@@ -6,3 +6,5 @@ acme.json
 /ssl
 !/ssl/.gitkeep
 docker-compose.yml
+compose.yml
+compose.override.yml

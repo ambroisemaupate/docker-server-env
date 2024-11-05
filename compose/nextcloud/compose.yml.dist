@@ -27,7 +27,7 @@ services:
       APACHE_DISABLE_REWRITE_IP: 1
       TRUSTED_PROXIES: ${TRUSTED_PROXIES}
     volumes:
-      # docker-compose exec nextcloud chown -R www-data:www-data /data
+      # docker compose exec nextcloud chown -R www-data:www-data /data
       - data:/data
       - config:/var/www/html/config
       - apps:/var/www/html/custom_apps

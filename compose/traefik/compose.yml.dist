@@ -1,3 +1,4 @@
+name: traefik
 services:
   traefik:
     image: traefik:2.11

@@ -1,4 +1,4 @@
 *.log
+*.gz
 .env
-docker-compose.yml
 compose.yml
