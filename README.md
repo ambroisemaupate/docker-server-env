@@ -58,7 +58,7 @@ cd ~/docker-server-env
 #
 # Pass DISTRIB env to install [ubuntu/debian] and EMAIL for Postfix aliases
 # sudo DISTRIB="debian" EMAIL="ambroise@rezo-zero.com" bash ./install.sh if not root
-sudo DISTRIB="debian" EMAIL="ambroise@rezo-zero.com" bash ./install.sh
+sudo HOME="/home/debian" USER="debian" DISTRIB="debian" EMAIL="ambroise@rezo-zero.com" bash ./install.sh
 ```
 
 If you are not `root` user, do not forget to add your user to `docker` group.

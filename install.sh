@@ -49,10 +49,6 @@ apt update;
 apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin;
 groupadd docker;
 
-# Add your user to docker group
-# for non-root installs
-# usermod -aG docker $USER;
-
 # Configure Docker to start on boot
 # with systemd
 systemctl enable docker;
@@ -89,6 +85,9 @@ systemctl enable add-ip-blacklist.service
 #
 cp ./.zshrc $HOME/.zshrc;
 cp ./etc/fail2ban/jail.d/defaults-${DISTRIB}.conf /etc/fail2ban/jail.d/defaults-${DISTRIB}.conf;
+cp ./etc/fail2ban/jail.d/traefik.conf /etc/fail2ban/jail.d/traefik.conf;
+sed -i 's@/root/@'"$HOME"'/@gi' /etc/fail2ban/jail.d/traefik.conf;
+
 cp ./etc/logrotate.d/docker-server-env /etc/logrotate.d/docker-server-env;
 ## EDIT script path
 sed -i 's@/root/@'"$HOME"'/@gi' /etc/logrotate.d/docker-server-env;
@@ -122,6 +121,10 @@ service fail2ban restart;
 
 #
 # create default bridge network
-# TODO: Generate a new random private subnet
 #
 docker network create --ipv6 --driver bridge --subnet="fd01:846c:3ae6:fe92::/64" frontproxynet;
+
+# Add your user to docker group
+# for non-root installs
+usermod -aG docker ${USER}
+sudo chown -R  ${USER}:${USER} ${HOME}/docker-server-env
