@@ -40,3 +40,5 @@ alias dc="docker compose"
 alias dcapp="docker compose exec -u www-data app"
 # Display only docker containers CPU usage
 alias dstats="docker stats --format \"table {{.Name}}\t{{.CPUPerc}}\t{{.MemPerc}}\""
+# Display Docker system Disk usage
+alias ddf="docker system df -v"
