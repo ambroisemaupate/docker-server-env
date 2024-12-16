@@ -12,14 +12,14 @@ services:
             # Listen HTTP
             - "traefik.http.routers.${APP_NAMESPACE}.entrypoints=http"
             - "traefik.http.routers.${APP_NAMESPACE}.priority=11"
-            - "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME})"
+            - "traefik.http.routers.${APP_NAMESPACE}.rule=HostRegexp(${HOSTNAME})"
             - "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
             # Listen HTTPS
             - "traefik.http.routers.${APP_NAMESPACE}-secure.entrypoints=https"
             - "traefik.http.routers.${APP_NAMESPACE}_secure.priority=11"
             - "traefik.http.routers.${APP_NAMESPACE}-secure.tls=true"
             - "traefik.http.routers.${APP_NAMESPACE}-secure.tls.certresolver=letsencrypt"
-            - "traefik.http.routers.${APP_NAMESPACE}-secure.rule=Host(${HOSTNAME})"
+            - "traefik.http.routers.${APP_NAMESPACE}-secure.rule=HostRegexp(${HOSTNAME})"
             - "traefik.http.routers.${APP_NAMESPACE}-secure.service=${APP_NAMESPACE}"
             # Apply middlewares
             - "traefik.http.routers.${APP_NAMESPACE}-secure.middlewares=defaultCompress,${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Sts"
@@ -27,8 +27,8 @@ services:
             # Define Middlewares
             # Add a Basic auth protection
             - "traefik.http.middlewares.${APP_NAMESPACE}Auth.basicauth.users=${AUTH_BASIC}"
-            # IP Whitelist
-            - "traefik.http.middlewares.${APP_NAMESPACE}Ipwhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
+            # IP Allowlist
+            - "traefik.http.middlewares.${APP_NAMESPACE}Ipwhitelist.ipallowlist.sourcerange=${IP_RANGE}"
             # Add domain redirection (${APP_NAMESPACE} non-www to www redir)
             - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.regex=${REDIRECT_REGEX}"
             - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.replacement=${REDIRECT_REPLACEMENT}"
@@ -98,8 +98,8 @@ services:
             ## Define Middlewares
             ## Add a Basic auth protection
             #- "traefik.http.middlewares.${APP_NAMESPACE}Auth.basicauth.users=${AUTH_BASIC}"
-            ## IP Whitelist
-            #- "traefik.http.middlewares.${APP_NAMESPACE}Ipwhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
+            ## IP Allowlist
+            #- "traefik.http.middlewares.${APP_NAMESPACE}Ipwhitelist.ipallowlist.sourcerange=${IP_RANGE}"
             ## Add domain redirection (${APP_NAMESPACE} non-www to www redir)
             #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.regex=${REDIRECT_REGEX}"
             #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.replacement=${REDIRECT_REPLACEMENT}"

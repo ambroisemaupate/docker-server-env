@@ -1,7 +1,7 @@
 name: traefik
 services:
   traefik:
-    image: traefik:2.11
+    image: traefik:3.2
     restart: always
     ports:
       - target: 80
@@ -30,7 +30,6 @@ services:
     #  start_period: 15s
     labels:
       - "traefik.enable=true"
-      - "com.centurylinklabs.watchtower.enable=true"
 
       ## Listen HTTP
       #- "traefik.http.routers.api.entrypoints=http"
@@ -51,11 +50,11 @@ services:
       ## Use Basic auth
       #- "traefik.http.middlewares.apiAuth.basicauth.users=${MONITORING_AUTH_BASIC}"
 
-      # Use IP Whitelisting
-      # BECAREFUL, if you are using IPv6, Traefik wont see X-Real-IP
-      - "traefik.http.middlewares.apiIpWhitelist.ipwhitelist.sourcerange=${IP_RANGE}"
+      # Use IP Allowlist
+      # BE CAREFUL, if you are using IPv6, Traefik wont see X-Real-IP
+      - "traefik.http.middlewares.apiIpAllowlist.ipallowlist.sourcerange=${IP_RANGE}"
       # Only use depth if X-Forwarded_For is present (Cloudflare)
-      #- "traefik.http.middlewares.apiIpWhitelist.ipwhitelist.ipstrategy.depth=1"
+      #- "traefik.http.middlewares.apiIpAllowlist.ipallowlist.ipstrategy.depth=1"
 
       # Add SSL redirection
       - "traefik.http.middlewares.apiRedirectscheme.redirectscheme.scheme=https"

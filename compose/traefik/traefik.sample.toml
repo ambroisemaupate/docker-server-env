@@ -16,9 +16,6 @@
   checkNewVersion = false
   sendAnonymousUsage = false
 
-[experimental]
-  http3 = true
-
 [entryPoints]
   [entryPoints.http]
     address = ":80"
