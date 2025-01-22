@@ -1,10 +1,14 @@
 # https://doc.traefik.io/traefik/observability/metrics/prometheus/#entrypoint
 # https://medium.com/@tomer.klein/visualizing-traefik-metrics-with-grafana-and-prometheus-step-by-step-a6a1e9b5fb2c
 # https://grafana.com/docs/grafana/latest/setup-grafana/installation/docker/
-# https://grafana.com/grafana/dashboards/17346-traefik-official-standalone-dashboard/
-# https://grafana.com/grafana/dashboards/893-main/
 # https://docs.docker.com/engine/daemon/prometheus/
 # https://medium.com/@tomer.klein/visualizing-traefik-metrics-with-grafana-and-prometheus-step-by-step-a6a1e9b5fb2c
+#
+# Some Grafana dashboards:
+# https://grafana.com/grafana/dashboards/17346-traefik-official-standalone-dashboard/
+# https://grafana.com/grafana/dashboards/893-main/
+# https://grafana.com/grafana/dashboards/13702-node-exporter-resources-overview/
+# https://grafana.com/grafana/dashboards/22403-node-information/
 name: metrics
 services:
     prometheus:
@@ -12,9 +16,9 @@ services:
         container_name: prometheus
         command:
             - '--storage.tsdb.retention.time=30d'
-            - '--config.file=/etc/prometheus/prometheus.yaml'
+            - '--config.file=/etc/prometheus/prometheus.yml'
         volumes:
-            - ./prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
+            - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
             - prometheus:/prometheus
         restart: unless-stopped
         networks:
