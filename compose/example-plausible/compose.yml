@@ -41,19 +41,13 @@ services:
       - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.scheme=http"
       - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.port=${APP_PORT}"
       - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.passhostheader=true"
-      # Listen HTTP
-      - "traefik.http.routers.${APP_NAMESPACE}.entrypoints=http"
+      # Router
+      - "traefik.http.routers.${APP_NAMESPACE}.tls=true"
+      - "traefik.http.routers.${APP_NAMESPACE}.tls.certresolver=letsencrypt"
       - "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME})"
       - "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
-      # Listen HTTPS
-      - "traefik.http.routers.${APP_NAMESPACE}-secure.entrypoints=https"
-      - "traefik.http.routers.${APP_NAMESPACE}-secure.tls=true"
-      - "traefik.http.routers.${APP_NAMESPACE}-secure.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.${APP_NAMESPACE}-secure.rule=Host(${HOSTNAME})"
-      - "traefik.http.routers.${APP_NAMESPACE}-secure.service=${APP_NAMESPACE}"
       # Apply middlewares
-      - "traefik.http.routers.${APP_NAMESPACE}-secure.middlewares=${APP_NAMESPACE}Sts"
-      - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Redirectscheme"
+      - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Sts,${APP_NAMESPACE}Redirectscheme"
       # Add SSL redirection
       - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.scheme=https"
       - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.permanent=true"

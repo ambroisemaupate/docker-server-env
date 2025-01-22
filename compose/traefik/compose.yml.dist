@@ -31,34 +31,37 @@ services:
     labels:
       - "traefik.enable=true"
 
-      ## Listen HTTP
-      #- "traefik.http.routers.api.entrypoints=http"
-      #- "traefik.http.routers.api.rule=Host(${MONITORING_HOST})"
-      #- "traefik.http.routers.api.service=api@internal"
+      # This special router allows to redirect all HTTP traffic to HTTPS
+      # and avoid defining it on each service
+      # HTTP catch all to HTTPS
+      - "traefik.http.routers.http-catchall.rule=HostRegexp(`{any:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=http"
+      - "traefik.http.routers.http-catchall.middlewares=force-secure"
 
-      ## Listen HTTPS
-      #- "traefik.http.routers.api-secure.entrypoints=https"
-      #- "traefik.http.routers.api-secure.tls=true"
-      #- "traefik.http.routers.api-secure.tls.certresolver=letsencrypt"
-      #- "traefik.http.routers.api-secure.rule=Host(${MONITORING_HOST})"
-      #- "traefik.http.routers.api-secure.service=api@internal"
-
-      ## Apply middlewares
-      #- "traefik.http.routers.api.middlewares=apiAuth,apiRedirectscheme"
-      #- "traefik.http.routers.api-secure.middlewares=apiAuth"
+      ## API Router
+      - "traefik.http.routers.api.rule=Host(${MONITORING_HOST})"
+      - "traefik.http.routers.api.priority=2"
+      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.api.middlewares=apiAuth"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.api.tls.certresolver=letsencrypt"
 
       ## Use Basic auth
-      #- "traefik.http.middlewares.apiAuth.basicauth.users=${MONITORING_AUTH_BASIC}"
+      - "traefik.http.middlewares.apiAuth.basicauth.users=${MONITORING_AUTH_BASIC}"
 
       # Use IP Allowlist
       # BE CAREFUL, if you are using IPv6, Traefik wont see X-Real-IP
-      - "traefik.http.middlewares.apiIpAllowlist.ipallowlist.sourcerange=${IP_RANGE}"
+      #- "traefik.http.middlewares.apiIpAllowlist.ipallowlist.sourcerange=${IP_RANGE}"
       # Only use depth if X-Forwarded_For is present (Cloudflare)
       #- "traefik.http.middlewares.apiIpAllowlist.ipallowlist.ipstrategy.depth=1"
 
       # Add SSL redirection
-      - "traefik.http.middlewares.apiRedirectscheme.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.apiRedirectscheme.redirectscheme.permanent=true"
+      - "traefik.http.middlewares.force-secure.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.force-secure.redirectscheme.permanent=true"
+
+      # Add Gzip globally
+      - "traefik.http.middlewares.defaultCompress.compress=true"
+      - "traefik.http.middlewares.defaultCompress.compress.excludedcontenttypes=${EXCLUDED_COMPRESS_TYPES}"
 
 #  traefik-service-error:
 #    image: nginx:alpine
@@ -72,15 +75,11 @@ services:
 #    restart: always
 #    labels:
 #      - "traefik.enable=true"
+#
 #      - "traefik.http.routers.traefik-service-error-traefik.priority=1"
 #      - "traefik.http.routers.traefik-service-error-traefik.rule=HostRegexp(`{host:.+}`)"
-#      - "traefik.http.routers.traefik-service-error-traefik.entrypoints=http"
-#
-#      - "traefik.http.routers.traefik-service-error-traefik-secure.priority=1"
-#      - "traefik.http.routers.traefik-service-error-traefik-secure.rule=HostRegexp(`{host:.+}`)"
-#      - "traefik.http.routers.traefik-service-error-traefik-secure.entrypoints=https"
-#      - "traefik.http.routers.traefik-service-error-traefik-secure.tls=true"
-#      - "traefik.http.routers.traefik-service-error-traefik-secure.tls.certresolver=letsencrypt"
+#      - "traefik.http.routers.traefik-service-error-traefik.tls=true"
+#      - "traefik.http.routers.traefik-service-error-traefik.tls.certresolver=letsencrypt"
 #
 #      - "traefik.http.services.traefik-service-error-traefik.loadbalancer.server.port=80"
 
