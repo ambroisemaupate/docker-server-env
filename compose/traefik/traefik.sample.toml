@@ -30,6 +30,10 @@
       insecure = true
       trustedIPs = ["127.0.0.1", "192.168.0.1"]
 
+[http.middlewares]
+  [http.middlewares.defaultCompress.compress]
+    excludedContentTypes = ["image/avif","image/webp","image/png","image/jpeg","video/webm","font/woff2","font/woff","video/ogg","video/mpeg","video/mp4","application/gzip","application/zip"]
+
 [api]
   debug = false
   insecure = false
