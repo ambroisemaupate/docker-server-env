@@ -60,10 +60,6 @@ services:
       - "traefik.http.middlewares.apiRedirectscheme.redirectscheme.scheme=https"
       - "traefik.http.middlewares.apiRedirectscheme.redirectscheme.permanent=true"
 
-      # Add Gzip globally
-      - "traefik.http.middlewares.defaultCompress.compress=true"
-      - "traefik.http.middlewares.defaultCompress.compress.excludedcontenttypes=${EXCLUDED_COMPRESS_TYPES}"
-
 #  traefik-service-error:
 #    image: nginx:alpine
 #    networks:
