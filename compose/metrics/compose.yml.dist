@@ -1,0 +1,84 @@
+# https://doc.traefik.io/traefik/observability/metrics/prometheus/#entrypoint
+# https://medium.com/@tomer.klein/visualizing-traefik-metrics-with-grafana-and-prometheus-step-by-step-a6a1e9b5fb2c
+# https://grafana.com/docs/grafana/latest/setup-grafana/installation/docker/
+# https://grafana.com/grafana/dashboards/17346-traefik-official-standalone-dashboard/
+# https://grafana.com/grafana/dashboards/893-main/
+# https://docs.docker.com/engine/daemon/prometheus/
+# https://medium.com/@tomer.klein/visualizing-traefik-metrics-with-grafana-and-prometheus-step-by-step-a6a1e9b5fb2c
+name: metrics
+services:
+    prometheus:
+        image: prom/prometheus
+        container_name: prometheus
+        command:
+            - '--storage.tsdb.retention.time=30d'
+            - '--config.file=/etc/prometheus/prometheus.yaml'
+        volumes:
+            - ./prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
+            - prometheus:/prometheus
+        restart: unless-stopped
+        networks:
+            - default
+            - frontproxynet
+
+#    cadvisor:
+#        image: gcr.io/cadvisor/cadvisor:v0.49.2
+#        container_name: cadvisor
+#        privileged: true
+#        restart: unless-stopped
+##        ports:
+##            - "8080:8080"
+#        command:
+#            # Options are advtcp,app,cpu,cpuLoad,cpu_topology,cpuset,disk,diskIO,hugetlb,memory,memory_numa,network,oom_event,percpu,perf_event,process,referenced_memory,resctrl,sched,tcp,udp.
+#            # (default advtcp,cpu_topology,cpuset,hugetlb,memory_numa,process,referenced_memory,resctrl,sched,tcp,udp)
+#            - '-disable_metrics=disk,referenced_memory'
+#        networks:
+#            - default
+#        volumes:
+#            - /:/rootfs:ro
+#            - /var/run:/var/run:ro
+#            - /sys:/sys:ro
+#            - /var/lib/docker/:/var/lib/docker:ro
+#            - /dev/disk/:/dev/disk:ro
+
+    node_exporter:
+        image: quay.io/prometheus/node-exporter:latest
+        container_name: node_exporter
+        privileged: true
+        restart: unless-stopped
+        command:
+            - '--path.rootfs=/host'
+        volumes:
+            - '/:/host:ro,rslave'
+
+    grafana:
+        image: grafana/grafana
+        container_name: grafana
+        environment:
+            GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
+            GF_SERVER_ROOT_URL: ${GF_SERVER_ROOT_URL}
+        restart: unless-stopped
+        networks:
+            - default
+            - frontproxynet
+        volumes:
+            - grafana:/var/lib/grafana
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.services.metrics-grafana.loadbalancer.server.scheme=http"
+            - "traefik.http.services.metrics-grafana.loadbalancer.server.port=3000"
+            - "traefik.http.services.metrics-grafana.loadbalancer.passhostheader=true"
+            - "traefik.http.routers.metrics-grafana.tls=true"
+            - "traefik.http.routers.metrics-grafana.tls.certresolver=letsencrypt"
+            - "traefik.http.routers.metrics-grafana.rule=Host(${HOSTNAME})"
+            - "traefik.http.routers.metrics-grafana.service=metrics-grafana"
+            - "traefik.http.routers.metrics-grafana.priority=11"
+
+
+volumes:
+    prometheus:
+    grafana:
+
+networks:
+    frontproxynet:
+        external: true

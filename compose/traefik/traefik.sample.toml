@@ -4,6 +4,14 @@
 # https://doc.traefik.io/traefik/operations/ping/
 [ping]
 
+# https://doc.traefik.io/traefik/observability/metrics/prometheus/#entrypoint
+[metrics]
+  [metrics.prometheus]
+    addServicesLabels = true
+    addEntryPointsLabels = true
+    addRoutersLabels = true
+    entryPoint = "metrics"
+
 # Limiting the Logs to Specific Fields
 [accessLog]
   filePath = "/access.log"
@@ -17,6 +25,9 @@
   sendAnonymousUsage = false
 
 [entryPoints]
+  [entryPoints.metrics]
+    address = ":8899"
+
   [entryPoints.http]
     address = ":80"
     [entryPoints.http.forwardedHeaders]

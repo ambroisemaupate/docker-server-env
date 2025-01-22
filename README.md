@@ -3,18 +3,27 @@
 This repository is meant to get a configuration set for installing a fresh server for *Docker* hosting.
 It’s specialized for **my personal usage**, but if it fits your needs, feel free to use it and give your feedback.
 
-* [Base path](#base-path)
-* [Base installation](#base-installation)
-  + [Enable IPv6 networking](#enable-ipv6-networking)
-  + [hub.docker.com mirroring](#hubdockercom-mirroring)
-* [Some of the docker images I use in this environment](#some-of-the-docker-images-i-use-in-this-environment)
-* [Using *docker compose*](#using--docker-compose)
-* [Using Traefik v2.x as main front-end](#using-traefik-v2x-as-main-front-end)
-* [Back-up containers](#back-up-containers)
-* [Clean-up FTP backups](#clean-up-ftp-backups)
-* [Rolling backups](#rolling-backups)
-* [Using custom Docker images for Roadiz](#using-custom-docker-images-for-roadiz)
-* [Rotating logs](#rotating-logs)
+- [Base path](#base-path)
+- [Base installation](#base-installation)
+  * [Enable IPv6 networking](#enable-ipv6-networking)
+  * [hub.docker.com mirroring](#hubdockercom-mirroring)
+- [Some of the docker images I use in this environment](#some-of-the-docker-images-i-use-in-this-environment)
+- [Using *docker compose*](#using-docker-compose)
+- [Using Traefik v3.x as main front-end](#using-traefik-v3x-as-main-front-end)
+- [Back-up containers](#back-up-containers)
+  * [Using *docker compose* services](#using-docker-compose-services)
+- [Clean-up FTP backups](#clean-up-ftp-backups)
+  * [Using *docker compose* services](#using-docker-compose-services-1)
+- [Rolling backups](#rolling-backups)
+- [Using custom Docker images for Roadiz](#using-custom-docker-images-for-roadiz)
+  * [Update and restart your Roadiz image](#update-and-restart-your-roadiz-image)
+- [Rotating logs](#rotating-logs)
+- [Ban IPs](#ban-ips)
+- [Error pages service](#error-pages-service)
+  * [Catch-all error page](#catch-all-error-page)
+  * [Adapt kernel parameters](#adapt-kernel-parameters)
+- [Observability](#observability)
+  * [Using *Prometheus* and *Grafana*](#using-prometheus-and-grafana)
 
 
 ## Base path
@@ -187,7 +196,7 @@ services:
       - default
 ```
 
-## Using Traefik v2.x as main front-end
+## Using Traefik v3.x as main front-end
 
 https://docs.traefik.io/providers/docker/
 
@@ -506,3 +515,10 @@ sudo sysctl -w fs.aio-max-nr=200000
 ```
 
 If you want this value to be persisted, you can add it in `/etc/sysctl.conf` or any `/etc/sysctl.d/*.conf` file.
+
+## Observability
+
+### Using *Prometheus* and *Grafana*
+
+You can use *Prometheus* and *Grafana* to monitor your server and services. 
+An example configuration folder is available in `./compose/metrics/` folder, and Traefik metrics are already enabled in `./compose/traefik/traefik.toml` file.

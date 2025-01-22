@@ -1,4 +1,5 @@
 {
   "ipv6": true,
-  "fixed-cidr-v6": "fd34:fe56:7891:2f3a::/64"
+  "fixed-cidr-v6": "fd34:fe56:7891:2f3a::/64",
+  "metrics-addr": "127.0.0.1:9323"
 }
