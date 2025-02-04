@@ -1,11 +1,14 @@
 #
 # THIS IS AN EXAMPLE FILE WORKING WITH TRAEFIK ONLY
+# https://docs.gitlab.com/ee/install/docker/installation.html
 #
 # Copy .env.dist to .env to customize your domain names.
 #
 services:
-  web:
+  gitlab:
     image: 'gitlab/gitlab-ce:latest'
+    container_name: gitlab
+    shm_size: '256m'
     restart: always
     #
     # Alias is needed for Mattermost
@@ -28,6 +31,7 @@ services:
       - "traefik.http.middlewares.gitlab-sts.headers.stsseconds=31536000"
       - "traefik.http.middlewares.gitlab-sts.headers.isdevelopment=false"
 
+      - "traefik.http.routers.gitlab.entrypoints=http,https"
       - "traefik.http.routers.gitlab.middlewares=gitlab-redirectscheme,gitlab-sts"
       - "traefik.http.routers.gitlab.rule=Host(`${GITLAB_HOSTNAME}`)"
       - "traefik.http.routers.gitlab.service=gitlab"
@@ -43,21 +47,18 @@ services:
       - "traefik.http.routers.registry.service=registry"
       - "traefik.http.routers.registry.tls.certresolver=letsencrypt"
       - "traefik.http.routers.registry.tls=true"
+      
       - "traefik.http.services.registry.loadbalancer.server.port=${REGISTRY_PORT}"
 
       - "traefik.http.routers.mattermost.rule=Host(`${MATTERMOST_HOSTNAME}`)"
-      - "traefik.http.routers.mattermost.entrypoints=http"
+      - "traefik.http.routers.mattermost.entrypoints=http,https"
       - "traefik.http.routers.mattermost.service=mattermost"
+      - "traefik.http.routers.mattermost.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.mattermost.tls=true"
+      - "traefik.http.routers.mattermost.middlewares=mattermost-redirectscheme,gitlab-sts"
+      
       - "traefik.http.middlewares.mattermost-redirectscheme.redirectscheme.scheme=https"
       - "traefik.http.middlewares.mattermost-redirectscheme.redirectscheme.permanent=false"
-      - "traefik.http.routers.mattermost.middlewares=mattermost-redirectscheme"
-
-      - "traefik.http.routers.mattermost-secure.rule=Host(`${MATTERMOST_HOSTNAME}`)"
-      - "traefik.http.routers.mattermost-secure.entrypoints=https"
-      - "traefik.http.routers.mattermost-secure.service=mattermost"
-      - "traefik.http.routers.mattermost-secure.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.mattermost-secure.tls=true"
-      - "traefik.http.routers.mattermost-secure.middlewares=gitlab-sts"
 
       - "traefik.http.services.mattermost.loadbalancer.server.port=${MATTERMOST_PORT}"
       - "traefik.http.services.mattermost.loadbalancer.server.scheme=http"
