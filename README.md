@@ -10,6 +10,7 @@ It’s specialized for **my personal usage**, but if it fits your needs, feel fr
 - [Some of the docker images I use in this environment](#some-of-the-docker-images-i-use-in-this-environment)
 - [Using *docker compose*](#using-docker-compose)
 - [Using Traefik v3.x as main front-end](#using-traefik-v3x-as-main-front-end)
+  * [Enable Traefik dashboard](#enable-traefik-dashboard)
   * [Configure Cloudflare with Traefik](#configure-cloudflare-with-traefik)
 - [Back-up containers](#back-up-containers)
   * [Using *docker compose* services](#using-docker-compose-services)
@@ -224,13 +225,25 @@ Traefik *dashboard* will be available on a dedicated domain name: edit `./compos
 **Warning**: IP whitelisting won’t work correctly if you enabled AAAA (ipv6) record for your domains. Traefik won’t see 
 `X-Real-IP`. For the moment, if you need to get correct IP address, just use ipv4. 
 
+### Enable Traefik dashboard
+
+Edit your `traefik.toml` file and add the following lines:
+
+```toml
+[api]
+  dashboard = true
+```
+
+Make sure to add your service labels in `compose.yml` file.
+
+Dashboard will be available on `https://my-domain.tld/dashboard/` URL. **Make sure to add trailing slash after
+
+
 ### Configure Cloudflare with Traefik
 
 - Make sure you set Cloudflare SSL mode to **Full** or **Full (strict)** to avoid SSL errors and `418` errors. https://developers.cloudflare.com/ssl/origin-configuration/ssl-modes/ Because *Traefik* will see incoming requests as `http` and not `https` and redirect in loop to 443.
-- Add Cloudflare IPv4 and IPv6 ranges to your `traefik.toml` file in `entryPoints.web.forwardedHeaders` / `trustedIPs` section.
-- Add Cloudflare IPv4 and IPv6 ranges to your `traefik.toml` file in `entryPoints.web_secure.forwardedHeaders` / `trustedIPs` section.
-
-```toml
+- Add Cloudflare [IPv4 and IPv6 ranges](https://www.cloudflare.com/fr-fr/ips/) to your `traefik.toml` file in `entryPoints.web.forwardedHeaders` / `trustedIPs` section.
+- Add them again in `entryPoints.web_secure.forwardedHeaders` / `trustedIPs` section.
 
 ## Back-up containers
 
