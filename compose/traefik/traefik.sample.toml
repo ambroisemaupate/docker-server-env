@@ -28,22 +28,29 @@
   [entryPoints.metrics]
     address = ":8899"
 
-  [entryPoints.http]
+  [entryPoints.web]
     address = ":80"
-    [entryPoints.http.forwardedHeaders]
+    [entryPoints.web.http.redirections.entryPoint]
+      to = "web_secure"
+      scheme = "https"
+    [entryPoints.web.forwardedHeaders]
       insecure = true
-      # Add here any addtional reverse-proxy IPs (such as Cloudlflare)
+      # Add here any additional reverse-proxy IPs (such as Cloudflare)
       trustedIPs = ["127.0.0.1", "192.168.0.1"]
 
-  [entryPoints.https]
+  [entryPoints.web_secure]
     address = ":443"
-    [entryPoints.https.http3]
-    [entryPoints.https.forwardedHeaders]
+    asDefault = true
+    [entryPoints.web_secure.http]
+      tls = true
+    [entryPoints.web_secure.http3]
+    [entryPoints.web_secure.forwardedHeaders]
       insecure = true
-      # Add here any addtional reverse-proxy IPs (such as Cloudlflare)
+      # Add here any additional reverse-proxy IPs (such as Cloudflare)
       trustedIPs = ["127.0.0.1", "192.168.0.1"]
 
 [api]
+  dashboard = true
 
 [providers.docker]
   endpoint = "unix:///var/run/docker.sock"
@@ -59,4 +66,4 @@
 
   [certificatesResolvers.letsencrypt.acme.httpChallenge]
     # used during the challenge
-    entryPoint = "http"
+    entryPoint = "web"

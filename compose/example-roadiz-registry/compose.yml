@@ -13,12 +13,11 @@ services:
             - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.passhostheader=true"
             # Router
             - "traefik.http.routers.${APP_NAMESPACE}_secure.priority=11"
-            - "traefik.http.routers.${APP_NAMESPACE}.tls=true"
             - "traefik.http.routers.${APP_NAMESPACE}.tls.certresolver=letsencrypt"
             - "traefik.http.routers.${APP_NAMESPACE}.rule=HostRegexp(${HOSTNAME})"
             - "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
             # Apply middlewares
-            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=defaultCompress,${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Redirectscheme,${APP_NAMESPACE}Sts"
+            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Sts"
             # Define Middlewares
             # Add a Basic auth protection
             - "traefik.http.middlewares.${APP_NAMESPACE}Auth.basicauth.users=${AUTH_BASIC}"
@@ -28,9 +27,6 @@ services:
             - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.regex=${REDIRECT_REGEX}"
             - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.replacement=${REDIRECT_REPLACEMENT}"
             - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.permanent=true"
-            # Add SSL redirection
-            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.scheme=https"
-            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.permanent=true"
             # HSTS headers
             - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsincludesubdomains=false"
             - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stspreload=true"
@@ -70,38 +66,6 @@ services:
             #- frontproxynet
         labels:
             - "com.centurylinklabs.watchtower.enable=true"
-            # Force Watchtower to restart nginx after app update
-            #- "com.centurylinklabs.watchtower.depends-on=/exampleroadizregistry-solr-1"
-            # Uncomment if not using Varnish
-            #- "traefik.enable=true"
-            #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.scheme=http"
-            #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.port=80"
-            #- "traefik.http.services.${APP_NAMESPACE}.loadbalancer.passhostheader=true"
-            ## Listen HTTP
-            #- "traefik.http.routers.${APP_NAMESPACE}.entrypoints=http"
-            #- "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME})"
-            #- "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
-            ## Listen HTTPS
-            #- "traefik.http.routers.${APP_NAMESPACE}.entrypoints=https"
-            #- "traefik.http.routers.${APP_NAMESPACE}.tls=true"
-            #- "traefik.http.routers.${APP_NAMESPACE}.tls.certresolver=letsencrypt"
-            #- "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME})"
-            #- "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
-            ## Apply middlewares
-            #- "traefik.http.routers.${APP_NAMESPACE}.middlewares=defaultCompress,${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex"
-            #- "traefik.http.routers.${APP_NAMESPACE}.middlewares=defaultCompress,${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Redirectscheme"
-            ## Define Middlewares
-            ## Add a Basic auth protection
-            #- "traefik.http.middlewares.${APP_NAMESPACE}Auth.basicauth.users=${AUTH_BASIC}"
-            ## IP Allowlist
-            #- "traefik.http.middlewares.${APP_NAMESPACE}Ipwhitelist.ipallowlist.sourcerange=${IP_RANGE}"
-            ## Add domain redirection (${APP_NAMESPACE} non-www to www redir)
-            #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.regex=${REDIRECT_REGEX}"
-            #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.replacement=${REDIRECT_REPLACEMENT}"
-            #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.permanent=true"
-            ## Add SSL redirection
-            #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.scheme=https"
-            #- "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.permanent=true"
 
     db:
         image: mysql:8.0

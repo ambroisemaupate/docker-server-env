@@ -29,12 +29,7 @@ apt install -y \
     mailutils \
     apt-transport-https \
     ca-certificates \
-    software-properties-common \
-    clamav \
-    clamav-daemon;
-
-# Configure ClamAV
-clamconf;
+    software-properties-common;
 
 # Install latest docker
 install -m 0755 -d /etc/apt/keyrings;

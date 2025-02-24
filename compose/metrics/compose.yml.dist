@@ -69,14 +69,15 @@ services:
             - grafana:/var/lib/grafana
         labels:
             - "traefik.enable=true"
-            - "traefik.http.services.metrics-grafana.loadbalancer.server.scheme=http"
-            - "traefik.http.services.metrics-grafana.loadbalancer.server.port=3000"
-            - "traefik.http.services.metrics-grafana.loadbalancer.passhostheader=true"
-            - "traefik.http.routers.metrics-grafana.tls=true"
-            - "traefik.http.routers.metrics-grafana.tls.certresolver=letsencrypt"
-            - "traefik.http.routers.metrics-grafana.rule=Host(${HOSTNAME})"
-            - "traefik.http.routers.metrics-grafana.service=metrics-grafana"
-            - "traefik.http.routers.metrics-grafana.priority=11"
+            # Service
+            - "traefik.http.services.grafana.loadbalancer.server.scheme=http"
+            - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+            - "traefik.http.services.grafana.loadbalancer.passhostheader=true"
+            # Router
+            - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
+            - "traefik.http.routers.grafana.rule=Host(${HOSTNAME})"
+            - "traefik.http.routers.grafana.service=grafana"
+            - "traefik.http.routers.grafana.priority=11"
 
 
 volumes:

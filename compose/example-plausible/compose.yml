@@ -42,15 +42,11 @@ services:
       - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.port=${APP_PORT}"
       - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.passhostheader=true"
       # Router
-      - "traefik.http.routers.${APP_NAMESPACE}.tls=true"
       - "traefik.http.routers.${APP_NAMESPACE}.tls.certresolver=letsencrypt"
       - "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME})"
       - "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
       # Apply middlewares
-      - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Sts,${APP_NAMESPACE}Redirectscheme"
-      # Add SSL redirection
-      - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.permanent=true"
+      - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Sts"
       # HSTS headers
       - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsincludesubdomains=false"
       - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stspreload=true"

@@ -10,6 +10,7 @@ It’s specialized for **my personal usage**, but if it fits your needs, feel fr
 - [Some of the docker images I use in this environment](#some-of-the-docker-images-i-use-in-this-environment)
 - [Using *docker compose*](#using-docker-compose)
 - [Using Traefik v3.x as main front-end](#using-traefik-v3x-as-main-front-end)
+  * [Configure Cloudflare with Traefik](#configure-cloudflare-with-traefik)
 - [Back-up containers](#back-up-containers)
   * [Using *docker compose* services](#using-docker-compose-services)
 - [Clean-up FTP backups](#clean-up-ftp-backups)
@@ -92,8 +93,6 @@ Installation script `install.sh` will install:
 - apt-transport-https
 - ca-certificates
 - software-properties-common
-- clamav
-- clamav-daemon
 
 ### Enable IPv6 networking
 
@@ -198,6 +197,10 @@ services:
 
 ## Using Traefik v3.x as main front-end
 
+Traefik will be used as a main front-end to route your websites and services. It will also handle SSL certificates with Let’s Encrypt.
+
+HTTP to HTTPS is automatically redirected.
+
 https://docs.traefik.io/providers/docker/
 
 If `install.sh` script did not setup traefik conf automatically, do:
@@ -220,6 +223,14 @@ Traefik *dashboard* will be available on a dedicated domain name: edit `./compos
 
 **Warning**: IP whitelisting won’t work correctly if you enabled AAAA (ipv6) record for your domains. Traefik won’t see 
 `X-Real-IP`. For the moment, if you need to get correct IP address, just use ipv4. 
+
+### Configure Cloudflare with Traefik
+
+- Make sure you set Cloudflare SSL mode to **Full** or **Full (strict)** to avoid SSL errors and `418` errors. https://developers.cloudflare.com/ssl/origin-configuration/ssl-modes/ Because *Traefik* will see incoming requests as `http` and not `https` and redirect in loop to 443.
+- Add Cloudflare IPv4 and IPv6 ranges to your `traefik.toml` file in `entryPoints.web.forwardedHeaders` / `trustedIPs` section.
+- Add Cloudflare IPv4 and IPv6 ranges to your `traefik.toml` file in `entryPoints.web_secure.forwardedHeaders` / `trustedIPs` section.
+
+```toml
 
 ## Back-up containers
 

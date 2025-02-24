@@ -13,7 +13,6 @@ services:
         protocol: tcp
         mode: host
     networks:
-      - default
       - frontproxynet
     privileged: true
     volumes:
@@ -22,43 +21,22 @@ services:
       - ./acme.json:/acme.json
       - ./access.log:/access.log
     container_name: traefik
-    #healthcheck:
-    #  test: [ "CMD", "traefik", "healthcheck" ]
-    #  interval: 1m30s
-    #  timeout: 3s
-    #  retries: 3
-    #  start_period: 15s
     labels:
       - "traefik.enable=true"
-
-      # This special router allows to redirect all HTTP traffic to HTTPS
-      # and avoid defining it on each service
-      # HTTP catch all to HTTPS
-      #- "traefik.http.routers.http-catchall.rule=HostRegexp(`{any:.+}`)"
-      #- "traefik.http.routers.http-catchall.entrypoints=http"
-      #- "traefik.http.routers.http-catchall.middlewares=force-secure"
-
-      ## API Router
-      - "traefik.http.routers.dashboard.rule=Host(${MONITORING_HOST}) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      ## Router
+      ## https://doc.traefik.io/traefik/v3.2/reference/install-configuration/api-dashboard/#dashboard-router-rule
+      - "traefik.http.routers.dashboard.rule=Host(${MONITORING_HOST})"
       - "traefik.http.routers.dashboard.priority=10"
       - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.middlewares=apiAuth,force-secure"
-      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.middlewares=dashboard_auth"
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
-
       ## Use Basic auth
-      - "traefik.http.middlewares.apiAuth.basicauth.users=${MONITORING_AUTH_BASIC}"
-
+      - "traefik.http.middlewares.dashboard_auth.basicauth.users=${MONITORING_AUTH_BASIC}"
       # Use IP Allowlist
       # BE CAREFUL, if you are using IPv6, Traefik wont see X-Real-IP
       #- "traefik.http.middlewares.apiIpAllowlist.ipallowlist.sourcerange=${IP_RANGE}"
       # Only use depth if X-Forwarded_For is present (Cloudflare)
       #- "traefik.http.middlewares.apiIpAllowlist.ipallowlist.ipstrategy.depth=1"
-
-      # Add SSL redirection
-      - "traefik.http.middlewares.force-secure.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.force-secure.redirectscheme.permanent=true"
-
       # Add Gzip globally
       #- "traefik.http.middlewares.defaultCompress.compress=true"
       #- "traefik.http.middlewares.defaultCompress.compress.excludedcontenttypes=${EXCLUDED_COMPRESS_TYPES}"

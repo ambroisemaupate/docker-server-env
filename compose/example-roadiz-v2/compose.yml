@@ -56,7 +56,6 @@ services:
             # - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.healthcheck.interval=10s"
             # - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.healthcheck.timeout=3s"
             # - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.healthcheck.headers.x-health-check=${APP_HEALTH_CHECK_TOKEN}"
-            - "traefik.http.routers.${APP_NAMESPACE}.tls=true"
             - "traefik.http.routers.${APP_NAMESPACE}.tls.certresolver=letsencrypt"
             # Combine Host and PathPrefix to allow API and Frontend to share same domain name
             - "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME}) && PathPrefix(${PATH_PREFIX})"
@@ -65,14 +64,11 @@ services:
             #
             # Apply middlewares
             #
-            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Sts,${APP_NAMESPACE}Redirectscheme"
+            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Sts"
             # Add domain redirection (${APP_NAMESPACE} non-www to www redir)
             - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.regex=${REDIRECT_REGEX}"
             - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.replacement=${REDIRECT_REPLACEMENT}"
             - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.permanent=true"
-            # Add SSL redirection
-            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.scheme=https"
-            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.permanent=true"
             # HSTS headers
             - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsincludesubdomains=false"
             - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stspreload=true"
