@@ -32,6 +32,7 @@
     address = ":80"
     [entryPoints.http.forwardedHeaders]
       insecure = true
+      # Add here any addtional reverse-proxy IPs (such as Cloudlflare)
       trustedIPs = ["127.0.0.1", "192.168.0.1"]
 
   [entryPoints.https]
@@ -39,12 +40,10 @@
     [entryPoints.https.http3]
     [entryPoints.https.forwardedHeaders]
       insecure = true
+      # Add here any addtional reverse-proxy IPs (such as Cloudlflare)
       trustedIPs = ["127.0.0.1", "192.168.0.1"]
 
 [api]
-  debug = false
-  insecure = false
-  dashboard = false
 
 [providers.docker]
   endpoint = "unix:///var/run/docker.sock"
