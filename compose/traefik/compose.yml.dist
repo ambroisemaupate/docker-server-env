@@ -1,7 +1,7 @@
 name: traefik
 services:
   traefik:
-    image: traefik:3.2
+    image: traefik:3.3
     restart: always
     ports:
       - target: 80
@@ -44,7 +44,6 @@ services:
 #  traefik-service-error:
 #    image: nginx:alpine
 #    networks:
-#      - default
 #      - frontproxynet
 #    container_name: traefik-service-error
 #    volumes:
@@ -53,13 +52,10 @@ services:
 #    restart: always
 #    labels:
 #      - "traefik.enable=true"
-#
 #      - "traefik.http.routers.traefik-service-error-traefik.priority=1"
-#      - "traefik.http.routers.traefik-service-error-traefik.rule=HostRegexp(`{host:.+}`)"
-#      - "traefik.http.routers.traefik-service-error-traefik.tls=true"
-#      - "traefik.http.routers.traefik-service-error-traefik.tls.certresolver=letsencrypt"
-#
+#      - "traefik.http.routers.traefik-service-error-traefik.rule=HostRegexp(`^.+$`)"
 #      - "traefik.http.services.traefik-service-error-traefik.loadbalancer.server.port=80"
+
 
   # Watch acme.json and dump certificates to files
 #  traefik-certs-dumper:

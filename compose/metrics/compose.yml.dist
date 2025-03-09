@@ -15,7 +15,7 @@ services:
         image: prom/prometheus
         container_name: prometheus
         command:
-            - '--storage.tsdb.retention.time=30d'
+            - '--storage.tsdb.retention.time=15d'
             - '--config.file=/etc/prometheus/prometheus.yml'
         volumes:
             - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
@@ -77,7 +77,7 @@ services:
             - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
             - "traefik.http.routers.grafana.rule=Host(${HOSTNAME})"
             - "traefik.http.routers.grafana.service=grafana"
-            - "traefik.http.routers.grafana.priority=11"
+            - "traefik.http.routers.grafana.priority=20"
 
 
 volumes:
