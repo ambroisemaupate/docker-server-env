@@ -8,4 +8,7 @@ services:
             REGISTRY_PROXY_PASSWORD: ${REGISTRY_PROXY_PASSWORD}
         ports:
             - 6000:5000
-
+        volumes:
+            - registry:/var/lib/registry
+volumes:
+    registry:

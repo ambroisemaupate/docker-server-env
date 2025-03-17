@@ -5,3 +5,6 @@ services:
         volumes:
             - /etc/gitlab-runner/config:/etc/gitlab-runner
             - /var/run/docker.sock:/var/run/docker.sock
+            - gitlab_runner:/home/gitlab-runner
+volumes:
+    gitlab_runner:
