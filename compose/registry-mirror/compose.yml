@@ -2,10 +2,14 @@ services:
     mirror:
         image: registry:2
         restart: always
+        dns:
+            - 1.1.1.1
+            - 1.0.0.1
         environment:
             REGISTRY_PROXY_REMOTEURL: ${REGISTRY_PROXY_REMOTEURL}
             REGISTRY_PROXY_USERNAME: ${REGISTRY_PROXY_USERNAME}
             REGISTRY_PROXY_PASSWORD: ${REGISTRY_PROXY_PASSWORD}
+            REGISTRY_HTTP_SECRET: ${REGISTRY_HTTP_SECRET}
         ports:
             - 6000:5000
         volumes:

@@ -9,7 +9,7 @@ It’s specialized for **my personal usage**, but if it fits your needs, feel fr
   * [hub.docker.com mirroring](#hubdockercom-mirroring)
 - [Some of the docker images I use in this environment](#some-of-the-docker-images-i-use-in-this-environment)
 - [Using *docker compose*](#using-docker-compose)
-- [Using Traefik v3.x as main front-end](#using-traefik-v3x-as-main-front-end)
+- [Using Traefik v3.x as the main front-end](#using-traefik-v3x-as-the-main-front-end)
   * [Enable Traefik dashboard](#enable-traefik-dashboard)
   * [Configure Cloudflare with Traefik](#configure-cloudflare-with-traefik)
 - [Back-up containers](#back-up-containers)
@@ -43,7 +43,7 @@ Skip this part if your hosting provider has already provisioned your server with
 # Base apps
 #
 sudo apt update;
-sudo apt install sudo curl nano git zsh ufw;
+sudo apt install sudo curl nano git zsh;
 
 #
 # Install oh-my-zsh
@@ -196,7 +196,7 @@ services:
       - default
 ```
 
-## Using Traefik v3.x as main front-end
+## Using Traefik v3.x as the main front-end
 
 Traefik will be used as a main front-end to route your websites and services. It will also handle SSL certificates with Let’s Encrypt.
 

@@ -37,7 +37,7 @@ alias dpsa="docker ps --format \"table{{.Names}}\\t{{.Image}}\\t{{.Ports}}\\t{{.
 alias dvls="docker volume ls"
 # Because it is too long to write it 500x a day
 alias dc="docker compose"
-alias dcapp="docker compose exec -u www-data app"
+alias dcapp="docker compose exec app"
 # Display only docker containers CPU usage
 alias dstats="docker stats --format \"table {{.Name}}\t{{.CPUPerc}}\t{{.MemPerc}}\""
 # Display Docker system Disk usage
