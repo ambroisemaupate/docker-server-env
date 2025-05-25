@@ -1,4 +1,44 @@
 {
+    "__inputs": [],
+    "__elements": {},
+    "__requires": [
+        {
+            "type": "panel",
+            "id": "bargauge",
+            "name": "Bar gauge",
+            "version": ""
+        },
+        {
+            "type": "panel",
+            "id": "gauge",
+            "name": "Gauge",
+            "version": ""
+        },
+        {
+            "type": "grafana",
+            "id": "grafana",
+            "name": "Grafana",
+            "version": "11.6.0"
+        },
+        {
+            "type": "datasource",
+            "id": "prometheus",
+            "name": "Prometheus",
+            "version": "1.0.0"
+        },
+        {
+            "type": "panel",
+            "id": "stat",
+            "name": "Stat",
+            "version": ""
+        },
+        {
+            "type": "panel",
+            "id": "timeseries",
+            "name": "Time series",
+            "version": ""
+        }
+    ],
     "annotations": {
         "list": [
             {
@@ -26,7 +66,7 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 1,
-    "id": 5,
+    "id": null,
     "links": [
         {
             "icon": "external link",
@@ -65,8 +105,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "#EAB839",
@@ -114,12 +153,12 @@
                 "text": {},
                 "valueMode": "color"
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": "100 - (avg(rate(node_cpu_seconds_total{instance=~\"$instance\",mode=\"idle\"}[$__rate_interval])) * 100)",
@@ -144,7 +183,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": "(1 - (node_memory_MemAvailable_bytes{instance=~\"$instance\"} / (node_memory_MemTotal_bytes{instance=~\"$instance\"})))* 100",
@@ -166,13 +205,12 @@
                     "refId": "F"
                 }
             ],
-            "title": "",
             "type": "bargauge"
         },
         {
             "datasource": {
                 "type": "prometheus",
-                "uid": "${data_source}"
+                "uid": "default_prometheus_uid"
             },
             "description": "Busy state of all CPU cores together",
             "fieldConfig": {
@@ -198,8 +236,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "rgba(50, 172, 45, 0.97)",
-                                "value": null
+                                "color": "rgba(50, 172, 45, 0.97)"
                             },
                             {
                                 "color": "rgba(237, 129, 40, 0.89)",
@@ -237,7 +274,7 @@
                 "showThresholdMarkers": true,
                 "sizing": "auto"
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
@@ -262,7 +299,7 @@
         {
             "datasource": {
                 "type": "prometheus",
-                "uid": "${data_source}"
+                "uid": "default_prometheus_uid"
             },
             "description": "System load  over all CPU cores together",
             "fieldConfig": {
@@ -288,8 +325,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "rgba(50, 172, 45, 0.97)",
-                                "value": null
+                                "color": "rgba(50, 172, 45, 0.97)"
                             },
                             {
                                 "color": "rgba(237, 129, 40, 0.89)",
@@ -327,7 +363,7 @@
                 "showThresholdMarkers": true,
                 "sizing": "auto"
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
@@ -352,7 +388,7 @@
         {
             "datasource": {
                 "type": "prometheus",
-                "uid": "${data_source}"
+                "uid": "default_prometheus_uid"
             },
             "description": "Non available RAM memory",
             "fieldConfig": {
@@ -368,8 +404,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "rgba(50, 172, 45, 0.97)",
-                                "value": null
+                                "color": "rgba(50, 172, 45, 0.97)"
                             },
                             {
                                 "color": "rgba(237, 129, 40, 0.89)",
@@ -407,7 +442,7 @@
                 "showThresholdMarkers": true,
                 "sizing": "auto"
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
@@ -428,7 +463,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "exemplar": false,
@@ -474,8 +509,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "rgba(50, 172, 45, 0.97)",
-                                "value": null
+                                "color": "rgba(50, 172, 45, 0.97)"
                             },
                             {
                                 "color": "rgba(237, 129, 40, 0.89)",
@@ -513,12 +547,12 @@
                 "showThresholdMarkers": true,
                 "sizing": "auto"
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "exemplar": false,
@@ -561,8 +595,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -599,12 +632,12 @@
                 "textMode": "auto",
                 "wideLayout": true
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "exemplar": false,
@@ -645,8 +678,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "rgba(50, 172, 45, 0.97)",
-                                "value": null
+                                "color": "rgba(50, 172, 45, 0.97)"
                             },
                             {
                                 "color": "rgba(237, 129, 40, 0.89)",
@@ -688,12 +720,12 @@
                 "textMode": "auto",
                 "wideLayout": true
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": "avg(rate(node_cpu_seconds_total{instance=~\"$instance\",mode=\"iowait\"}[$__rate_interval])) * 100",
@@ -737,8 +769,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -775,12 +806,12 @@
                 "textMode": "auto",
                 "wideLayout": true
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "exemplar": false,
@@ -822,8 +853,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "rgba(50, 172, 45, 0.97)",
-                                "value": null
+                                "color": "rgba(50, 172, 45, 0.97)"
                             },
                             {
                                 "color": "rgba(237, 129, 40, 0.89)",
@@ -864,12 +894,12 @@
                 "textMode": "auto",
                 "wideLayout": true
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "exemplar": false,
@@ -937,8 +967,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -1225,16 +1254,17 @@
                     "showLegend": true
                 },
                 "tooltip": {
+                    "hideZeros": false,
                     "mode": "multi",
                     "sort": "desc"
                 }
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": "avg(rate(node_cpu_seconds_total{instance=~\"$instance\",mode=\"system\"}[$__rate_interval])) by (instance) *100",
@@ -1266,7 +1296,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": "avg(rate(node_cpu_seconds_total{instance=~\"$instance\",mode=\"iowait\"}[$__interval])) by (instance) *100",
@@ -1302,7 +1332,7 @@
         {
             "datasource": {
                 "type": "prometheus",
-                "uid": "${data_source}"
+                "uid": "default_prometheus_uid"
             },
             "fieldConfig": {
                 "defaults": {
@@ -1349,8 +1379,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -1620,11 +1649,12 @@
                     "showLegend": true
                 },
                 "tooltip": {
+                    "hideZeros": false,
                     "mode": "multi",
                     "sort": "desc"
                 }
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
@@ -1643,7 +1673,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "exemplar": true,
@@ -1671,7 +1701,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "exemplar": true,
@@ -1701,7 +1731,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "exemplar": true,
@@ -1729,7 +1759,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "exemplar": true,
@@ -1793,8 +1823,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -1909,16 +1938,17 @@
                     "showLegend": true
                 },
                 "tooltip": {
+                    "hideZeros": false,
                     "mode": "multi",
                     "sort": "desc"
                 }
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": "rate(node_network_receive_bytes_total{instance=~'$instance',device=~\"$net_interface\"}[$__rate_interval])*8",
@@ -1952,7 +1982,7 @@
         {
             "datasource": {
                 "type": "prometheus",
-                "uid": "${data_source}"
+                "uid": "default_prometheus_uid"
             },
             "fieldConfig": {
                 "defaults": {
@@ -1998,8 +2028,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -2132,11 +2161,12 @@
                     "showLegend": true
                 },
                 "tooltip": {
+                    "hideZeros": false,
                     "mode": "multi",
                     "sort": "desc"
                 }
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
@@ -2158,7 +2188,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": "node_load5{instance=~\"$instance\"}",
@@ -2188,7 +2218,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": " sum(count(node_cpu_seconds_total{instance=~\"$instance\", mode='system'}) by (cpu,instance)) by(instance)",
@@ -2254,8 +2284,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -2355,16 +2384,17 @@
                     "showLegend": true
                 },
                 "tooltip": {
+                    "hideZeros": false,
                     "mode": "multi",
                     "sort": "desc"
                 }
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": "rate(node_disk_read_bytes_total{instance=~\"$instance\"}[$__rate_interval])",
@@ -2399,7 +2429,7 @@
         {
             "datasource": {
                 "type": "prometheus",
-                "uid": "${data_source}"
+                "uid": "default_prometheus_uid"
             },
             "fieldConfig": {
                 "defaults": {
@@ -2445,8 +2475,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -2621,11 +2650,12 @@
                     "showLegend": false
                 },
                 "tooltip": {
+                    "hideZeros": false,
                     "mode": "multi",
                     "sort": "none"
                 }
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
@@ -2646,7 +2676,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": "increase(node_network_transmit_bytes_total{instance=~\"$instance\",device=~\"$net_interface\"}[60m])",
@@ -2712,8 +2742,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -2864,16 +2893,17 @@
                     "showLegend": true
                 },
                 "tooltip": {
+                    "hideZeros": false,
                     "mode": "multi",
                     "sort": "desc"
                 }
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": "node_netstat_Tcp_CurrEstab{instance=~'$instance'}",
@@ -2903,7 +2933,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": "node_sockstat_sockets_used{instance=~'$instance'}",
@@ -2929,7 +2959,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": "node_sockstat_TCP_alloc{instance=~'$instance'}",
@@ -2954,7 +2984,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": "rate(node_netstat_Tcp_ActiveOpens{instance=~'$instance'}[$__rate_interval])",
@@ -2979,7 +3009,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": "rate(node_netstat_Tcp_OutSegs{instance=~'$instance'}[$__rate_interval])",
@@ -3004,7 +3034,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "editorMode": "code",
                     "expr": "rate(node_netstat_TcpExt_ListenDrops{instance=~'$instance'}[$__rate_interval])",
@@ -3067,8 +3097,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -3174,16 +3203,17 @@
                     "width": 300
                 },
                 "tooltip": {
+                    "hideZeros": false,
                     "mode": "multi",
                     "sort": "none"
                 }
             },
-            "pluginVersion": "11.4.0",
+            "pluginVersion": "11.6.0",
             "targets": [
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "expr": "irate(node_network_receive_packets_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                     "format": "time_series",
@@ -3213,7 +3243,7 @@
         {
             "datasource": {
                 "type": "prometheus",
-                "uid": "${data_source}"
+                "uid": "default_prometheus_uid"
             },
             "fieldConfig": {
                 "defaults": {
@@ -3260,8 +3290,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -3338,7 +3367,7 @@
         {
             "datasource": {
                 "type": "prometheus",
-                "uid": "${data_source}"
+                "uid": "default_prometheus_uid"
             },
             "fieldConfig": {
                 "defaults": {
@@ -3385,8 +3414,7 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
-                                "value": null
+                                "color": "green"
                             },
                             {
                                 "color": "red",
@@ -3461,7 +3489,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "expr": "node_netstat_Tcp_MaxConn{instance=\"$instance\",job=\"$job_name\"}",
                     "format": "time_series",
@@ -3577,7 +3605,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_load1{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -3601,7 +3629,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_load15{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -4070,7 +4098,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_memory_MemTotal_bytes{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -4096,7 +4124,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_memory_Cached_bytes{instance=\"$instance\",job=\"$job_name\"} + node_memory_Buffers_bytes{instance=\"$instance\",job=\"$job_name\"} + node_memory_SReclaimable_bytes{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -4120,7 +4148,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "(node_memory_SwapTotal_bytes{instance=\"$instance\",job=\"$job_name\"} - node_memory_SwapFree_bytes{instance=\"$instance\",job=\"$job_name\"})",
                             "format": "time_series",
@@ -4320,7 +4348,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_network_receive_bytes_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])*8",
                             "format": "time_series",
@@ -4348,7 +4376,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "description": "",
                     "fieldConfig": {
@@ -4574,7 +4602,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "editorMode": "code",
                             "expr": "sum(irate(node_cpu_seconds_total{instance=\"$instance\",job=\"$job_name\", mode=\"user\"}[$__rate_interval])) / scalar(count(count(node_cpu_seconds_total{instance=\"$instance\",job=\"$job_name\"}) by (cpu)))",
@@ -4602,7 +4630,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "editorMode": "code",
                             "expr": "sum by(instance) (irate(node_cpu_seconds_total{instance=\"$instance\",job=\"$job_name\", mode=\"iowait\"}[$__rate_interval])) / scalar(count(count(node_cpu_seconds_total{instance=\"$instance\",job=\"$job_name\"}) by (cpu)))",
@@ -4630,7 +4658,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "editorMode": "code",
                             "expr": "sum(irate(node_cpu_seconds_total{instance=\"$instance\",job=\"$job_name\", mode=\"softirq\"}[$__rate_interval])) / scalar(count(count(node_cpu_seconds_total{instance=\"$instance\",job=\"$job_name\"}) by (cpu)))",
@@ -4658,7 +4686,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "editorMode": "code",
                             "expr": "sum(irate(node_cpu_seconds_total{instance=\"$instance\",job=\"$job_name\", mode=\"idle\"}[$__rate_interval])) / scalar(count(count(node_cpu_seconds_total{instance=\"$instance\",job=\"$job_name\"}) by (cpu)))",
@@ -5092,7 +5120,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_disk_reads_completed_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "intervalFactor": 4,
@@ -5118,7 +5146,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "description": "The number of bytes read from or written to the device per second",
                     "fieldConfig": {
@@ -5531,7 +5559,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_disk_written_bytes_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -5948,7 +5976,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_disk_read_time_seconds_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval]) / irate(node_disk_reads_completed_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "hide": false,
@@ -5978,7 +6006,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "description": "The average queue length of the requests that were issued to the device",
                     "fieldConfig": {
@@ -6384,7 +6412,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "description": "The number of read and write requests merged per second that were queued to the device",
                     "fieldConfig": {
@@ -6796,7 +6824,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_disk_writes_merged_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "intervalFactor": 1,
@@ -7201,7 +7229,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_disk_io_time_seconds_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "interval": "",
@@ -7229,7 +7257,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "description": "The number of outstanding requests at the instant the sample was taken. Incremented as requests are given to appropriate struct request_queue and decremented as they finish.",
                     "fieldConfig": {
@@ -7635,7 +7663,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "description": "",
                     "fieldConfig": {
@@ -8036,7 +8064,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_disk_discards_merged_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "interval": "",
@@ -8167,7 +8195,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_network_receive_drop_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -8195,7 +8223,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "fieldConfig": {
                         "defaults": {
@@ -8308,7 +8336,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_network_transmit_errs_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -8425,7 +8453,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_network_receive_multicast_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -8542,7 +8570,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_network_receive_compressed_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -8570,7 +8598,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "fieldConfig": {
                         "defaults": {
@@ -8688,7 +8716,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "fieldConfig": {
                         "defaults": {
@@ -8801,7 +8829,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_network_transmit_fifo_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -8918,7 +8946,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_network_transmit_colls_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -9022,7 +9050,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_network_transmit_carrier_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -9126,7 +9154,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_arp_entries{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -9231,7 +9259,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_network_mtu_bytes{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -9336,7 +9364,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_network_speed_bytes{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -9441,7 +9469,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_network_transmit_queue_length{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -9558,7 +9586,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_softnet_processed_total{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -9588,7 +9616,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "fieldConfig": {
                         "defaults": {
@@ -9693,7 +9721,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "fieldConfig": {
                         "defaults": {
@@ -9793,7 +9821,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_network_carrier{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -9911,7 +9939,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_sockstat_TCP_alloc{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -9937,7 +9965,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_sockstat_TCP_mem{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -9964,7 +9992,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_sockstat_TCP_tw{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -10070,7 +10098,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_sockstat_UDPLITE_inuse{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -10096,7 +10124,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_sockstat_UDP_mem{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -10202,7 +10230,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_sockstat_FRAG_inuse{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -10232,7 +10260,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "fieldConfig": {
                         "defaults": {
@@ -10334,7 +10362,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "node_sockstat_UDP_mem_bytes{instance=\"$instance\",job=\"$job_name\"}",
                             "format": "time_series",
@@ -10362,7 +10390,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "fieldConfig": {
                         "defaults": {
@@ -10482,7 +10510,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "fieldConfig": {
                         "defaults": {
@@ -10596,7 +10624,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_netstat_IpExt_OutOctets{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -10701,7 +10729,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_netstat_Ip_Forwarding{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -10818,7 +10846,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_netstat_Icmp_InMsgs{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -10848,7 +10876,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "fieldConfig": {
                         "defaults": {
@@ -10965,7 +10993,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "fieldConfig": {
                         "defaults": {
@@ -11090,7 +11118,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_netstat_Udp_OutDatagrams{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -11194,7 +11222,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_netstat_Udp_InErrors{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -11220,7 +11248,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_netstat_UdpLite_InErrors{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "interval": "",
@@ -11243,7 +11271,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_netstat_Udp_SndbufErrors{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -11372,7 +11400,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_netstat_Tcp_InSegs{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -11403,7 +11431,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "description": "",
                     "fieldConfig": {
@@ -11506,7 +11534,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_netstat_TcpExt_ListenDrops{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -11533,7 +11561,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_netstat_Tcp_RetransSegs{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "interval": "",
@@ -11553,7 +11581,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_netstat_Tcp_OutRsts{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "interval": "",
@@ -11576,7 +11604,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "editorMode": "code",
                             "expr": "irate(node_netstat_TcpExt_TCPOFOQueue{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
@@ -11681,7 +11709,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_netstat_Tcp_ActiveOpens{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -11711,7 +11739,7 @@
                 {
                     "datasource": {
                         "type": "prometheus",
-                        "uid": "${data_source}"
+                        "uid": "default_prometheus_uid"
                     },
                     "description": "",
                     "fieldConfig": {
@@ -11826,7 +11854,7 @@
                         {
                             "datasource": {
                                 "type": "prometheus",
-                                "uid": "${data_source}"
+                                "uid": "default_prometheus_uid"
                             },
                             "expr": "irate(node_netstat_TcpExt_SyncookiesRecv{instance=\"$instance\",job=\"$job_name\"}[$__rate_interval])",
                             "format": "time_series",
@@ -11860,19 +11888,15 @@
             "type": "row"
         }
     ],
-    "preload": false,
     "refresh": "15s",
-    "schemaVersion": 40,
+    "schemaVersion": 41,
     "tags": [
         "linux"
     ],
     "templating": {
         "list": [
             {
-                "current": {
-                    "text": "node_exporter:9100",
-                    "value": "node_exporter:9100"
-                },
+                "current": {},
                 "definition": "label_values({job=\"$job_name\"},instance)",
                 "name": "instance",
                 "options": [],
@@ -11920,10 +11944,7 @@
                 "type": "custom"
             },
             {
-                "current": {
-                    "text": "prometheus",
-                    "value": "ceaslregtgflsb"
-                },
+                "current": {},
                 "name": "data_source",
                 "options": [],
                 "query": "prometheus",
@@ -11955,6 +11976,6 @@
     "timezone": "browser",
     "title": "Linux System Overview",
     "uid": "publicok",
-    "version": 6,
+    "version": 1,
     "weekStart": ""
 }

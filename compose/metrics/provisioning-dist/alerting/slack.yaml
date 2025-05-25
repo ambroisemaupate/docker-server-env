@@ -1,0 +1,14 @@
+apiVersion: 1
+contactPoints:
+    - orgId: 1
+      name: Slack
+      receivers:
+          - uid: default_slack
+            type: slack
+            settings:
+                recipient: status
+                # The token should be replaced with your actual Slack token.
+                token: xoxb-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                # The username can be customized to reflect your Grafana instance.
+                username: grafana.xxxx.com
+            disableResolveMessage: false

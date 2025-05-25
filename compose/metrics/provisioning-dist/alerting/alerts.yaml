@@ -1,0 +1,172 @@
+apiVersion: 1
+groups:
+    - orgId: 1
+      name: Each minute
+      folder: Services
+      interval: 1m
+      rules:
+          - uid: prometheus_node_rootfs_uid
+            title: Node Root FS used
+            condition: C
+            data:
+                - refId: A
+                  relativeTimeRange:
+                      from: 600
+                      to: 0
+                  datasourceUid: default_prometheus_uid
+                  model:
+                      editorMode: code
+                      expr: 100 - ((node_filesystem_avail_bytes{instance="node_exporter:9100",job="node",mountpoint="/",fstype!="rootfs"} * 100) / node_filesystem_size_bytes{instance="node_exporter:9100",job="node",mountpoint="/",fstype!="rootfs"})
+                      instant: true
+                      intervalMs: 1000
+                      legendFormat: __auto
+                      maxDataPoints: 43200
+                      range: false
+                      refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                      conditions:
+                          - evaluator:
+                                params:
+                                    - 80
+                                type: gt
+                            operator:
+                                type: and
+                            query:
+                                params:
+                                    - C
+                            reducer:
+                                params: []
+                                type: last
+                            type: query
+                      datasource:
+                          type: __expr__
+                          uid: __expr__
+                      expression: A
+                      intervalMs: 1000
+                      maxDataPoints: 43200
+                      refId: C
+                      type: threshold
+            noDataState: NoData
+            execErrState: Error
+            for: 1m
+            annotations:
+                summary: Node RootFS usage is above 80%
+            isPaused: false
+            notification_settings:
+                receiver: Slack
+
+          - uid: prometheus_node_ram_uid
+            title: Node RAM used
+            condition: C
+            data:
+                - refId: A
+                  relativeTimeRange:
+                      from: 600
+                      to: 0
+                  datasourceUid: default_prometheus_uid
+                  model:
+                      editorMode: code
+                      expr: ((node_memory_MemTotal_bytes{instance="node_exporter:9100", job="node"} - node_memory_MemFree_bytes{instance="node_exporter:9100", job="node"}) / node_memory_MemTotal_bytes{instance="node_exporter:9100", job="node"}) * 100
+                      instant: true
+                      intervalMs: 1000
+                      legendFormat: __auto
+                      maxDataPoints: 43200
+                      range: false
+                      refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                      conditions:
+                          - evaluator:
+                                params:
+                                    - 90
+                                type: gt
+                            operator:
+                                type: and
+                            query:
+                                params:
+                                    - C
+                            reducer:
+                                params: []
+                                type: last
+                            type: query
+                      datasource:
+                          type: __expr__
+                          uid: __expr__
+                      expression: A
+                      intervalMs: 1000
+                      maxDataPoints: 43200
+                      refId: C
+                      type: threshold
+            noDataState: NoData
+            execErrState: Error
+            for: 1m
+            annotations:
+                summary: Node RAM usage is above 90%
+            isPaused: false
+            notification_settings:
+                receiver: Slack
+
+          - uid: prometheus_node_cpu_uid
+            title: Node CPU
+            condition: C
+            data:
+                - refId: A
+                  relativeTimeRange:
+                      from: 600
+                      to: 0
+                  datasourceUid: default_prometheus_uid
+                  model:
+                      datasource:
+                          type: prometheus
+                          uid: default_prometheus_uid
+                      editorMode: code
+                      expr: |
+                          scalar(node_load1{instance="node_exporter:9100",job="node"}) * 100 / count(count(node_cpu_seconds_total{instance="node_exporter:9100",job="node"}) by (cpu))
+                      instant: true
+                      intervalMs: 1000
+                      legendFormat: __auto
+                      maxDataPoints: 43200
+                      range: false
+                      refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                      conditions:
+                          - evaluator:
+                                params:
+                                    - 75
+                                type: gt
+                            operator:
+                                type: and
+                            query:
+                                params:
+                                    - C
+                            reducer:
+                                params: []
+                                type: last
+                            type: query
+                            unloadEvaluator:
+                                params:
+                                    - 60
+                                type: lt
+                      datasource:
+                          type: __expr__
+                          uid: __expr__
+                      expression: A
+                      intervalMs: 1000
+                      maxDataPoints: 43200
+                      refId: C
+                      type: threshold
+            dashboardUid: ""
+            panelId: 0
+            noDataState: NoData
+            execErrState: Error
+            for: 1m
+            annotations:
+                summary: Node CPU is above 75%
+            isPaused: false
+            notification_settings:
+                receiver: Slack

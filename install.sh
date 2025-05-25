@@ -104,6 +104,12 @@ cp ./compose/whoami/.env.dist ./compose/whoami/.env;
 cp ./compose/watchtower/.env.dist ./compose/watchtower/.env;
 cp ./compose/watchtower/compose.yml.dist ./compose/watchtower/compose.yml;
 
+# Copy defaults for metrics
+cp ./compose/metrics/.env.dist ./compose/metrics/.env;
+cp ./compose/metrics/prometheus.yml.dist ./compose/metrics/prometheus.yml;
+cp ./compose/metrics/compose.yml.dist ./compose/metrics/compose.yml;
+cp -ar ./compose/metrics/provisioning-dist ./compose/metrics/provisioning;
+
 touch ./compose/traefik/acme.json;
 touch ./compose/traefik/access.log;
 chmod 0600 ./compose/traefik/acme.json;

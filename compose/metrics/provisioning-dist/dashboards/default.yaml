@@ -1,0 +1,9 @@
+apiVersion: 1
+
+providers:
+    - name: Docker system
+      folder: Services
+      updateIntervalSeconds: 5
+      type: file
+      options:
+          path: /etc/grafana/provisioning/dashboards/definitions

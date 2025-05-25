@@ -67,6 +67,7 @@ services:
             - frontproxynet
         volumes:
             - grafana:/var/lib/grafana
+            - ./provisioning:/etc/grafana/provisioning
         labels:
             - "traefik.enable=true"
             # Service
