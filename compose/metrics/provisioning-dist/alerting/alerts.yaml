@@ -6,7 +6,7 @@ groups:
       interval: 1m
       rules:
           - uid: prometheus_node_rootfs_uid
-            title: Node Root FS used
+            title: Root FS used
             condition: C
             data:
                 - refId: A
@@ -52,13 +52,13 @@ groups:
             execErrState: Error
             for: 1m
             annotations:
-                summary: Node RootFS usage is above 80%
+                summary: RootFS usage is above 80%
             isPaused: false
             notification_settings:
                 receiver: Slack
 
           - uid: prometheus_node_ram_uid
-            title: Node RAM used
+            title: RAM used
             condition: C
             data:
                 - refId: A
@@ -81,7 +81,7 @@ groups:
                       conditions:
                           - evaluator:
                                 params:
-                                    - 90
+                                    - 98
                                 type: gt
                             operator:
                                 type: and
@@ -104,13 +104,13 @@ groups:
             execErrState: Error
             for: 1m
             annotations:
-                summary: Node RAM usage is above 90%
+                summary: RAM total usage is above 98%
             isPaused: false
             notification_settings:
                 receiver: Slack
 
           - uid: prometheus_node_cpu_uid
-            title: Node CPU
+            title: CPU usage
             condition: C
             data:
                 - refId: A
@@ -166,7 +166,7 @@ groups:
             execErrState: Error
             for: 1m
             annotations:
-                summary: Node CPU is above 75%
+                summary: CPU usage is above 75%
             isPaused: false
             notification_settings:
                 receiver: Slack
