@@ -42,3 +42,5 @@ alias dcapp="docker compose exec app"
 alias dstats="docker stats --format \"table {{.Name}}\t{{.CPUPerc}}\t{{.MemPerc}}\""
 # Display Docker system Disk usage
 alias ddf="docker system df -v"
+# Execute varnishncsa to log Bot agents in requests
+alias logvarnishbots="docker compose exec varnish varnishncsa -c -g request -q \"ReqHeader: User-Agent ~ 'Bot'\" -F \"%t %{Host}i %h %{Referer}i %U %{User-agent}i %s %b %{X-Forwarded-For}i\""
