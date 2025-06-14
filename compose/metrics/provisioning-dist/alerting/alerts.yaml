@@ -106,7 +106,7 @@ groups:
             execErrState: Error
             for: 1m
             annotations:
-                summary: RAM total usage is above 98%
+                summary: RAM total usage is above 90%
             isPaused: false
             notification_settings:
                 receiver: Slack
