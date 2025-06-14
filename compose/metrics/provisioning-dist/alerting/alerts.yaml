@@ -68,7 +68,9 @@ groups:
                   datasourceUid: default_prometheus_uid
                   model:
                       editorMode: code
-                      expr: ((node_memory_MemTotal_bytes{instance="node_exporter:9100", job="node"} - node_memory_MemFree_bytes{instance="node_exporter:9100", job="node"}) / node_memory_MemTotal_bytes{instance="node_exporter:9100", job="node"}) * 100
+                      # Total ram including cache (not relevant)
+                      #expr: ((node_memory_MemTotal_bytes{instance="node_exporter:9100", job="node"} - node_memory_MemFree_bytes{instance="node_exporter:9100", job="node"}) / node_memory_MemTotal_bytes{instance="node_exporter:9100", job="node"}) * 100
+                      expr: (1 - (node_memory_MemAvailable_bytes{instance="node_exporter:9100", job="node"} / node_memory_MemTotal_bytes{instance="node_exporter:9100", job="node"})) * 100
                       instant: true
                       intervalMs: 1000
                       legendFormat: __auto
