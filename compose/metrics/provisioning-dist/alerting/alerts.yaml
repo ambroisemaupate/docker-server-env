@@ -50,7 +50,7 @@ groups:
                       type: threshold
             noDataState: NoData
             execErrState: Error
-            for: 1m
+            for: 2m
             annotations:
                 summary: RootFS usage is above 80%
             isPaused: false
@@ -104,7 +104,7 @@ groups:
                       type: threshold
             noDataState: NoData
             execErrState: Error
-            for: 1m
+            for: 2m
             annotations:
                 summary: RAM total usage is above 90%
             isPaused: false
@@ -139,7 +139,7 @@ groups:
                       conditions:
                           - evaluator:
                                 params:
-                                    - 75
+                                    - 100
                                 type: gt
                             operator:
                                 type: and
@@ -152,7 +152,7 @@ groups:
                             type: query
                             unloadEvaluator:
                                 params:
-                                    - 60
+                                    - 70
                                 type: lt
                       datasource:
                           type: __expr__
@@ -168,7 +168,7 @@ groups:
             execErrState: Error
             for: 1m
             annotations:
-                summary: CPU usage is above 75%
+                summary: CPU usage is above 100%
             isPaused: false
             notification_settings:
                 receiver: Slack
