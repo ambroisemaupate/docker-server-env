@@ -43,6 +43,7 @@ Skip this part if your hosting provider has already provisioned your server with
 # Base apps
 #
 sudo apt update;
+sudo apt upgrade;
 sudo apt install sudo curl nano git zsh;
 
 #
