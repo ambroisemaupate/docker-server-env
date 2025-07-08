@@ -16,6 +16,7 @@ if [ "$DISTRIB" != "debian" -a "$DISTRIB" != "ubuntu" ]; then
 fi
 
 apt update;
+apt upgrade -y;
 apt install -y \
     ntpdate \
     cron \
@@ -88,15 +89,17 @@ cp ./etc/logrotate.d/docker-server-env /etc/logrotate.d/docker-server-env;
 ## EDIT script path
 sed -i 's@/root/@'"$HOME"'/@gi' /etc/logrotate.d/docker-server-env;
 sed -i 's@root@'"$USER"'@gi' /etc/logrotate.d/docker-server-env;
+
+# Copy Docker daemon configuration
 cp ./etc/docker/daemon.json /etc/docker/daemon.json;
 
 # Copy defaults for traefik
 cp ./compose/traefik/traefik.sample.toml ./compose/traefik/traefik.toml;
 cp ./compose/traefik/compose.yml.dist ./compose/traefik/compose.yml;
 cp ./compose/traefik/.env.dist ./compose/traefik/.env;
-
-# Copy defaults for netdata
-cp ./compose/netdata/.env.dist ./compose/netdata/.env;
+touch ./compose/traefik/acme.json;
+touch ./compose/traefik/access.log;
+chmod 0600 ./compose/traefik/acme.json;
 
 # Copy defaults for whoami
 cp ./compose/whoami/.env.dist ./compose/whoami/.env;
@@ -111,14 +114,6 @@ cp ./compose/metrics/prometheus.yml.dist ./compose/metrics/prometheus.yml;
 cp ./compose/metrics/compose.yml.dist ./compose/metrics/compose.yml;
 cp -ar ./compose/metrics/provisioning-dist ./compose/metrics/provisioning;
 
-touch ./compose/traefik/acme.json;
-touch ./compose/traefik/access.log;
-chmod 0600 ./compose/traefik/acme.json;
-
-#
-# create a mount point for FTP backup
-#
-mkdir -p /mnt/ftpbackup;
 service fail2ban restart;
 
 #
@@ -129,4 +124,4 @@ docker network create --ipv6 --driver bridge --subnet="fd01:846c:3ae6:fe92::/64"
 # Add your user to docker group
 # for non-root installs
 usermod -aG docker ${USER}
-sudo chown -R  ${USER}:${USER} ${HOME}/docker-server-env
+chown -R  ${USER}:${USER} ${HOME}/docker-server-env
