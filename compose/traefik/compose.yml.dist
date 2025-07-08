@@ -12,6 +12,10 @@ services:
         published: 443
         protocol: tcp
         mode: host
+      - target: 443
+        published: 443
+        protocol: udp
+        mode: host
     networks:
       - frontproxynet
     privileged: true
