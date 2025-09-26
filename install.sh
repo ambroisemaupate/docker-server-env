@@ -21,6 +21,7 @@ apt install -y \
     ntpdate \
     cron \
     nano \
+    logrotate \
     gnupg \
     htop \
     curl \
