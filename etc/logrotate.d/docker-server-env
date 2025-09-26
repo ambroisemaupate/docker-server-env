@@ -11,6 +11,7 @@
     missingok
     rotate 25
     compress
+    delaycompress
     notifempty
     create 644 root root
     postrotate
