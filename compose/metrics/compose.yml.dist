@@ -55,6 +55,18 @@ services:
         volumes:
             - '/:/host:ro,rslave'
 
+    restic_exporter:
+        image: ngosang/restic-exporter
+        container_name: restic_exporter
+        environment:
+            AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY}
+            AWS_SECRET_ACCESS_KEY: ${S3_SECRET_KEY}
+            S3_STORAGE_CLASS: ${S3_STORAGE_CLASS}
+            RESTIC_REPOSITORY: ${RESTIC_REPOSITORY}
+            RESTIC_PASSWORD: ${RESTIC_PASSWORD}
+            REFRESH_INTERVAL: 1800 # 30 min
+        restart: unless-stopped
+
     grafana:
         image: grafana/grafana
         container_name: grafana

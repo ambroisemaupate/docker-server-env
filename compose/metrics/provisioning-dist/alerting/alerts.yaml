@@ -172,3 +172,119 @@ groups:
             isPaused: false
             notification_settings:
                 receiver: Slack
+
+
+    - orgId: 1
+      name: Restic
+      folder: Services
+      interval: 5m
+      rules:
+          - uid: prometheus_ResticCheckFailed_uid
+            title: ResticCheckFailed
+            condition: C
+            data:
+                - refId: A
+                  relativeTimeRange:
+                      from: 600
+                      to: 0
+                  datasourceUid: default_prometheus_uid
+                  model:
+                      editorMode: code
+                      expr: restic_check_success != bool 1
+                      instant: true
+                      intervalMs: 1000
+                      legendFormat: __auto
+                      maxDataPoints: 43200
+                      range: false
+                      refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                      conditions:
+                          - evaluator:
+                                params:
+                                    - 1
+                                type: gte
+                            operator:
+                                type: and
+                            query:
+                                params:
+                                    - C
+                            reducer:
+                                params: []
+                                type: last
+                            type: query
+                      datasource:
+                          type: __expr__
+                          uid: __expr__
+                      expression: A
+                      intervalMs: 1000
+                      maxDataPoints: 43200
+                      refId: C
+                      type: threshold
+            noDataState: NoData
+            execErrState: Error
+            for: 5m
+            annotations:
+                summary: Restic check failed (instance {{ $labels.instance }})
+            labels:
+                severity: critical
+            isPaused: false
+            notification_settings:
+                receiver: Slack
+
+
+          - uid: prometheus_ResticOutdatedBackup_uid
+            title: ResticOutdatedBackup
+            condition: C
+            data:
+                - refId: A
+                  relativeTimeRange:
+                      from: 600
+                      to: 0
+                  datasourceUid: default_prometheus_uid
+                  model:
+                      editorMode: code
+                      expr: time() - restic_backup_timestamp
+                      instant: true
+                      intervalMs: 1000
+                      legendFormat: __auto
+                      maxDataPoints: 43200
+                      range: false
+                      refId: A
+                - refId: C
+                  datasourceUid: __expr__
+                  model:
+                      conditions:
+                          - evaluator:
+                                params:
+                                    # 48 hours
+                                    - 172800
+                                type: gte
+                            operator:
+                                type: and
+                            query:
+                                params:
+                                    - C
+                            reducer:
+                                params: []
+                                type: last
+                            type: query
+                      datasource:
+                          type: __expr__
+                          uid: __expr__
+                      expression: A
+                      intervalMs: 1000
+                      maxDataPoints: 43200
+                      refId: C
+                      type: threshold
+            noDataState: NoData
+            execErrState: Error
+            for: 5m
+            annotations:
+                summary: Restic {{ $labels.client_hostname }}/{{ $labels.client_username }}/{{ $labels.snapshot_tags }}  backup is outdated
+            labels:
+                severity: critical
+            isPaused: false
+            notification_settings:
+                receiver: Slack

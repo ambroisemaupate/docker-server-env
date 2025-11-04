@@ -18,3 +18,6 @@ scrape_configs:
 #      metrics_path: '/metrics'
 #      static_configs:
 #          - targets: ['cadvisor:8080']
+    - job_name: 'restic_exporter'
+      static_configs:
+          - targets: ['restic_exporter:8001']
