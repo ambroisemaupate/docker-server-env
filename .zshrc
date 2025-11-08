@@ -31,8 +31,8 @@ alias zshconfig="mate ~/.zshrc"
 alias ohmyzsh="mate ~/.oh-my-zsh"
 
 # Alias for pretty docker ps output
-alias dps="docker ps --format \"table{{.Names}}\\t{{.Image}}\\t{{.Ports}}\\t{{.Status}}\""
-alias dpsa="docker ps --format \"table{{.Names}}\\t{{.Image}}\\t{{.Ports}}\\t{{.Status}}\" -a"
+alias dps="docker ps --format \"table{{.Names}}\\t{{.Image}}\\t{{.Status}}\""
+alias dpsa="docker ps --format \"table{{.Names}}\\t{{.Image}}\\t{{.Status}}\" -a"
 # List docker volumes
 alias dvls="docker volume ls"
 # Because it is too long to write it 500x a day
