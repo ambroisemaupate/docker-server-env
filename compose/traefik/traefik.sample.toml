@@ -15,9 +15,19 @@
 # Limiting the Logs to Specific Fields
 [accessLog]
   filePath = "/access.log"
+  # Use JSON format for fail2ban filtering
+  format = "json"
 
   [accessLog.filters]
-    statusCodes = ["200", "400-403", "300-302", "500-503"]
+    statusCodes = ["200", "400-404", "500-503"]
+  [accessLog.fields]
+    [accessLog.fields.names]
+      ClientUsername = "drop"
+    [accessLog.fields.headers]
+      defaultMode = "keep"
+      [accessLog.fields.headers.names]
+        "User-Agent" = "redact"
+        "Content-Type" = "keep"
 
 [global]
   checkNewVersion = false
