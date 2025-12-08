@@ -10,6 +10,7 @@
     weekly
     missingok
     rotate 25
+    size 500M
     compress
     delaycompress
     notifempty
