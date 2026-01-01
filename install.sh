@@ -309,9 +309,14 @@ setup_ip_blacklist() {
   # Patch chemin du script dans le service: /root -> thome
   sed -i "s@/root/@${thome}/@g" /etc/systemd/system/add-ip-blacklist.service
 
-  systemctl daemon-reload
   ./add-ip-blacklist.sh
-  systemctl enable --now add-ip-blacklist.service
+
+  if has_systemd; then
+    systemctl daemon-reload
+    systemctl enable --now add-ip-blacklist.service
+  else
+    warn "Skip enable add-ip-blacklist.service (pas de systemd dans ce contexte)"
+  fi
 }
 
 setup_compose_defaults() {
