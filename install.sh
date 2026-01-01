@@ -26,7 +26,7 @@ require_root() {
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="${SCRIPT_DIR}"
-DEFAULT_USER="${SUDO_USER:-${USER}}"
+DEFAULT_USER="${SUDO_USER:-${USER:-$(id -un)}}"
 
 EMAIL=""
 TARGET_USER="$DEFAULT_USER"
@@ -86,8 +86,15 @@ apt_install_base() {
   # ntpdate est souvent remplacé; on installe chrony (plus moderne) si dispo
   local pkgs=(
     cron nano logrotate gnupg htop curl zsh fail2ban
-    apt-transport-https ca-certificates software-properties-common
+    apt-transport-https ca-certificates
   )
+
+  # software-properties-common n'existe pas partout
+  if apt-cache show software-properties-common >/dev/null 2>&1; then
+    pkgs+=(software-properties-common)
+  else
+    warn "software-properties-common indisponible sur cette distro → ignoré"
+  fi
 
   # chrony existe sur debian/ubuntu modernes; sinon on retombe sur ntpdate
   if apt-cache show chrony >/dev/null 2>&1; then
