@@ -152,12 +152,36 @@ EOF
   else
     warn "L'utilisateur '$TARGET_USER' n'existe pas: impossible de l'ajouter au groupe docker."
   fi
+}
 
-  # create default bridge network only if not exists
-  if ! docker network ls --format '{{.Name}}' | grep -q '^frontproxynet$'; then
-    log "Création du réseau docker 'frontproxynet' (bridge IPv6)"
-    docker network create --ipv6 --driver bridge --subnet="fd01:846c:3ae6:fe92::/64" frontproxynet;
+docker_ready() {
+  command -v docker >/dev/null 2>&1 || return 1
+  docker info >/dev/null 2>&1
+}
+
+ensure_docker_running() {
+  if docker_ready; then return 0; fi
+
+  # systemd actif ?
+  if command -v systemctl >/dev/null 2>&1 && [[ -d /run/systemd/system ]]; then
+    systemctl start docker.service || true
+    sleep 1
+  else
+    warn "Docker daemon non démarré (pas de systemd)."
   fi
+
+  docker_ready
+}
+
+create_frontproxynet() {
+  if ! ensure_docker_running; then
+    warn "Création du réseau 'frontproxynet' ignorée."
+    return 0
+  fi
+
+  log "Création du réseau docker 'frontproxynet' (bridge IPv6)"
+  docker network inspect frontproxynet >/dev/null 2>&1 || \
+    docker network create --driver bridge --ipv6 frontproxynet
 }
 
 configure_postfix_aliases() {
@@ -319,6 +343,7 @@ main() {
 
   apt_install_base
   install_docker
+  create_frontproxynet
   configure_postfix_aliases
   copy_repo_configs
   setup_ip_blacklist
