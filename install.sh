@@ -110,6 +110,18 @@ apt_install_base() {
   apt-get install -y "${pkgs[@]}"
 }
 
+start_docker_service() {
+  # systemd présent ET PID 1 = systemd ?
+  if command -v systemctl >/dev/null 2>&1 && [[ -d /run/systemd/system ]]; then
+    systemctl daemon-reload || true
+    systemctl enable docker.service docker.socket || true
+    systemctl restart docker.service || systemctl start docker.service || true
+  else
+    warn "systemd n'est pas actif (container/chroot?). Docker installé mais service non démarré automatiquement."
+    warn "Si tu es sur une VM normale: redémarre le serveur ou lance le service à la main."
+  fi
+}
+
 install_docker() {
   log "Installation Docker (repo officiel) pour $DISTRIB ($CODENAME)"
 
@@ -127,7 +139,7 @@ EOF
   apt-get update -y
   apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-  systemctl enable --now docker
+  start_docker_service
 
   # docker group idempotent
   if ! getent group docker >/dev/null; then
