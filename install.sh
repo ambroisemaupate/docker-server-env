@@ -1,128 +1,315 @@
-#!/bin/bash
-#
-if [ -z "$EMAIL" ]; then
-    echo "Need to set EMAIL env variable for Postfix aliases."
-    exit 1
-fi
+#!/usr/bin/env bash
+set -Eeuo pipefail
 
-if [ -z "$DISTRIB" ]; then
-    echo "Need to set DISTRIB env variable [debian|ubuntu]."
-    exit 1
-fi
+# ------------------------------------------------------------
+# docker-server-env provisioner (improved)
+# - idempotent-ish
+# - distro autodetect (debian/ubuntu)
+# - optional postfix aliases + ip blacklist service
+# - robust paths (run from anywhere)
+# ------------------------------------------------------------
 
-if [ "$DISTRIB" != "debian" -a "$DISTRIB" != "ubuntu" ]; then
-    echo "DISTRIB env variable only supports debian or ubuntu."
-    exit 1
-fi
+log()  { printf "\n\033[1;34m[+] %s\033[0m\n" "$*"; }
+warn() { printf "\033[1;33m[!] %s\033[0m\n" "$*" >&2; }
+die()  { printf "\033[1;31m[x] %s\033[0m\n" "$*" >&2; exit 1; }
 
-apt update;
-apt upgrade -y;
-apt install -y \
-    ntpdate \
-    cron \
-    nano \
-    logrotate \
-    gnupg \
-    htop \
-    curl \
-    zsh \
-    fail2ban \
-    postfix \
-    mailutils \
-    apt-transport-https \
-    ca-certificates \
-    software-properties-common;
+on_err() {
+  local code=$?
+  warn "Erreur à la ligne ${BASH_LINENO[0]} (exit=${code})."
+  exit "$code"
+}
+trap on_err ERR
 
-# Install latest docker
-install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/$DISTRIB/gpg -o /etc/apt/keyrings/docker.asc
-chmod a+r /etc/apt/keyrings/docker.asc
+require_root() {
+  [[ "$(id -u)" -eq 0 ]] || die "Ce script doit être exécuté en root (ou via sudo)."
+}
 
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/$DISTRIB \
-  $(. /etc/os-release && echo "${VERSION_CODENAME}") stable" | \
-  tee /etc/apt/sources.list.d/docker.list > /dev/null
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="${SCRIPT_DIR}"
+DEFAULT_USER="${SUDO_USER:-${USER}}"
 
-apt update;
-apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin;
-groupadd docker;
+EMAIL=""
+TARGET_USER="$DEFAULT_USER"
+SKIP_POSTFIX=0
+SKIP_BLACKLIST=0
+SKIP_COMPOSE_SETUP=0
 
-# Configure Docker to start on boot
-# with systemd
-systemctl enable docker;
+usage() {
+  cat <<EOF
+Usage: $0 [options]
 
-#
-# Listen only localhost for Postfix
-#
-sed -i -e "s/inet\_interfaces = all/inet\_interfaces = loopback-only/" /etc/postfix/main.cf;
-echo "root: $EMAIL" >> /etc/aliases;
-newaliases;
-service postfix restart;
+Options:
+  --email <addr>          Email pour l'alias root (Postfix)
+  --user <name>           User à ajouter au groupe docker (défaut: ${DEFAULT_USER})
+  --skip-postfix          N'installe/configure pas postfix
+  --skip-blacklist        Ne configure pas le service add-ip-blacklist
+  --skip-compose-setup    Ne copie pas les fichiers compose/ (traefik/metrics/etc.)
+  -h, --help              Affiche l'aide
+EOF
+}
 
-#
-# go to current script folder
-#
-cd "$(dirname "$0")";
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --email) EMAIL="${2:-}"; shift 2;;
+      --user) TARGET_USER="${2:-}"; shift 2;;
+      --skip-postfix) SKIP_POSTFIX=1; shift;;
+      --skip-blacklist) SKIP_BLACKLIST=1; shift;;
+      --skip-compose-setup) SKIP_COMPOSE_SETUP=1; shift;;
+      -h|--help) usage; exit 0;;
+      *) die "Option inconnue: $1";;
+    esac
+  done
+}
 
-#
-# Download ip block list for known attacker sources
-#
-curl https://gitlab.rezo-zero.com/-/snippets/29/raw/main/add-ip-blacklist.sh > ./add-ip-blacklist.sh
-curl https://gitlab.rezo-zero.com/-/snippets/29/raw/main/ip-blacklist.txt > ./ip-blacklist.txt
-curl https://gitlab.rezo-zero.com/-/snippets/29/raw/main/etc/systemd/system/add-ip-blacklist.service > /etc/systemd/system/add-ip-blacklist.service
-chmod +x ./add-ip-blacklist.sh
-chmod 644 /etc/systemd/system/add-ip-blacklist.service
-## EDIT script path
-sed -i 's@/root/@'"$HOME"'/@gi' /etc/systemd/system/add-ip-blacklist.service
-# Added ip block list into iptables
-./add-ip-blacklist.sh
-systemctl enable add-ip-blacklist.service
+detect_distro() {
+  # shellcheck disable=SC1091
+  source /etc/os-release
 
-#
-# Copy sample config files
-#
-cp ./.zshrc $HOME/.zshrc;
-cp ./etc/fail2ban/jail.d/defaults-${DISTRIB}.conf /etc/fail2ban/jail.d/defaults-${DISTRIB}.conf;
-cp ./etc/fail2ban/jail.d/traefik.conf /etc/fail2ban/jail.d/traefik.conf;
-sed -i 's@/root/@'"$HOME"'/@gi' /etc/fail2ban/jail.d/traefik.conf;
+  case "${ID:-}" in
+    debian|ubuntu) ;;
+    *) die "Distro non supportée: ID=${ID:-unknown}. (Support: debian, ubuntu)";;
+  esac
 
-cp ./etc/logrotate.d/docker-server-env /etc/logrotate.d/docker-server-env;
-## EDIT script path
-sed -i 's@/root/@'"$HOME"'/@gi' /etc/logrotate.d/docker-server-env;
-sed -i 's@root@'"$USER"'@gi' /etc/logrotate.d/docker-server-env;
+  DISTRIB="$ID"
+  CODENAME="${VERSION_CODENAME:-}"
+  [[ -n "$CODENAME" ]] || die "Impossible de déterminer VERSION_CODENAME depuis /etc/os-release"
+}
 
-# Copy Docker daemon configuration
-cp ./etc/docker/daemon.json /etc/docker/daemon.json;
+apt_install_base() {
+  log "Mise à jour APT + packages de base"
+  export DEBIAN_FRONTEND=noninteractive
 
-# Copy defaults for traefik
-cp ./compose/traefik/traefik.sample.toml ./compose/traefik/traefik.toml;
-cp ./compose/traefik/compose.yml.dist ./compose/traefik/compose.yml;
-cp ./compose/traefik/.env.dist ./compose/traefik/.env;
-touch ./compose/traefik/acme.json;
-touch ./compose/traefik/access.log;
-chmod 0600 ./compose/traefik/acme.json;
+  apt-get update -y
+  apt-get upgrade -y
 
-# Copy defaults for whoami
-cp ./compose/whoami/.env.dist ./compose/whoami/.env;
+  # ntpdate est souvent remplacé; on installe chrony (plus moderne) si dispo
+  local pkgs=(
+    cron nano logrotate gnupg htop curl zsh fail2ban
+    apt-transport-https ca-certificates software-properties-common
+  )
 
-# Copy defaults for watchtower
-cp ./compose/watchtower/.env.dist ./compose/watchtower/.env;
-cp ./compose/watchtower/compose.yml.dist ./compose/watchtower/compose.yml;
+  # chrony existe sur debian/ubuntu modernes; sinon on retombe sur ntpdate
+  if apt-cache show chrony >/dev/null 2>&1; then
+    pkgs+=(chrony)
+  else
+    pkgs+=(ntpdate)
+  fi
 
-# Copy defaults for metrics
-cp ./compose/metrics/.env.dist ./compose/metrics/.env;
-cp ./compose/metrics/prometheus.yml.dist ./compose/metrics/prometheus.yml;
-cp ./compose/metrics/compose.yml.dist ./compose/metrics/compose.yml;
-cp -ar ./compose/metrics/provisioning-dist ./compose/metrics/provisioning;
+  if [[ "$SKIP_POSTFIX" -eq 0 ]]; then
+    pkgs+=(postfix mailutils)
+  fi
 
-service fail2ban restart;
+  apt-get install -y "${pkgs[@]}"
+}
 
-#
-# create default bridge network
-#
-docker network create --ipv6 --driver bridge --subnet="fd01:846c:3ae6:fe92::/64" frontproxynet;
+install_docker() {
+  log "Installation Docker (repo officiel) pour $DISTRIB ($CODENAME)"
 
-# Add your user to docker group
-# for non-root installs
-usermod -aG docker ${USER}
-chown -R  ${USER}:${USER} ${HOME}/docker-server-env
+  install -m 0755 -d /etc/apt/keyrings
+
+  curl -fsSL --retry 3 --retry-delay 2 \
+    "https://download.docker.com/linux/${DISTRIB}/gpg" \
+    -o /etc/apt/keyrings/docker.asc
+  chmod a+r /etc/apt/keyrings/docker.asc
+
+  cat > /etc/apt/sources.list.d/docker.list <<EOF
+deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${DISTRIB} ${CODENAME} stable
+EOF
+
+  apt-get update -y
+  apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+  systemctl enable --now docker
+
+  # docker group idempotent
+  if ! getent group docker >/dev/null; then
+    groupadd docker
+  fi
+
+  # Ajout de l'user au groupe docker si user existe
+  if id "$TARGET_USER" >/dev/null 2>&1; then
+    usermod -aG docker "$TARGET_USER"
+  else
+    warn "L'utilisateur '$TARGET_USER' n'existe pas: impossible de l'ajouter au groupe docker."
+  fi
+
+  # create default bridge network only if not exists
+  if ! docker network ls --format '{{.Name}}' | grep -q '^frontproxynet$'; then
+    log "Création du réseau docker 'frontproxynet' (bridge IPv6)"
+    docker network create --ipv6 --driver bridge --subnet="fd01:846c:3ae6:fe92::/64" frontproxynet;
+  fi
+}
+
+configure_postfix_aliases() {
+  [[ "$SKIP_POSTFIX" -eq 0 ]] || return 0
+  [[ -n "$EMAIL" ]] || die "Postfix activé mais --email n'est pas fourni."
+
+  log "Configuration Postfix + alias root -> $EMAIL"
+
+  # Sécurise postfix: écoute loopback only (comportement que tu avais commenté)
+  if [[ -f /etc/postfix/main.cf ]]; then
+    if grep -qE '^\s*inet_interfaces\s*=' /etc/postfix/main.cf; then
+      sed -i -E 's/^\s*inet_interfaces\s*=.*/inet_interfaces = loopback-only/' /etc/postfix/main.cf
+    else
+      echo "inet_interfaces = loopback-only" >> /etc/postfix/main.cf
+    fi
+  fi
+
+  # Alias idempotent: remplace/ajoute root:
+  if grep -qE '^root:' /etc/aliases; then
+    sed -i -E "s/^root:.*/root: ${EMAIL}/" /etc/aliases
+  else
+    echo "root: ${EMAIL}" >> /etc/aliases
+  fi
+
+  newaliases
+  systemctl restart postfix || service postfix restart
+}
+
+backup_if_exists() {
+  local path="$1"
+  if [[ -e "$path" ]]; then
+    cp -a "$path" "${path}.bak.$(date +%Y%m%d%H%M%S)"
+  fi
+}
+
+copy_repo_configs() {
+  log "Copie des configurations depuis le repo: $REPO_DIR"
+
+  local thome
+  thome="$(eval echo "~${TARGET_USER}")"
+
+  # ZSH
+  backup_if_exists "${thome}/.zshrc"
+  install -m 0644 "${REPO_DIR}/.zshrc" "${thome}/.zshrc"
+
+  # Fail2ban
+  if [[ -f "${REPO_DIR}/etc/fail2ban/jail.d/defaults-${DISTRIB}.conf" ]]; then
+    install -d /etc/fail2ban/jail.d
+    backup_if_exists "/etc/fail2ban/jail.d/defaults-${DISTRIB}.conf"
+    install -m 0644 "${REPO_DIR}/etc/fail2ban/jail.d/defaults-${DISTRIB}.conf" "/etc/fail2ban/jail.d/defaults-${DISTRIB}.conf"
+  else
+    warn "Config fail2ban defaults manquante: etc/fail2ban/jail.d/defaults-${DISTRIB}.conf"
+  fi
+
+  if [[ -f "${REPO_DIR}/etc/fail2ban/jail.d/traefik.conf" ]]; then
+    backup_if_exists "/etc/fail2ban/jail.d/traefik.conf"
+    install -m 0644 "${REPO_DIR}/etc/fail2ban/jail.d/traefik.conf" "/etc/fail2ban/jail.d/traefik.conf"
+    # Ajuste /root -> HOME du target user
+    sed -i "s@/root/@${thome}/@g" /etc/fail2ban/jail.d/traefik.conf
+  fi
+
+  # Logrotate
+  if [[ -f "${REPO_DIR}/etc/logrotate.d/docker-server-env" ]]; then
+    backup_if_exists "/etc/logrotate.d/docker-server-env"
+    install -m 0644 "${REPO_DIR}/etc/logrotate.d/docker-server-env" "/etc/logrotate.d/docker-server-env"
+    sed -i "s@/root/@${thome}/@g" /etc/logrotate.d/docker-server-env
+    sed -i "s@root@${TARGET_USER}@g" /etc/logrotate.d/docker-server-env
+  fi
+
+  # Docker daemon.json
+  if [[ -f "${REPO_DIR}/etc/docker/daemon.json" ]]; then
+    install -d /etc/docker
+    backup_if_exists "/etc/docker/daemon.json"
+    install -m 0644 "${REPO_DIR}/etc/docker/daemon.json" "/etc/docker/daemon.json"
+    systemctl restart docker
+  fi
+
+  systemctl restart fail2ban || service fail2ban restart
+}
+
+setup_ip_blacklist() {
+  [[ "$SKIP_BLACKLIST" -eq 0 ]] || return 0
+
+  log "Mise en place add-ip-blacklist (snippets GitLab)"
+
+  local thome
+  thome="$(eval echo "~${TARGET_USER}")"
+
+  install -d -m 0755 "${thome}/docker-server-env"
+  cd "${thome}/docker-server-env"
+
+  curl -fsSL --retry 3 --retry-delay 2 \
+    "https://gitlab.rezo-zero.com/-/snippets/29/raw/main/add-ip-blacklist.sh" \
+    -o "./add-ip-blacklist.sh"
+  curl -fsSL --retry 3 --retry-delay 2 \
+    "https://gitlab.rezo-zero.com/-/snippets/29/raw/main/ip-blacklist.txt" \
+    -o "./ip-blacklist.txt"
+  curl -fsSL --retry 3 --retry-delay 2 \
+    "https://gitlab.rezo-zero.com/-/snippets/29/raw/main/etc/systemd/system/add-ip-blacklist.service" \
+    -o "/etc/systemd/system/add-ip-blacklist.service"
+
+  chmod +x "./add-ip-blacklist.sh"
+  chmod 0644 "/etc/systemd/system/add-ip-blacklist.service"
+
+  # Patch chemin du script dans le service: /root -> thome
+  sed -i "s@/root/@${thome}/@g" /etc/systemd/system/add-ip-blacklist.service
+
+  systemctl daemon-reload
+  ./add-ip-blacklist.sh
+  systemctl enable --now add-ip-blacklist.service
+}
+
+setup_compose_defaults() {
+  [[ "$SKIP_COMPOSE_SETUP" -eq 0 ]] || return 0
+
+  log "Initialisation des fichiers compose/ (traefik, whoami, watchtower, metrics)"
+  cd "$REPO_DIR"
+
+  # Traefik
+  install -d "./compose/traefik"
+  [[ -f "./compose/traefik/traefik.toml" ]] || cp "./compose/traefik/traefik.sample.toml" "./compose/traefik/traefik.toml"
+  [[ -f "./compose/traefik/compose.yml" ]] || cp "./compose/traefik/compose.yml.dist" "./compose/traefik/compose.yml"
+  [[ -f "./compose/traefik/.env" ]] || cp "./compose/traefik/.env.dist" "./compose/traefik/.env"
+
+  touch "./compose/traefik/acme.json" "./compose/traefik/access.log"
+  chmod 0600 "./compose/traefik/acme.json"
+
+  # whoami
+  [[ -f "./compose/whoami/.env" ]] || cp "./compose/whoami/.env.dist" "./compose/whoami/.env"
+
+  # metrics
+  [[ -f "./compose/metrics/.env" ]] || cp "./compose/metrics/.env.dist" "./compose/metrics/.env"
+  [[ -f "./compose/metrics/prometheus.yml" ]] || cp "./compose/metrics/prometheus.yml.dist" "./compose/metrics/prometheus.yml"
+  [[ -f "./compose/metrics/compose.yml" ]] || cp "./compose/metrics/compose.yml.dist" "./compose/metrics/compose.yml"
+  [[ -d "./compose/metrics/provisioning" ]] || cp -a "./compose/metrics/provisioning-dist" "./compose/metrics/provisioning"
+}
+
+fix_ownership() {
+  log "Permissions: dossier repo + ${TARGET_USER}"
+  local thome
+  thome="$(eval echo "~${TARGET_USER}")"
+
+  # Si le repo est déjà dans un autre chemin, on ne force pas un chown arbitraire.
+  # On chown uniquement ce qu'on a créé: ${thome}/docker-server-env
+  if [[ -d "${thome}/docker-server-env" ]] && id "$TARGET_USER" >/dev/null 2>&1; then
+    chown -R "${TARGET_USER}:${TARGET_USER}" "${thome}/docker-server-env"
+  fi
+}
+
+main() {
+  require_root
+  parse_args "$@"
+  detect_distro
+
+  log "Repo: ${REPO_DIR}"
+  log "User docker: ${TARGET_USER}"
+  [[ "$SKIP_POSTFIX" -eq 1 ]] && warn "Postfix: SKIP" || log "Postfix: ON"
+  [[ "$SKIP_BLACKLIST" -eq 1 ]] && warn "Blacklist: SKIP" || log "Blacklist: ON"
+
+  apt_install_base
+  install_docker
+  configure_postfix_aliases
+  copy_repo_configs
+  setup_ip_blacklist
+  setup_compose_defaults
+  fix_ownership
+
+  log "Terminé ✅"
+  if id "$TARGET_USER" >/dev/null 2>&1; then
+    warn "Note: l'ajout au groupe docker nécessite une reconnexion de '${TARGET_USER}' pour prendre effet."
+  fi
+}
+
+main "$@"

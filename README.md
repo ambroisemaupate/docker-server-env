@@ -3,30 +3,33 @@
 This repository is meant to get a configuration set for installing a fresh server for *Docker* hosting.
 It’s specialized for **my personal usage**, but if it fits your needs, feel free to use it and give your feedback.
 
-- [Base path](#base-path)
-- [Base installation](#base-installation)
-  * [Enable IPv6 networking](#enable-ipv6-networking)
-  * [hub.docker.com mirroring](#hubdockercom-mirroring)
-- [Some of the docker images I use in this environment](#some-of-the-docker-images-i-use-in-this-environment)
-- [Using *docker compose*](#using-docker-compose)
-- [Using Traefik v3.x as the main front-end](#using-traefik-v3x-as-the-main-front-end)
-  * [Enable Traefik dashboard](#enable-traefik-dashboard)
-  * [Configure Cloudflare with Traefik](#configure-cloudflare-with-traefik)
-- [Back-up containers](#back-up-containers)
-  * [Using *docker compose* services](#using-docker-compose-services)
-- [Clean-up FTP backups](#clean-up-ftp-backups)
-  * [Using *docker compose* services](#using-docker-compose-services-1)
-- [Rolling backups](#rolling-backups)
-- [Using custom Docker images for Roadiz](#using-custom-docker-images-for-roadiz)
-  * [Update and restart your Roadiz image](#update-and-restart-your-roadiz-image)
-- [Rotating logs](#rotating-logs)
-- [Ban IPs](#ban-ips)
-- [Error pages service](#error-pages-service)
-  * [Catch-all error page](#catch-all-error-page)
-  * [Adapt kernel parameters](#adapt-kernel-parameters)
-- [Observability](#observability)
-  * [Using *Prometheus* and *Grafana*](#using-prometheus-and-grafana)
-
+* [Base path](#base-path)
+* [Base installation](#base-installation)
+  + [Full install with postfix](#full-install-with-postfix)
+  + [Full install without postfix](#full-install-without-postfix)
+  + [Full install without blacklist](#full-install-without-blacklist)
+  + [Enable IPv6 networking](#enable-ipv6-networking)
+  + [hub.docker.com mirroring](#hubdockercom-mirroring)
+    - [Use registry mirror inside your Gitlab Runners on same host](#use-registry-mirror-inside-your-gitlab-runners-on-same-host)
+* [Some of the docker images I use in this environment](#some-of-the-docker-images-i-use-in-this-environment)
+* [Using *docker compose*](#using-docker-compose)
+* [Using Traefik v3.x as the main front-end](#using-traefik-v3x-as-the-main-front-end)
+  + [Enable Traefik dashboard](#enable-traefik-dashboard)
+  + [Configure Cloudflare with Traefik](#configure-cloudflare-with-traefik)
+* [Back-up containers](#back-up-containers)
+  + [Using *docker compose* services](#using-docker-compose-services)
+* [Clean-up FTP backups](#clean-up-ftp-backups)
+  + [Using *docker compose* services](#using-docker-compose-services-1)
+* [Rolling backups](#rolling-backups)
+* [Using custom Docker images for Roadiz](#using-custom-docker-images-for-roadiz)
+  + [Update and restart your Roadiz image](#update-and-restart-your-roadiz-image)
+* [Rotating logs](#rotating-logs)
+* [Ban IPs](#ban-ips)
+* [Error pages service](#error-pages-service)
+  + [Catch-all error page](#catch-all-error-page)
+  + [Adapt kernel parameters](#adapt-kernel-parameters)
+* [Observability](#observability)
+  + [Using *Prometheus* and *Grafana*](#using-prometheus-and-grafana)
 
 ## Base path
 
@@ -67,34 +70,22 @@ git clone https://github.com/ambroisemaupate/docker-server-env.git ~/docker-serv
 # It will install more lib, secure postfix and pull base docker images
 #
 cd ~/docker-server-env
-#
-# Pass DISTRIB env to install [ubuntu/debian] and EMAIL for Postfix aliases
-# sudo DISTRIB="debian" EMAIL="ambroise@rezo-zero.com" bash ./install.sh if not root
-sudo HOME="/home/debian" USER="debian" DISTRIB="debian" EMAIL="ambroise@rezo-zero.com" bash ./install.sh
 ```
 
-If you are not `root` user, do not forget to add your user to `docker` group.
-
-```
-sudo usermod -aG docker myuser
-sudo chown -R myuser:myuser ~/docker-server-env
+### Full install with postfix:
+```shell
+sudo bash install.sh --email ambroise@rezo-zero.com --user debian
 ```
 
-Installation script `install.sh` will install:
+### Full install without postfix:
+```shell
+sudo bash install.sh --skip-postfix --user ambroise
+```
 
-- ntp
-- ntpdate
-- nano
-- gnupg
-- htop
-- curl
-- zsh
-- fail2ban
-- postfix
-- mailutils
-- apt-transport-https
-- ca-certificates
-- software-properties-common
+### Full install without blacklist:
+```shell
+sudo bash install.sh --email ambroise@rezo-zero.com --user debian --skip-blacklist
+```
 
 ### Enable IPv6 networking
 
