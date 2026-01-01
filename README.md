@@ -79,7 +79,7 @@ sudo bash install.sh --email ambroise@rezo-zero.com --user debian
 
 ### Full install without postfix:
 ```shell
-sudo bash install.sh --skip-postfix --user ambroise
+sudo bash install.sh --skip-postfix --user debian
 ```
 
 ### Full install without blacklist:
