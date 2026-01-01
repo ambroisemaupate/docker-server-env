@@ -135,7 +135,7 @@ start_docker_service() {
   if command -v systemctl >/dev/null 2>&1 && [[ -d /run/systemd/system ]]; then
     systemctl daemon-reload || true
     systemctl enable docker.service docker.socket || true
-    restart_service docker.service || systemctl start docker.service || true
+    systemctl restart docker.service || systemctl start docker.service || true
   else
     warn "systemd n'est pas actif (container/chroot?). Docker installé mais service non démarré automatiquement."
     warn "Si tu es sur une VM normale: redémarre le serveur ou lance le service à la main."
@@ -241,7 +241,8 @@ copy_repo_configs() {
   log "Copie des configurations depuis le repo: $REPO_DIR"
 
   local thome
-  thome="$(eval echo "~${TARGET_USER}")"
+  thome="$(getent passwd "$TARGET_USER" | cut -d: -f6 || true)"
+  [[ -n "$thome" ]] || thome="/root"
 
   # ZSH
   backup_if_exists "${thome}/.zshrc"
