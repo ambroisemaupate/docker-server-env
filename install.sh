@@ -62,6 +62,26 @@ parse_args() {
   done
 }
 
+is_container() {
+  # Heuristiques robustes
+  if [[ -f /.dockerenv ]]; then return 0; fi
+  if grep -qaE '(docker|containerd|kubepods|lxc)' /proc/1/cgroup 2>/dev/null; then return 0; fi
+  return 1
+}
+
+has_systemd() {
+  [[ -d /run/systemd/system ]] && command -v systemctl >/dev/null 2>&1
+}
+
+restart_service() {
+  local svc="$1"
+  if has_systemd; then
+    systemctl restart "$svc" || true
+  else
+    warn "Skip restart $svc (pas de systemd dans ce contexte)"
+  fi
+}
+
 detect_distro() {
   # shellcheck disable=SC1091
   source /etc/os-release
@@ -115,7 +135,7 @@ start_docker_service() {
   if command -v systemctl >/dev/null 2>&1 && [[ -d /run/systemd/system ]]; then
     systemctl daemon-reload || true
     systemctl enable docker.service docker.socket || true
-    systemctl restart docker.service || systemctl start docker.service || true
+    restart_service docker.service || systemctl start docker.service || true
   else
     warn "systemd n'est pas actif (container/chroot?). Docker installé mais service non démarré automatiquement."
     warn "Si tu es sur une VM normale: redémarre le serveur ou lance le service à la main."
@@ -207,7 +227,7 @@ configure_postfix_aliases() {
   fi
 
   newaliases
-  systemctl restart postfix || service postfix restart
+  restart_service postfix
 }
 
 backup_if_exists() {
@@ -256,10 +276,10 @@ copy_repo_configs() {
     install -d /etc/docker
     backup_if_exists "/etc/docker/daemon.json"
     install -m 0644 "${REPO_DIR}/etc/docker/daemon.json" "/etc/docker/daemon.json"
-    systemctl restart docker
+    restart_service docker
   fi
 
-  systemctl restart fail2ban || service fail2ban restart
+  restart_service fail2ban
 }
 
 setup_ip_blacklist() {
