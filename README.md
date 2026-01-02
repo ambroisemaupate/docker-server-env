@@ -5,9 +5,9 @@ It’s specialized for **my personal usage**, but if it fits your needs, feel fr
 
 * [Base path](#base-path)
 * [Base installation](#base-installation)
-  + [Full install with postfix](#full-install-with-postfix)
-  + [Full install without postfix](#full-install-without-postfix)
-  + [Full install without blacklist](#full-install-without-blacklist)
+  + [Install with postfix](#install-with-postfix)
+  + [Install without postfix](#install-without-postfix)
+  + [Install without blacklist](#install-without-blacklist)
   + [Enable IPv6 networking](#enable-ipv6-networking)
   + [hub.docker.com mirroring](#hubdockercom-mirroring)
     - [Use registry mirror inside your Gitlab Runners on same host](#use-registry-mirror-inside-your-gitlab-runners-on-same-host)
@@ -72,17 +72,21 @@ git clone https://github.com/ambroisemaupate/docker-server-env.git ~/docker-serv
 cd ~/docker-server-env
 ```
 
-### Full install with postfix:
+### Install with postfix:
 ```shell
 sudo bash install.sh --email ambroise@rezo-zero.com --user debian
 ```
 
-### Full install without postfix:
+### Install without postfix:
 ```shell
 sudo bash install.sh --skip-postfix --user debian
 ```
 
-### Full install without blacklist:
+### Install without blacklist:
+
+If you want to manage your server with _Rezo Zero Ansible_ `ip_blocklist` role, you may want to skip the blacklist installation
+to avoid conflicts.
+
 ```shell
 sudo bash install.sh --email ambroise@rezo-zero.com --user debian --skip-blacklist
 ```
