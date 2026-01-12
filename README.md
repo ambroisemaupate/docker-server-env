@@ -8,6 +8,7 @@ It’s specialized for **my personal usage**, but if it fits your needs, feel fr
   + [Install with postfix](#install-with-postfix)
   + [Install without postfix](#install-without-postfix)
   + [Install without blacklist](#install-without-blacklist)
+  + [Install Docker data on different folder](#install-docker-data-on-different-folder)
   + [Enable IPv6 networking](#enable-ipv6-networking)
   + [hub.docker.com mirroring](#hubdockercom-mirroring)
     - [Use registry mirror inside your Gitlab Runners on same host](#use-registry-mirror-inside-your-gitlab-runners-on-same-host)
@@ -89,6 +90,36 @@ to avoid conflicts.
 
 ```shell
 sudo bash install.sh --email ambroise@rezo-zero.com --user debian --skip-blacklist
+```
+
+### Install Docker data on different folder
+
+When using a dedicated block-storage disk, you may have to change docker default root. **Do not forget to change *containerd* too!**
+And make sure you've configured `docker` and `containerd` root folders **before** pulling Docker images and starting containers.
+
+For example, if you mounted your additional drive `/dev/sdb` on `/data`:
+
+1. Stop `docker` and `containerd` services
+2. Create `/data/docker` and `/data/containerd` folder with `root` ownership
+3. **Change Docker** root folder: `sudo nano /etc/docker/daemon.json`
+```json
+{
+  "data-root": "/data/docker"
+}
+```
+4. **Change Containerd** root folder: `sudo nano /etc/containerd/config.toml`
+```
+root = "/data/containerd"
+state = "/run/containerd"
+```
+5. Restart `docker` and `containerd`
+6. Your system partition (`/`) usage should now stay low:
+
+```shell
+# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        20G  7.9G   11G  42% /
+/dev/sdb        246G   11G  223G   5% /data
 ```
 
 ### Enable IPv6 networking
