@@ -94,25 +94,42 @@ sudo bash install.sh --email ambroise@rezo-zero.com --user debian --skip-blackli
 
 ### Install Docker data on different folder
 
-When using a dedicated block-storage disk, you may have to change docker default root. **Do not forget to change *containerd* too!**
+When using a dedicated **block-storage** disk, you may have to change docker default root. **Do not forget to change *containerd* too!**
 And make sure you've configured `docker` and `containerd` root folders **before** pulling Docker images and starting containers.
 
 For example, if you mounted your additional drive `/dev/sdb` on `/data`:
 
 1. Stop `docker` and `containerd` services
 2. Create `/data/docker` and `/data/containerd` folder with `root` ownership
+```shell
+sudo mkdir -p /data/docker /data/containerd
+sudo chown root:root /data/docker /data/containerd
+sudo chmod 711 /data/docker /data/containerd
+```
 3. **Change Docker** root folder: `sudo nano /etc/docker/daemon.json`
 ```json
 {
   "data-root": "/data/docker"
 }
 ```
-4. **Change Containerd** root folder: `sudo nano /etc/containerd/config.toml`
+4. Force docker service to wait your `/data` partition to be mounted before starting: `sudo systemctl edit docker`
+```shell
+[Unit]
+RequiresMountsFor=/data
 ```
+Reload systemd: `sudo systemctl daemon-reload`
+5. **Change Containerd** root folder: `sudo nano /etc/containerd/config.toml`
+```shell
 root = "/data/containerd"
 state = "/run/containerd"
 ```
-5. Restart `docker` and `containerd`
+5. Force containerd service to wait your `/data` partition to be mounted before starting: `sudo systemctl edit containerd`
+```shell
+[Unit]
+RequiresMountsFor=/data
+```
+Reload systemd: `sudo systemctl daemon-reload`
+6. Restart `docker` and `containerd`: `sudo systemctl restart docker containerd`
 6. Your system partition (`/`) usage should now stay low:
 
 ```shell
