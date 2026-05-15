@@ -24,6 +24,8 @@ services:
       - ./traefik.toml:/traefik.toml
       - ./acme.json:/acme.json
       - ./access.log:/access.log
+      - ./certs:/certs:ro          # wildcard certificate files
+      - ./conf.d:/conf.d:ro        # dynamic TLS config
     container_name: traefik
     labels:
       - "traefik.enable=true"
@@ -79,7 +81,8 @@ services:
 #      && traefik-certs-dumper file --version v2 --watch
 #      --source /data/acme.json --dest /data/certs'
 #    volumes:
-#      - ./:/data
+#      - ./acme.json:/data/acme.json:ro
+#      - ./certs:/data/certs
 
 networks:
   frontproxynet:

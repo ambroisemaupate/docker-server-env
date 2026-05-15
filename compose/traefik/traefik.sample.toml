@@ -61,6 +61,10 @@
 [api]
   dashboard = true
 
+[providers.file]
+  directory = "/conf.d"
+  watch = true
+
 [providers.docker]
   endpoint = "unix:///var/run/docker.sock"
   watch = true

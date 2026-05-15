@@ -17,6 +17,7 @@ It’s specialized for **my personal usage**, but if it fits your needs, feel fr
 * [Using Traefik v3.x as the main front-end](#using-traefik-v3x-as-the-main-front-end)
   + [Enable Traefik dashboard](#enable-traefik-dashboard)
   + [Configure Cloudflare with Traefik](#configure-cloudflare-with-traefik)
+  + [Wildcard certificates](#wildcard-certificates)
 * [Back-up containers](#back-up-containers)
   + [Using *docker compose* services](#using-docker-compose-services)
 * [Clean-up FTP backups](#clean-up-ftp-backups)
@@ -280,14 +281,107 @@ Edit your `traefik.toml` file and add the following lines:
 
 Make sure to add your service labels in `compose.yml` file.
 
-Dashboard will be available on `https://my-domain.tld/dashboard/` URL. **Make sure to add trailing slash after
-
+Dashboard will be available on `https://my-domain.tld/dashboard/` URL. **Make sure to add a trailing slash after `/dashboard/`**, otherwise Traefik returns a 404.
 
 ### Configure Cloudflare with Traefik
 
 - Make sure you set Cloudflare SSL mode to **Full** or **Full (strict)** to avoid SSL errors and `418` errors. https://developers.cloudflare.com/ssl/origin-configuration/ssl-modes/ Because *Traefik* will see incoming requests as `http` and not `https` and redirect in loop to 443.
 - Add Cloudflare [IPv4 and IPv6 ranges](https://www.cloudflare.com/fr-fr/ips/) to your `traefik.toml` file in `entryPoints.web.forwardedHeaders` / `trustedIPs` section.
 - Add them again in `entryPoints.web_secure.forwardedHeaders` / `trustedIPs` section.
+
+### Wildcard certificates
+
+Traefik can serve pre-obtained wildcard certificates (e.g. `*.example.com`) using its [file provider](https://doc.traefik.io/traefik/providers/file/),
+which watches the `compose/traefik/conf.d/` directory for dynamic TLS configuration.
+This is useful when your DNS provider is not supported by Traefik's built-in ACME DNS challenge, or when you manage certificates centrally.
+
+> **Note:** wildcard certificates require a **DNS-01 challenge** — HTTP challenge cannot issue them.
+
+#### 1. Obtain a wildcard certificate
+
+Using [certbot](https://certbot.eff.org/) with manual DNS challenge:
+
+```bash
+certbot certonly \
+  --manual \
+  --preferred-challenges dns \
+  -d "*.example.com" \
+  -d "example.com" \
+  --agree-tos \
+  --email admin@example.com
+```
+
+Or using [acme.sh](https://github.com/acmesh-official/acme.sh) with a Cloudflare DNS plugin (fully automated):
+
+```bash
+# Export your Cloudflare API token first
+export CF_Token="your-cloudflare-api-token"
+
+acme.sh --issue \
+  --dns dns_cf \
+  -d "*.example.com" \
+  -d "example.com"
+```
+
+#### 2. Copy certificate files into the Traefik directory
+
+The `compose/traefik/certs/` directory is bind-mounted read-only into the Traefik container at `/certs`.
+Place your certificate and private key inside the pre-existing subdirectories:
+
+```bash
+# certbot paths — adapt if using acme.sh
+cp /etc/letsencrypt/live/example.com/fullchain.pem \
+   ~/docker-server-env/compose/traefik/certs/certs/example.com.crt
+cp /etc/letsencrypt/live/example.com/privkey.pem \
+   ~/docker-server-env/compose/traefik/certs/private/example.com.key
+chmod 600 ~/docker-server-env/compose/traefik/certs/private/example.com.key
+```
+
+#### 3. Declare the certificate in `conf.d/`
+
+Create a TOML file in `compose/traefik/conf.d/`. Traefik watches this directory live — no restart needed.
+
+```bash
+cat > ~/docker-server-env/compose/traefik/conf.d/wildcard.toml << 'EOF'
+[[tls.certificates]]
+  certFile = "/certs/certs/example.com.crt"
+  keyFile  = "/certs/private/example.com.key"
+EOF
+```
+
+To also use the wildcard as the **default certificate** for any unmatched domain (replaces Traefik's self-signed fallback):
+
+```toml
+# conf.d/wildcard.toml
+[[tls.certificates]]
+  certFile = "/certs/certs/example.com.crt"
+  keyFile  = "/certs/private/example.com.key"
+
+[tls.stores]
+  [tls.stores.default]
+    [tls.stores.default.defaultCertificate]
+      certFile = "/certs/certs/example.com.crt"
+      keyFile  = "/certs/private/example.com.key"
+```
+
+#### 4. Use the wildcard cert in your services
+
+In your service `compose.yml`, enable TLS **without** a `certresolver`. Traefik will automatically match the wildcard certificate via SNI:
+
+```yaml
+labels:
+  - "traefik.http.routers.${APP_NAMESPACE}.tls=true"
+  # Do NOT set tls.certresolver — that would trigger ACME and override the file-based cert
+```
+
+#### 5. Renewal
+
+Wildcard certificates must be renewed manually (or via a cron/hook). After copying renewed files into `certs/`, Traefik
+picks them up automatically because the file provider watches `conf.d/` for changes. Touch the config file to force a reload if needed:
+
+```bash
+touch ~/docker-server-env/compose/traefik/conf.d/wildcard.toml
+```
 
 ## Back-up containers
 

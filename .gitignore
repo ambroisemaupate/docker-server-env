@@ -1,0 +1,6 @@
+.claude/secrets
+.claude/agent-memory
+.claude/memory
+.claude/cache
+.claude/*.local
+.claude/*.local.json
