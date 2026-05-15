@@ -84,7 +84,6 @@ Full production stack: MySQL 8.0 → PHP-FPM app → Nginx → Varnish → Traef
 - Restic backup services (`backup_files`, `backup_mysql`, `forget`) are run on-demand via `docker compose run`
 - JWT keys (`jwt_private.pem`, `jwt_public.pem`) are generated on the host and bind-mounted read-only
 - The compose `.env` file is bind-mounted as `.env.local` inside the PHP container
-- Watchtower labels on `nginx`/`worker`/`cron` chain restarts after image updates
 
 ## Backup strategy
 
@@ -100,6 +99,3 @@ docker compose run --rm forget
 
 Prometheus scrapes Traefik's `:8899` metrics endpoint. Grafana dashboards are provisioned automatically from `compose/metrics/provisioning/`.
 
-## Watchtower (`compose/watchtower/`)
-
-Opt-in per container via `com.centurylinklabs.watchtower.enable=true`. Dependency chains use `com.centurylinklabs.watchtower.depends-on=/container-name`.

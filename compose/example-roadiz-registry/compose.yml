@@ -3,9 +3,6 @@ services:
         image: varnish:6.3
         tmpfs: /usr/local/var/varnish:exec
         labels:
-            # Watchtower -----------------------------------------------------
-            # Force Watchtower to restart nginx after app update
-            - "com.centurylinklabs.watchtower.depends-on=/exampleroadizregistry-app-1"
             # Traefik v3 -----------------------------------------------------
             - "traefik.enable=true"
             - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.scheme=http"
@@ -17,7 +14,7 @@ services:
             - "traefik.http.routers.${APP_NAMESPACE}.rule=HostRegexp(${HOSTNAME})"
             - "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
             # Apply middlewares
-            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Sts"
+            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Auth,${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Sts,${APP_NAMESPACE}Ratelimit"
             # Define Middlewares
             # Add a Basic auth protection
             - "traefik.http.middlewares.${APP_NAMESPACE}Auth.basicauth.users=${AUTH_BASIC}"
@@ -32,6 +29,10 @@ services:
             - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stspreload=true"
             - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsseconds=31536000"
             - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.isdevelopment=false"
+            # Rate limiting — 100 req/s average, burst up to 200, keyed per client IP
+            - "traefik.http.middlewares.${APP_NAMESPACE}Ratelimit.ratelimit.average=100"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Ratelimit.ratelimit.burst=200"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Ratelimit.ratelimit.period=1s"
         depends_on:
             - app
         restart: always
@@ -64,8 +65,6 @@ services:
             - default
             # Uncomment if not using Varnish
             #- frontproxynet
-        labels:
-            - "com.centurylinklabs.watchtower.enable=true"
 
     db:
         image: mysql:8.0

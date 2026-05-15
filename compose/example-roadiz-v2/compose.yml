@@ -42,10 +42,6 @@ services:
             - frontproxynet
             - default
         labels:
-            # Watchtower -----------------------------------------------------
-            #- "com.centurylinklabs.watchtower.enable=true"
-            # Force Watchtower to restart nginx after app update
-            #- "com.centurylinklabs.watchtower.depends-on=/exampleroadizv2-nginx-1"
             # Traefik v3 -----------------------------------------------------
             - "traefik.enable=true"
             - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.scheme=http"
@@ -64,7 +60,7 @@ services:
             #
             # Apply middlewares
             #
-            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Sts"
+            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Redirectregex,${APP_NAMESPACE}Sts,${APP_NAMESPACE}Ratelimit"
             # Add domain redirection (${APP_NAMESPACE} non-www to www redir)
             - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.regex=${REDIRECT_REGEX}"
             - "traefik.http.middlewares.${APP_NAMESPACE}Redirectregex.redirectregex.replacement=${REDIRECT_REPLACEMENT}"
@@ -74,6 +70,10 @@ services:
             - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stspreload=true"
             - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsseconds=31536000"
             - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.isdevelopment=false"
+            # Rate limiting — 100 req/s average, burst up to 200, keyed per client IP
+            - "traefik.http.middlewares.${APP_NAMESPACE}Ratelimit.ratelimit.average=100"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Ratelimit.ratelimit.burst=200"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Ratelimit.ratelimit.period=1s"
 
 
     nginx:
@@ -90,10 +90,6 @@ services:
             - ./robots.txt:/var/www/html/public/robots.txt:ro
             - app_file_data:/var/www/html/public/files:ro
             - app_assets_data:/var/www/html/public/assets:ro
-        labels:
-            - "com.centurylinklabs.watchtower.enable=true"
-            # Force Watchtower to restart varnish after app update
-            - "com.centurylinklabs.watchtower.depends-on=/exampleroadizv2-app-1"
 
     app:
         image: my-registry/roadiz_skeleton:latest
@@ -131,10 +127,6 @@ services:
             APP_ENV: prod
             APP_RUNTIME_ENV: prod
             APP_DEBUG: 0
-        labels:
-            - "com.centurylinklabs.watchtower.enable=true"
-            # Force Watchtower to restart varnish after app update
-            #- "com.centurylinklabs.watchtower.depends-on=/exampleroadizv2-solr-1"
 
     worker:
         extends:
@@ -145,8 +137,6 @@ services:
             replicas: 1
         entrypoint: [ "php", "/var/www/html/bin/console", "messenger:consume", "async", "--time-limit=1800" ]
         restart: always
-        labels:
-            - "com.centurylinklabs.watchtower.enable=true"
 
     cron:
         extends:
@@ -155,8 +145,6 @@ services:
         init: true
         entrypoint: [ "crond", "-f", "-L", "15" ]
         restart: always
-        labels:
-            - "com.centurylinklabs.watchtower.enable=true"
 
     #solr:
     #    image: my-registry/roadiz_skeleton/solr:latest
