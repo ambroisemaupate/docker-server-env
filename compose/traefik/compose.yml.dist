@@ -48,13 +48,16 @@ services:
       #- "traefik.http.middlewares.defaultCompress.compress.excludedcontenttypes=${EXCLUDED_COMPRESS_TYPES}"
 
 #  traefik-service-error:
-#    image: nginx:alpine
+##    image: nginx:alpine
+## You can use a dedicated maintenance page with assets and html already packaged
+#    image: registry.gitlab.com/my-project/common-maintenance:develop
 #    networks:
 #      - frontproxynet
 #    container_name: traefik-service-error
-#    volumes:
-#      - ./service-error/html:/usr/share/nginx/html:ro
-#      - ./service-error/default.conf:/etc/nginx/conf.d/default.conf:ro
+## Do not declare volumes if you created a custom maintenance page
+##    volumes:
+##      - ./service-error/html:/usr/share/nginx/html:ro
+##      - ./service-error/default.conf:/etc/nginx/conf.d/default.conf:ro
 #    restart: always
 #    labels:
 #      - "traefik.enable=true"
