@@ -19,10 +19,12 @@ It’s specialized for **my personal usage**, but if it fits your needs, feel fr
   + [Configure Cloudflare with Traefik](#configure-cloudflare-with-traefik)
   + [Wildcard certificates](#wildcard-certificates)
 * [Back-up containers](#back-up-containers)
+  + [Compose profiles for one-shot services](#compose-profiles-for-one-shot-services)
   + [Using *docker compose* services](#using-docker-compose-services)
 * [Clean-up FTP backups](#clean-up-ftp-backups)
   + [Using *docker compose* services](#using-docker-compose-services-1)
 * [Rolling backups](#rolling-backups)
+* [Unlocking a Restic repository](#unlocking-a-restic-repository)
 * [Using custom Docker images for Roadiz](#using-custom-docker-images-for-roadiz)
   + [Update and restart your Roadiz image](#update-and-restart-your-roadiz-image)
 * [Rotating logs](#rotating-logs)
@@ -32,6 +34,7 @@ It’s specialized for **my personal usage**, but if it fits your needs, feel fr
   + [Adapt kernel parameters](#adapt-kernel-parameters)
 * [Observability](#observability)
   + [Using *Prometheus* and *Grafana*](#using-prometheus-and-grafana)
+  + [Monitoring Restic backups](#monitoring-restic-backups)
 
 ## Base path
 
@@ -385,6 +388,32 @@ touch ~/docker-server-env/compose/traefik/conf.d/wildcard.toml
 
 ## Back-up containers
 
+### Compose profiles for one-shot services
+
+Backup services (`backup`, `backup_cleanup`, and the Restic services `restic`, `backup_files`, `backup_mysql`, `forget`) are
+**one-shot** services: they are meant to be invoked manually or from a crontab with `docker compose run`, not to be kept
+running. If they are declared like regular services, a global `docker compose up -d` (initial deployment, adding a service,
+`up -d` after editing the file…) would also create and start them — printing noise, running an **unscheduled backup**, or
+even triggering an **unscheduled `forget --prune`** outside your retention schedule.
+
+To avoid this, assign them a Compose [profile](https://docs.docker.com/compose/how-tos/profiles/) named `backup`:
+
+```yaml
+services:
+  backup:
+    image: ambroisemaupate/ftp-backup
+    profiles: [ backup ]
+    # …
+```
+
+This changes nothing for day-to-day use, but makes the services safe by default:
+
+- `docker compose up -d` (and `ps`, `logs`, `down`…) **ignore** profiled services, so a routine deployment never triggers a
+  backup or prune.
+- `docker compose run --rm backup` keeps working **as-is**: `run` targets a service by name and ignores profiles, so existing
+  crontabs need no change.
+- If you ever want to bring them up explicitly, enable the profile: `docker compose --profile backup up -d`.
+
 ### Using *docker compose* services
 
 Added *backup* and *backup_cleanup* services to your `compose.yml` file:
@@ -396,6 +425,8 @@ services:
   #
   backup:
     image: ambroisemaupate/ftp-backup
+    # Gate behind the "backup" profile so `up -d` never triggers it
+    profiles: [ backup ]
     networks:
       # Container should be on same network as database
       - default
@@ -424,6 +455,8 @@ services:
 
   backup_cleanup:
     image: ambroisemaupate/ftp-cleanup
+    # Gate behind the "backup" profile so `up -d` never triggers it
+    profiles: [ backup ]
     networks:
       - default
     environment:
@@ -582,6 +615,47 @@ then launch them once a day, once a week, once a month from your crontab:
 30 4 1 * * cd /root/docker-server-env/compose/site_a && /usr/bin/docker compose run --rm --no-deps backup_cleanup_monthly
 ```
 
+## Unlocking a Restic repository
+
+Restic locks its repository while a `backup` or `forget` operation runs. If two operations overlap — e.g. a `forget --prune`
+still running when the next scheduled `backup_mysql` starts, or a job killed before it could release its lock — the repository
+stays **locked** and subsequent runs fail with:
+
+```
+unable to create lock in backend: repository is already locked …
+```
+
+> Because cron does not surface these failures, a locked repository can go unnoticed for days. The
+> [Restic Prometheus exporter](#monitoring-restic-backups) is there to detect it — it alerts when no successful snapshot has
+> been taken for ~48 hours.
+
+You do **not** need to delete the lock file manually from the object-storage bucket. The `restic` service has no default
+command, so you can pass any Restic subcommand to it. First make sure no backup is genuinely still running, then unlock the
+repository through the same credentials and repository configuration:
+
+```bash
+cd ~/docker-server-env/compose/my-site
+
+# List existing locks (and which host/PID created them)
+docker compose run --rm restic list locks
+
+# Remove stale locks. By default this only removes locks older than 30 minutes,
+# so it is safe even if you are unsure whether a job is still alive.
+docker compose run --rm restic unlock
+
+# Force-remove ALL locks, including non-stale ones. Use only once you are
+# certain no backup/forget process is still running.
+docker compose run --rm restic unlock --remove-all
+```
+
+`unlock` reaches the bucket using the `RESTIC_REPOSITORY`, `RESTIC_PASSWORD` and `AWS_*` environment variables already
+defined on the `restic` service, so there is no need to touch the bucket directly. After unlocking, re-run your backup or
+`forget` as usual.
+
+> **Tip:** to reduce the chance of overlap in the first place, schedule `backup_*` and `forget` at clearly separated times in
+> your crontab (the rolling-backup example above staggers each job), and avoid running `forget --prune` while a backup may
+> still be in flight.
+
 ## Using custom Docker images for Roadiz
 
 Example files can be found in `./compose/example-roadiz-registry/` and `./scripts/bck-example-roadiz-registry.sh.sample`
@@ -684,3 +758,29 @@ If you want this value to be persisted, you can add it in `/etc/sysctl.conf` or 
 
 You can use *Prometheus* and *Grafana* to monitor your server and services. 
 An example configuration folder is available in `./compose/metrics/` folder, and Traefik metrics are already enabled in `./compose/traefik/traefik.toml` file.
+
+### Monitoring Restic backups
+
+A locked repository (see [Unlocking a Restic repository](#unlocking-a-restic-repository)) is dangerous precisely because it
+fails **silently**: each scheduled `backup` aborts with a "repository is already locked" error, but cron stays quiet and the
+last good snapshot keeps ageing without anyone noticing. The `restic_exporter` service in `compose/metrics/` exists to catch
+exactly this situation.
+
+It runs [`ngosang/restic-exporter`](https://github.com/ngosang/restic-exporter), which connects to your repository with the
+same `RESTIC_REPOSITORY` / `RESTIC_PASSWORD` / `AWS_*` credentials (copy them into `compose/metrics/.env`), polls it every
+`REFRESH_INTERVAL` (30 min by default), and exposes metrics on `:8001` for Prometheus to scrape. The useful ones are:
+
+- `restic_backup_timestamp` — Unix time of the **most recent** snapshot per host/tag.
+- `restic_check_success` — `1` if the last repository check passed, `0` otherwise.
+- `restic_locks_total` — number of locks currently held on the repository.
+
+Two Grafana alerts are provisioned out of the box (`compose/metrics/provisioning-dist/alerting/alerts.yaml`):
+
+- **ResticOutdatedBackup** — fires when `time() - restic_backup_timestamp >= 172800` (no successful snapshot for **48 hours**).
+  This is what surfaces a stuck/locked repository: if backups have silently failed for a couple of days, the snapshot
+  timestamp stops advancing and the alert triggers.
+- **ResticCheckFailed** — fires when `restic_check_success != 1`, i.e. the repository is corrupted or unreadable.
+
+So the typical incident flow is: the alert tells you a backup has not completed for ~2 days → you check `restic_locks_total`
+(or run `docker compose run --rm restic list locks`) → you clear the stale lock with `docker compose run --rm restic unlock`
+and re-run the backup.

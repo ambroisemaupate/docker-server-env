@@ -84,6 +84,7 @@ services:
             - ./.env
         depends_on:
             - db
+        profiles: [ backup ]
         environment:
             LOCAL_PATH: /var/www/html
             DB_USER: ${MYSQL_USER}

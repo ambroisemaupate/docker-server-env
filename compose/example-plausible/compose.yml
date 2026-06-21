@@ -57,6 +57,7 @@ services:
     image: ambroisemaupate/s3-backup
     networks:
       - default
+    profiles: [ backup ]
     environment:
       LOCAL_PATH: /var/www/html
       S3_ACCESS_KEY: ${S3_ACCESS_KEY}

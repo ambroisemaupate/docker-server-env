@@ -81,7 +81,7 @@ Labels go on the container that Traefik should route to (typically `varnish` for
 Full production stack: MySQL 8.0 → PHP-FPM app → Nginx → Varnish → Traefik.
 
 - `worker` and `cron` services `extend` the `app` service with different entrypoints
-- Restic backup services (`backup_files`, `backup_mysql`, `forget`) are run on-demand via `docker compose run`
+- Restic backup services (`restic`, `backup_files`, `backup_mysql`, `forget`) are run on-demand via `docker compose run` and are gated behind the `backup` Compose profile (see Backup strategy)
 - JWT keys (`jwt_private.pem`, `jwt_public.pem`) are generated on the host and bind-mounted read-only
 - The compose `.env` file is bind-mounted as `.env.local` inside the PHP container
 
@@ -94,6 +94,8 @@ docker compose run --rm backup_files
 docker compose run --rm backup_mysql
 docker compose run --rm forget
 ```
+
+**Compose profile**: the one-shot backup services carry `profiles: [ backup ]` (across `example-roadiz-v2`, `example-roadiz-registry`, `example-matomo`, `example-plausible`). This keeps them out of global operations — `docker compose up -d` (and `ps`/`logs`/`down`) skip them, so a routine deployment never triggers an unscheduled backup or a `forget --prune`. The `docker compose run --rm <svc>` commands above are unaffected because `run` targets a service by name and ignores profiles. To start them explicitly: `docker compose --profile backup up -d`.
 
 ## Observability (`compose/metrics/`)
 

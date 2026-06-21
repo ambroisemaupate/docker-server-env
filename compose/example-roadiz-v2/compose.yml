@@ -163,6 +163,7 @@ services:
         # Keep the same hostname for all Restic services
         hostname: restic-api-backup
         image: restic/restic:latest
+        profiles: [ backup ]
         networks:
             - default
         environment:
@@ -181,6 +182,7 @@ services:
         # Keep the same hostname for all Restic services
         extends:
             service: restic
+        profiles: [ backup ]
         command: 'backup -o s3.storage-class=${S3_STORAGE_CLASS} --tag files /srv'
     backup_mysql:
         # Keep the same hostname for all Restic services
@@ -198,6 +200,7 @@ services:
             MYSQL_PASSWORD: ${MYSQL_PASSWORD}
             MYSQL_USER: ${MYSQL_USER}
             MYSQL_DUMP_FILENAME: ${MYSQL_DUMP_FILENAME}
+        profiles: [ backup ]
         volumes:
             - restic_cache:/root/.cache/restic
         depends_on:
@@ -206,6 +209,7 @@ services:
     forget:
         extends:
             service: restic
+        profiles: [ backup ]
         # Forget all snapshots older than 7 days and keep 12 monthly snapshots
         command: 'forget -o s3.storage-class=${S3_STORAGE_CLASS} --keep-daily 7 --keep-monthly 12 --prune'
 
