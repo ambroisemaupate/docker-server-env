@@ -203,8 +203,12 @@ That way, all gitlab runners will pull Docker image through your host mirror and
 * *ambroisemaupate/ftp-cleanup*: smart FTP/SFTP backup clean-up image than delete files older than your defined limit. It won’t delete older backup files if they are the only ones available.
 * *ambroisemaupate/light-ssh*, For SSH access directly inside your container with some useful command as `mysqldump`, `git` and `composer`.
 * *mysql*: for latest php80-alpine-nginx images and all official docker images
-* *gitlab-ce*: If you want to setup your own Gitlab instance with a dedicated registry, all running on *docker*
-* *plausible/analytics*: Awesome open-source and privacy-friendly analytics tool. Based on https://github.com/plausible/hosting.
+* *gitlab-ce*: If you want to setup your own Gitlab instance with a dedicated registry, all running on *docker*. Example stacks in `compose/example-gitlab-traefik/` (instance) and `compose/example-gitlab-runner/` (runner).
+* *plausible/analytics*: Awesome open-source and privacy-friendly analytics tool. Based on https://github.com/plausible/hosting. Stack in `compose/example-plausible/`.
+* *matomo*: Self-hosted web analytics (MariaDB + php-fpm + Nginx). Stack in `compose/example-matomo/`.
+* *nextcloud*: Self-hosted file sync and sharing. Stack in `compose/nextcloud/`.
+* *netdata*: Real-time host and container monitoring. Stack in `compose/netdata/`.
+* *tiago2/cap*: Lightweight, privacy-friendly proof-of-work CAPTCHA. Standalone stack in `compose/example-cap/`. See https://trycap.dev/guide/standalone/.
 
 ## Using *docker compose*
 
@@ -658,7 +662,7 @@ defined on the `restic` service, so there is no need to touch the bucket directl
 
 ## Using custom Docker images for Roadiz
 
-Example files can be found in `./compose/example-roadiz-registry/` and `./scripts/bck-example-roadiz-registry.sh.sample`
+Example files can be found in `./compose/example-roadiz-registry/`
 if you are building custom Roadiz images with direct *volumes* for your websites and private registry such as *Gitlab* one.
 
 Copy `.env.dist` to `.env` to store your secrets at one place.

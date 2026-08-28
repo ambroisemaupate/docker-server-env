@@ -1,0 +1,51 @@
+services:
+    cap:
+        image: tiago2/cap:latest
+        restart: always
+        networks:
+            - default
+            - frontproxynet
+        depends_on:
+            valkey:
+                condition: service_healthy
+        environment:
+            ADMIN_KEY: ${ADMIN_KEY}
+            REDIS_URL: redis://valkey:6379
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.services.${APP_NAMESPACE}.loadbalancer.server.port=3000"
+            # Router
+            - "traefik.http.routers.${APP_NAMESPACE}.tls=true"
+            - "traefik.http.routers.${APP_NAMESPACE}.tls.certresolver=letsencrypt"
+            - "traefik.http.routers.${APP_NAMESPACE}.rule=Host(${HOSTNAME})"
+            - "traefik.http.routers.${APP_NAMESPACE}.service=${APP_NAMESPACE}"
+            # Apply middlewares
+            - "traefik.http.routers.${APP_NAMESPACE}.middlewares=${APP_NAMESPACE}Sts,${APP_NAMESPACE}Redirectscheme"
+            # Add SSL redirection
+            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.scheme=https"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Redirectscheme.redirectscheme.permanent=true"
+            # HSTS headers
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsincludesubdomains=false"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stspreload=true"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.stsseconds=31536000"
+            - "traefik.http.middlewares.${APP_NAMESPACE}Sts.headers.isdevelopment=false"
+
+    valkey:
+        image: valkey/valkey:9-alpine
+        restart: always
+        networks:
+            - default
+        volumes:
+            - valkey:/data
+        healthcheck:
+            test: ["CMD", "valkey-cli", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+volumes:
+    valkey:
+
+networks:
+    frontproxynet:
+        external: true

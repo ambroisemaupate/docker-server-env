@@ -8,6 +8,7 @@
 !/example-gitlab-traefik
 !/example-gitlab-runner
 !/example-plausible
+!/example-cap
 !/watchtower
 !/registry-mirror
 !/example-gitlab
@@ -17,4 +18,3 @@
 !/traefik
 !/netdata
 !/metrics
-
