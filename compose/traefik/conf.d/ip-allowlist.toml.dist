@@ -1,0 +1,16 @@
+# Shared IP allowlist middlewares, usable from any compose stack.
+# cp ip-allowlist.toml.dist ip-allowlist.toml (Traefik ignores *.dist files)
+# Reference them in router labels with the @file suffix:
+#   - "traefik.http.routers.myrouter.middlewares=ip-allowlist@file,..."
+
+# Direct traffic (DNS only, no reverse-proxy in front): match the client remote address.
+[http.middlewares.ip-allowlist.ipAllowList]
+  sourceRange = ["192.168.1.0/24"]
+
+# Behind Cloudflare proxy: match the right-most X-Forwarded-For value (appended by Cloudflare).
+# BE CAREFUL: set forwardedHeaders.insecure = false and trustedIPs to Cloudflare ranges only in traefik.toml,
+# otherwise anyone reaching the origin directly can forge X-Forwarded-For and bypass this allowlist.
+[http.middlewares.ip-allowlist-cf.ipAllowList]
+  sourceRange = ["192.168.1.0/24"]
+  [http.middlewares.ip-allowlist-cf.ipAllowList.ipStrategy]
+    depth = 1

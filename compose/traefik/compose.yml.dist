@@ -35,14 +35,11 @@ services:
       - "traefik.http.routers.dashboard.priority=10"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.middlewares=dashboard_auth"
+      # Use shared IP allowlist from conf.d/ip-allowlist.toml (ip-allowlist-cf@file behind Cloudflare)
+      #- "traefik.http.routers.dashboard.middlewares=ip-allowlist@file,dashboard_auth"
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
       ## Use Basic auth
       - "traefik.http.middlewares.dashboard_auth.basicauth.users=${MONITORING_AUTH_BASIC}"
-      # Use IP Allowlist
-      # BE CAREFUL, if you are using IPv6, Traefik wont see X-Real-IP
-      #- "traefik.http.middlewares.apiIpAllowlist.ipallowlist.sourcerange=${IP_RANGE}"
-      # Only use depth if X-Forwarded_For is present (Cloudflare)
-      #- "traefik.http.middlewares.apiIpAllowlist.ipallowlist.ipstrategy.depth=1"
       # Add Gzip globally
       #- "traefik.http.middlewares.defaultCompress.compress=true"
       #- "traefik.http.middlewares.defaultCompress.compress.excludedcontenttypes=${EXCLUDED_COMPRESS_TYPES}"

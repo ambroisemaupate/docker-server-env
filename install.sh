@@ -323,7 +323,7 @@ setup_ip_blacklist() {
 setup_compose_defaults() {
   [[ "$SKIP_COMPOSE_SETUP" -eq 0 ]] || return 0
 
-  log "Initialisation des fichiers compose/ (traefik, whoami, watchtower, metrics)"
+  log "Initialisation des fichiers compose/ (traefik, whoami, metrics)"
   cd "$REPO_DIR"
 
   # Traefik

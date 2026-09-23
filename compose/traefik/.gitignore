@@ -8,3 +8,4 @@ acme.json
 docker-compose.yml
 compose.yml
 compose.override.yml
+/conf.d/*.toml

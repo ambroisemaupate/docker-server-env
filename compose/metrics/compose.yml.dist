@@ -91,6 +91,8 @@ services:
             - "traefik.http.routers.grafana.rule=Host(${HOSTNAME})"
             - "traefik.http.routers.grafana.service=grafana"
             - "traefik.http.routers.grafana.priority=20"
+            # Use shared IP allowlist from traefik/conf.d/ip-allowlist.toml (ip-allowlist-cf@file behind Cloudflare)
+            #- "traefik.http.routers.grafana.middlewares=ip-allowlist@file"
 
 
 volumes:

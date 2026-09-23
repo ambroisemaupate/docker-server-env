@@ -9,7 +9,6 @@
 !/example-gitlab-runner
 !/example-plausible
 !/example-cap
-!/watchtower
 !/registry-mirror
 !/example-gitlab
 !/whoami

@@ -1,4 +1,0 @@
-*.log
-*.gz
-.env
-compose.yml

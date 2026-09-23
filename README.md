@@ -17,6 +17,7 @@ It’s specialized for **my personal usage**, but if it fits your needs, feel fr
 * [Using Traefik v3.x as the main front-end](#using-traefik-v3x-as-the-main-front-end)
   + [Enable Traefik dashboard](#enable-traefik-dashboard)
   + [Configure Cloudflare with Traefik](#configure-cloudflare-with-traefik)
+  + [Shared IP allowlist](#shared-ip-allowlist)
   + [Wildcard certificates](#wildcard-certificates)
 * [Back-up containers](#back-up-containers)
   + [Compose profiles for one-shot services](#compose-profiles-for-one-shot-services)
@@ -295,6 +296,26 @@ Dashboard will be available on `https://my-domain.tld/dashboard/` URL. **Make su
 - Make sure you set Cloudflare SSL mode to **Full** or **Full (strict)** to avoid SSL errors and `418` errors. https://developers.cloudflare.com/ssl/origin-configuration/ssl-modes/ Because *Traefik* will see incoming requests as `http` and not `https` and redirect in loop to 443.
 - Add Cloudflare [IPv4 and IPv6 ranges](https://www.cloudflare.com/fr-fr/ips/) to your `traefik.toml` file in `entryPoints.web.forwardedHeaders` / `trustedIPs` section.
 - Add them again in `entryPoints.web_secure.forwardedHeaders` / `trustedIPs` section.
+
+### Shared IP allowlist
+
+`compose/traefik/conf.d/ip-allowlist.toml.dist` declares IP allowlist middlewares with the file provider,
+so any stack can use them without redeclaring them, and IP changes are reloaded live:
+
+```bash
+cp ./compose/traefik/conf.d/ip-allowlist.toml.dist ./compose/traefik/conf.d/ip-allowlist.toml
+```
+
+```yaml
+labels:
+  # Direct traffic
+  - "traefik.http.routers.myrouter.middlewares=ip-allowlist@file,..."
+  # Behind Cloudflare proxy
+  - "traefik.http.routers.myrouter.middlewares=ip-allowlist-cf@file,..."
+```
+
+**Warning**: `ip-allowlist-cf` trusts the right-most `X-Forwarded-For` value. Set `forwardedHeaders.insecure = false`
+and `trustedIPs` to Cloudflare ranges only, otherwise requests hitting your server directly can forge this header.
 
 ### Wildcard certificates
 
