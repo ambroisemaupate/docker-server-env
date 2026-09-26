@@ -25,10 +25,8 @@ mkdir -p "${SSH_DIR}"
 chmod 700 "${SSH_DIR}"
 chown "${ANSIBLE_USER}:${ANSIBLE_USER}" "${SSH_DIR}"
 
-# 3) Ajout de la clé SSH Ansible
-if [ ! -f "${AUTHORIZED_KEYS}" ]; then
-  touch "${AUTHORIZED_KEYS}"
-fi
+# 3) Ajout de la clé SSH Ansible (sans doublon si relancé)
+touch "${AUTHORIZED_KEYS}"
 
 echo
 echo "👉 Colle maintenant la CLÉ PUBLIQUE SSH pour Ansible."
@@ -36,35 +34,34 @@ echo "   (ex: ssh-ed25519 AAAA... rezozero-ansible)"
 echo "   Termine par Ctrl+D"
 echo
 
-cat >> "${AUTHORIZED_KEYS}"
+while IFS= read -r key || [ -n "${key}" ]; do
+  [ -z "${key}" ] && continue
+  if grep -qxF "${key}" "${AUTHORIZED_KEYS}"; then
+    echo "• Clé déjà présente"
+  else
+    echo "${key}" >> "${AUTHORIZED_KEYS}"
+    echo "• Clé ajoutée"
+  fi
+done
 
 chmod 600 "${AUTHORIZED_KEYS}"
 chown "${ANSIBLE_USER}:${ANSIBLE_USER}" "${AUTHORIZED_KEYS}"
 
-# 4) Sudoers minimal (sécurisé)
-if [ ! -f "${SUDOERS_FILE}" ]; then
+# 4) Sudoers : Ansible élève ses droits via /bin/sh -c, une liste de commandes ne le
+# restreindrait pas. On assume un sudo complet, la sécurité repose sur la clé dédiée.
+SUDOERS_TMP="$(mktemp)"
+echo "${ANSIBLE_USER} ALL=(ALL) NOPASSWD: ALL" > "${SUDOERS_TMP}"
+visudo -cf "${SUDOERS_TMP}"
+if ! cmp -s "${SUDOERS_TMP}" "${SUDOERS_FILE}"; then
   echo "• Installation du sudoers Ansible"
-  cat > "${SUDOERS_FILE}" <<'EOF'
-ansible ALL=(root) NOPASSWD: \
-  /usr/bin/apt, /usr/bin/apt-get, /usr/bin/dpkg, \
-  /usr/bin/systemctl, /usr/sbin/service, \
-  /usr/sbin/reboot, /usr/sbin/shutdown, \
-  /usr/bin/docker, /usr/bin/docker-compose, /usr/bin/docker\ compose, \
-  /bin/mkdir, /bin/chmod, /bin/chown, /bin/cp, /bin/mv, /bin/rm, \
-  /usr/bin/curl, /usr/bin/jq, /bin/sh
-EOF
-
-  chmod 440 "${SUDOERS_FILE}"
+  install -m 440 -o root -g root "${SUDOERS_TMP}" "${SUDOERS_FILE}"
 else
-  echo "• Sudoers Ansible déjà présent"
+  echo "• Sudoers Ansible déjà à jour"
 fi
-
-# 5) Vérification sudo
-echo "• Vérification sudo"
-visudo -cf "${SUDOERS_FILE}"
+rm -f "${SUDOERS_TMP}"
 
 echo
 echo "✅ Utilisateur '${ANSIBLE_USER}' prêt"
 echo "   → SSH par clé"
-echo "   → sudo limité"
+echo "   → sudo complet sans mot de passe"
 echo "   → prêt pour Ansible"
