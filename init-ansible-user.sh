@@ -31,18 +31,20 @@ touch "${AUTHORIZED_KEYS}"
 echo
 echo "👉 Colle maintenant la CLÉ PUBLIQUE SSH pour Ansible."
 echo "   (ex: ssh-ed25519 AAAA... rezozero-ansible)"
-echo "   Termine par Ctrl+D"
+echo "   Valide par Entrée"
 echo
 
-while IFS= read -r key || [ -n "${key}" ]; do
-  [ -z "${key}" ] && continue
-  if grep -qxF "${key}" "${AUTHORIZED_KEYS}"; then
-    echo "• Clé déjà présente"
-  else
-    echo "${key}" >> "${AUTHORIZED_KEYS}"
-    echo "• Clé ajoutée"
-  fi
-done
+IFS= read -r key
+if [ -z "${key}" ]; then
+  echo "✖ Aucune clé saisie" >&2
+  exit 1
+fi
+if grep -qxF "${key}" "${AUTHORIZED_KEYS}"; then
+  echo "• Clé déjà présente"
+else
+  echo "${key}" >> "${AUTHORIZED_KEYS}"
+  echo "• Clé ajoutée"
+fi
 
 chmod 600 "${AUTHORIZED_KEYS}"
 chown "${ANSIBLE_USER}:${ANSIBLE_USER}" "${AUTHORIZED_KEYS}"
