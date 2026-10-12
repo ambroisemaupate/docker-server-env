@@ -8,7 +8,7 @@ services:
   gitlab:
     image: 'gitlab/gitlab-ce:latest'
     container_name: gitlab
-    shm_size: '256m'
+    shm_size: '512m'
     sysctls:
       - net.ipv6.conf.all.disable_ipv6=1
       - net.ipv6.conf.default.disable_ipv6=1
@@ -41,7 +41,7 @@ services:
       - "traefik.http.routers.gitlab.tls=true"
       - "traefik.http.routers.gitlab.tls.certresolver=letsencrypt"
 
-      - "traefik.http.services.gitlab.loadbalancer.server.port=${GITLAB_PORT}"
+      - "traefik.http.services.gitlab.loadbalancer.server.port=${GITLAB_PORT:-80}"
       - "traefik.http.services.gitlab.loadbalancer.server.scheme=http"
       - "traefik.http.services.gitlab.loadbalancer.passhostheader=true"
 
@@ -50,7 +50,7 @@ services:
       - "traefik.http.routers.registry.service=registry"
       - "traefik.http.routers.registry.tls.certresolver=letsencrypt"
       - "traefik.http.routers.registry.tls=true"
-      
+
       - "traefik.http.services.registry.loadbalancer.server.port=${REGISTRY_PORT}"
 
       - "traefik.http.routers.mattermost.rule=Host(`${MATTERMOST_HOSTNAME}`)"
@@ -59,7 +59,7 @@ services:
       - "traefik.http.routers.mattermost.tls.certresolver=letsencrypt"
       - "traefik.http.routers.mattermost.tls=true"
       - "traefik.http.routers.mattermost.middlewares=mattermost-redirectscheme,gitlab-sts"
-      
+
       - "traefik.http.middlewares.mattermost-redirectscheme.redirectscheme.scheme=https"
       - "traefik.http.middlewares.mattermost-redirectscheme.redirectscheme.permanent=false"
 
@@ -74,26 +74,27 @@ services:
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'https://${GITLAB_HOSTNAME}'
         nginx['redirect_http_to_https'] = false
-        nginx['listen_port'] = ${GITLAB_PORT}
+        nginx['listen_port'] = ${GITLAB_PORT:-80}
         nginx['listen_https'] = false
         #nginx['proxy_set_headers'] = {
         #  'X-Forwarded-Proto' => 'https',
         #  'X-Forwarded-Ssl' => 'on'
         #}
         nginx['client_max_body_size'] = '2G'
-        
+
         #
         # PlantUML
         # https://docs.gitlab.com/ee/administration/integration/plantuml.html
         #
         nginx['custom_gitlab_server_config'] = "location /-/plantuml/ { \n    rewrite ^/-/plantuml/(.*) /$1 break;\n proxy_cache off; \n    proxy_pass  http://plantuml:8080/; \n}\n"
-        
+        gitlab_rails['env'] = { 'PLANTUML_ENCODING' => 'deflate' }
+
         #
         # Emails
         #
         gitlab_rails['smtp_enable'] = true
         gitlab_rails['smtp_address'] = "${SMTP_ADDRESS}"
-        gitlab_rails['smtp_port'] = ${SMTP_PORT}
+        gitlab_rails['smtp_port'] = ${SMTP_PORT:-587}
         gitlab_rails['smtp_user_name'] = "${SMTP_USERNAME}"
         gitlab_rails['smtp_password'] = "${SMTP_PASSWORD}"
         gitlab_rails['smtp_domain'] = "${SMTP_DOMAIN}"
@@ -104,10 +105,31 @@ services:
         gitlab_rails['gitlab_email_from'] = 'gitlab-notifications@${SMTP_DOMAIN}'
         gitlab_rails['gitlab_email_display_name'] = 'Gitlab'
         gitlab_rails['gitlab_email_reply_to'] = 'noreply@${SMTP_DOMAIN}'
-        
+
         # Puma config (ex. Unicorn)
         # https://docs.gitlab.com/omnibus/settings/puma.html#configuring-puma-settings
         puma['worker_processes'] = 7
+
+        #
+        # Service Desk configuration
+        #
+        # GMAIL: https://docs.gitlab.com/ee/administration/incoming_email.html#gmail
+        gitlab_rails['incoming_email_enabled'] = true
+        gitlab_rails['incoming_email_address'] = "${INCOMING_EMAIL_ADDRESS}"
+        gitlab_rails['incoming_email_email'] = "${INCOMING_EMAIL_EMAIL}"
+        gitlab_rails['incoming_email_password'] = "${INCOMING_EMAIL_PASSWORD}"
+        gitlab_rails['incoming_email_host'] = "${INCOMING_EMAIL_HOST:-imap.gmail.com}"
+        gitlab_rails['incoming_email_port'] = ${INCOMING_EMAIL_PORT:-993}
+        gitlab_rails['incoming_email_ssl'] = ${INCOMING_EMAIL_SSL:-true}
+        gitlab_rails['incoming_email_start_tls'] = ${INCOMING_EMAIL_START_TLS:-false}
+        gitlab_rails['incoming_email_mailbox_name'] = "${INCOMING_EMAIL_MAILBOX_NAME:-inbox}"
+        gitlab_rails['incoming_email_idle_timeout'] = 60
+        gitlab_rails['incoming_email_delete_after_delivery'] = true
+        gitlab_rails['incoming_email_expunge_deleted'] = true
+        gitlab_rails['incoming_email_delivery_method'] = "sidekiq"
+        gitlab_rails['incoming_email_gitlab_url'] = 'http://${GITLAB_HOSTNAME}'
+        gitlab_rails['service_desk_email_delivery_method'] = "sidekiq"
+        gitlab_rails['service_desk_email_gitlab_url'] = 'http://${GITLAB_HOSTNAME}'
 
         #
         # Send backups to Object Storage
@@ -127,12 +149,11 @@ services:
         #
         # https://docs.gitlab.com/ee/administration/packages/container_registry.html#disable-container-registry-for-new-projects-site-wide
         #
-        gitlab_rails['gitlab_default_projects_features_issues'] = false
-        gitlab_rails['gitlab_default_projects_features_merge_requests'] = false
+        gitlab_rails['gitlab_default_projects_features_issues'] = true
+        gitlab_rails['gitlab_default_projects_features_merge_requests'] = true
         gitlab_rails['gitlab_default_projects_features_wiki'] = false
         gitlab_rails['gitlab_default_projects_features_snippets'] = false
         gitlab_rails['gitlab_default_projects_features_builds'] = true
-        gitlab_rails['gitlab_default_projects_features_builds'] = false
 
         #
         # Consolidated object storage configuration for S3 compatible such as Scaleway
@@ -169,6 +190,21 @@ services:
         registry_nginx['listen_port'] = ${REGISTRY_PORT}
         registry_nginx['listen_https'] = false
         registry_nginx['redirect_http_to_https'] = false
+        registry['storage'] = {
+          's3' => {
+            'accesskey' => '${OBJECT_STORE_ACCESS_KEY_ID}',
+            'secretkey' => '${OBJECT_STORE_SECRET_ACCESS_KEY}',
+            'bucket' => 'gitlab-registry',
+            'region' => '${OBJECT_STORE_S3_REGION}',
+            'regionendpoint' => 'https://s3.${OBJECT_STORE_S3_REGION}.scw.cloud',
+            'pathstyle' => false
+          },
+          'maintenance' => {
+            'readonly' => {
+              'enabled' => false
+            }
+          }
+        }
 
         #
         # First run this stack before
@@ -187,7 +223,7 @@ services:
         mattermost['service_use_ssl'] = false
         mattermost['gitlab_id'] = "${MATTERMOST_GITLAB_ID}"
         mattermost['gitlab_secret'] = "${MATTERMOST_GITLAB_SECRET}"
-        mattermost['gitlab_scope'] = ""
+        mattermost['gitlab_scope'] = "read_user"
         #
         # Need to contact Gitlab on HTTP
         # https://forum.mattermost.org/t/solved-mattermost-gitlab-token-request-failed/2628/6
