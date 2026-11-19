@@ -1,6 +1,7 @@
 services:
     db:
-        image: mariadb:10.5
+        # Pinned in .env, bump it to upgrade MariaDB in place.
+        image: mariadb:${MARIADB_VERSION}
         command: --max-allowed-packet=64MB
         restart: always
         networks:
@@ -9,11 +10,16 @@ services:
             - db:/var/lib/mysql
         environment:
             MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+            # Runs mariadb-upgrade on startup when the image version changes
+            # (no-op otherwise). Required as the root password is random.
+            MARIADB_AUTO_UPGRADE: "1"
         env_file:
             - ./.env
 
     app:
-        image: matomo:fpm-alpine
+        # Pinned in .env. Matomo code lives in the "matomo" volume, so bumping
+        # the tag alone does NOT upgrade Matomo: see README "Upgrading Matomo".
+        image: matomo:${MATOMO_VERSION}-fpm-alpine
         restart: always
         networks:
             - default
