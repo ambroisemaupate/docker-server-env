@@ -40,9 +40,11 @@ services:
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
       ## Use Basic auth
       - "traefik.http.middlewares.dashboard_auth.basicauth.users=${MONITORING_AUTH_BASIC}"
-      # Add Gzip globally
+      # Add Brotli/Gzip globally
       #- "traefik.http.middlewares.defaultCompress.compress=true"
       #- "traefik.http.middlewares.defaultCompress.compress.excludedcontenttypes=${EXCLUDED_COMPRESS_TYPES}"
+      # Prefer brotli: otherwise Traefik picks gzip when browsers send "gzip, deflate, br, zstd"
+      #- "traefik.http.middlewares.defaultCompress.compress.encodings=br,gzip"
 
 #  traefik-service-error:
 ##    image: nginx:alpine
