@@ -2,6 +2,7 @@ name: traefik
 services:
   traefik:
     image: traefik:3.6
+    mem_limit: 512m
     restart: always
     ports:
       - target: 80
