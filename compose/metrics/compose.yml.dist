@@ -16,7 +16,7 @@ services:
         mem_limit: 512m  # grows with series count and retention
         container_name: prometheus
         command:
-            - '--storage.tsdb.retention.time=15d'
+            - '--storage.tsdb.retention.time=400d'  # 13 months: monthly and yearly hosting reports
             - '--config.file=/etc/prometheus/prometheus.yml'
         volumes:
             - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
